@@ -1,0 +1,4 @@
+Sitemap: www.andrewrosemberg.com/sitemap.xml
+
+User-agent: *
+Disallow:
