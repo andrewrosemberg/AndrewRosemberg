@@ -46,28 +46,4 @@ where appropriate -->
     </div>
   </div>
 </div>
-
 ~~~
-
-## Experiences
-
-#### 2023-Present: Researcher (Machine Learning and Optimization) 
-##### @AI4OPT, Atlanta, US
-Research in automated decision-making methods under uncertainty, combining Machine Learning and Optimization. The main emphasis is on the development of interpretable AI for pressing global challenges using tractable models and robust decision frameworks.
-
-#### 2020-2023: Researcher (Machine Learning and Optimization)
-##### @ Invenia Labs, Cambridge, UK
-
-Strategic algorithmic operation in energy markets to support the renewable energy transition.
-- Led projects on the implementation of stochastic, robust, and distributionally robust optimization approaches to tackle uncertainty in daily bidding operations, coupling Machine Learning techniques to estimate uncertainty and appropriate optimization methods to find robust decisions.
-- Contributed to the construction of a detailed market simulator for counterfactual analysis. Led the data analysis of simulation results accuracy.
-- Led work on decomposition techniques for large-scale Integer and continuous optimization problems, proposed methods for estimation of unknown parameters of the grid through Inverse Optimization and other heuristics.
-- Exploration of exact and surrogate approaches to bi-level optimization (for hyperparameter optimization and strategic bidding). Including integration of Automatic Differentiation and Automatic Dualization of optimization problems to help implement explored approaches.
-- Experience in MISO, PJM, ERCOT, CAISO, SPP, ISO-NE, and NYISO.
-
-#### 2017-2019: Research Staff Member
-##### @ LAMPS PUC-Rio, Rio de Janeiro, Brazil
-
-Laboratory for Applied Mathematical Programming and Statistics (LAMPS).
-- Research and development of mathematical programming solutions to find power systems transmission usage optimal contracting strategies for one of Brazil's biggest electricity services companies (Energisa Group).
-- Development of flexible software for Hydrothermal Multistage Economic dispatch in a consulting project for FGV Energia to help assess network and installed capacity changes. (HydroPowerModels Project).
