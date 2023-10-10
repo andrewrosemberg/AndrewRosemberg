@@ -1,10 +1,13 @@
 +++
 title = "Software"
 hascode = true
+hasmath = true
 rss = ""
 rss_title = "Software"
 rss_pubdate = Date(2023, 10, 1)
 +++
+
+@def mathjax = true
 
 ~~~
 <style>
@@ -109,6 +112,27 @@ Built as a Julia/JuMP package, it allows users to explore network formulations f
 <br clear="left"/>
 ~~~
 
+The complete mathematical formulation of the LTHDP in one stage, will be represented by the function $\mathcal{Q}_t(\nu_{t-1},\omega_t) =$
+
+\begin{align}
+    \hspace{-1cm}\underset{\mathbf{x}_t}{\text{min: }} & \sum_{i \in \mathcal{I}} C_{it} \, p_{it} + \sum_{n \in \mathcal{N}} C^{\delta}_{nt} \, \delta_{nt} + \mathbb{E}[\mathcal{Q}_{t+1}(\nu_{t}, \omega_{t+1})] \\
+    %  + \sum_{j \in \mathcal{H}} C^{s}_{jt} \, s_j \\
+    \text{s.t.: } & \\
+    & \sum_{\substack{i \in I_n}} p_{it} + \sum_{\substack{j \in \mathcal{H}_n}} u_{jt} \, \rho_{jt} -\sum_{\substack{m \in \mathcal{N}_n}} f_{(n,m)t} - \ell_{nt} + \\
+    & \qquad  =  D_{nt} - \delta_{nt}, \;\; \forall n\in \mathcal{N}  \\
+    & \nu_{jt} + u_{jt} + s_{jt} = \nu_{j,t-1} + A_{j,t}(\omega_t) + \\ 
+    & \qquad  \sum_{\substack{k \in \mathcal{H}^U_j}} u_{kt} + \sum_{\substack{k \in \mathcal{H}^{S}_j}} s_{kt}, \;\; \forall j \in \mathcal{H}  \\
+    & |f_{(n,m)t}| \leq F_{(n,m)t},\; |f_{(m,n)t}| \leq F_{(n,m)t} \;\; \forall (n,m) \in \mathcal{L} \\
+    % & |f_{(m,n)t}| \leq F_{(n,m)t} \;\; \forall (n,m) \in \mathcal{L} \\
+    & 0 \leq p_{it} \leq P_{it} \;\; \forall i \in I  \label{eq_gen_bounds}\\
+    & 0 \leq \nu_{jt} \leq \Upsilon_{jt} \;\; \forall j \in \mathcal{H} \\
+    & 0 \leq u_{jt} \leq U_{jt} \;\; \forall j \in \mathcal{H} \\
+    %& \mathbf{x}_t \in \mathbf{Proj}_{\mathbf{x}_t} \left(\mathcal{X}_t \right).
+    & \ell_{nt} \geq 0 \;\; \forall n \in \mathcal{N} \\
+    & \delta_{nt} \geq 0 \;\; \forall n \in \mathcal{N} \\
+    & \mathbf{x}_t \in \mathcal{X}_t.
+\end{align}
+
 ~~~
 <div style="display: flex; align-items: left; height: auto; width: 500px;">
     <img src="/assets/plot_agg_result_hydrogen.png" alt="Image 1" style="width: 50%;">
@@ -173,6 +197,8 @@ OptimalBids.jl is a Julia package to help users build simple simulators for mark
 Significant use cases are electricity markets. Complex and dynamic, the price of electricity is determined by grid physics besides the usual interaction of supply and demand.
 
 Bellow is a small comparison example of bidding strategies for a generator in a spot market based on IEEE-188 system. Even with complete information of what other participants will offer and the demand bids placed by load (demand) agents, maximizing the profit of the generator is not a simple task. 
+
+
 
 ~~~
 <img src="/assets/bayesopt_profit.png" alt="optbids" style="width: 750px; height: 500px; margin-left: -100px; margin-right: -100px; margin-bottom: 1px;">

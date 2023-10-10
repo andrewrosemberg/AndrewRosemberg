@@ -18,7 +18,7 @@ nav li {
 }
 
 nav li a {
-  color: #004de6;
+  color: #0f7f7f;
   text-decoration: none;
   font-size: 18px;
   font-weight: bold;
@@ -30,16 +30,19 @@ nav li a {
   padding-bottom: 5px;
   margin-left: 7px;
   margin-right: 7px;
-  border-bottom: 2px solid #4c9cf1;
+  border-bottom: 2px solid #057d49;
   transition: color 0.3s ease;
 }
 
 header {
-  text-align: right;
+  text-align: center;
   margin-top: 50px;
   margin-bottom: 50px;
   display: flex;
   align-items: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 18px;
+  white-space: nowrap; /* Prevent header content from wrapping */
 }
 
 header .blog-name {
@@ -52,7 +55,7 @@ header .blog-name {
 }
 
 header .blog-name a {
-  color: #a6a2a0;
+  color: #a0a6a2;
   text-decoration: none;
 }
 
@@ -187,4 +190,12 @@ td {
 
 table tbody tr td {
   border: 1px solid lightgray;
+}
+
+.page-footish {
+  background: url(/assets/city.png) center/cover no-repeat; /* Set the image as a background */
+  padding: 100px; /* Add padding to the footer content */
+  text-align: center;
+  color: #fff; /* Change text color to white for better visibility */
+  margin-bottom: -90px;
 }

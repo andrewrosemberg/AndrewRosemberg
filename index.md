@@ -27,8 +27,9 @@ where appropriate -->
     <img class="left" style="width:20%; float: left; margin-right: 20px;" src="assets/avatar.jpeg">
     <div class="link-container">
       <div style="float: left;">
-        <a href="https://github.com/andrewrosemberg"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="Github Profile" style="max-width:60px; max-height:60px; width=auto; height=auto"></a>
-        <a href="https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/linkedin/linkedin-original.svg" alt="Linkedin Profile" style="max-width:60px; max-height:60px; width=auto; height=auto"></a>
+        <a href="https://github.com/andrewrosemberg"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="Github Profile" style="max-width:40px; max-height:60px; width=auto; height=auto"></a>
+        <a href="https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/linkedin/linkedin-original.svg" alt="Linkedin Profile" style="max-width:40px; max-height:60px; width=auto; height=auto"></a>
+        <a href="https://scholar.google.com/citations?user=jOuzK3EAAAAJ&hl=en" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/c/c7/Google_Scholar_logo.svg" alt="Google Scholar Profile" style="max-width:40px; max-height:60px; width=auto; height=auto"></a>
       </div>
       <a href="https://www.ai4opt.org/"><img src="https://www.ai4opt.org/themes/custom/baltarai4opt/images/ai4opt.png" alt="AI4OPT" style="max-width:250px; max-height:250px; width=auto; height=auto"></a>
     </div>
