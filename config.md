@@ -19,7 +19,7 @@ ignore = ["node_modules/"]
 generate_rss = true
 website_title = "Andrew Rosemberg"
 website_descr = "David's Personal website"
-website_url   = "www.andrewrosemberg.com"
+website_url   = "https://andrewrosemberg.github.io/AndrewRosemberg/"
 +++
 
 <!--
