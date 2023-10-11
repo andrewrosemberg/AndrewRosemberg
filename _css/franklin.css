@@ -70,21 +70,6 @@ html {
   margin-bottom: 4em;
 }
 
-.franklin-content .page-footish a {
-  text-decoration: none;
-  color: #a6a2a0;
-  text-decoration: underline;
-}
-
-.page-footish {
-  background: url(/assets/city.png) center/cover no-repeat; /* Set the image as a background */
-  padding: 100px; /* Add padding to the footer content */
-  text-align: center;
-  color: #fff; /* Change text color to white for better visibility */
-  margin-bottom: -90px;
-}
-
-
 /* ==================================================================
     TEXT GEOMETRY
 ================================================================== */
