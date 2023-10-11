@@ -1,4 +1,4 @@
-Sitemap: www.andrewrosemberg.com/sitemap.xml
+Sitemap: https://andrewrosemberg.github.io/AndrewRosemberg/sitemap.xml
 
 User-agent: *
 Disallow:
