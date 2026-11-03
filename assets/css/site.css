@@ -1257,3 +1257,15 @@ strong.kw { color: var(--accent-dark); font-weight: 650; }
 /* Opening-scene captions: a one-line key to the painted overlays under each image of the pair. */
 .scene-item { min-width: 0; }
 .scene-cap { margin: 8px 2px 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+
+/* Education history: the double degree forks from the PUC-Rio engineering line (lower row) and merges
+   back into the engineering degree's 2017 graduation dot (upper row); the line continues below the fork. */
+.edu-history { --gh-main: var(--control); --gh-branch: var(--sky); }
+.edu-history .dot.solo { left: 6px; color: var(--gh-main); box-shadow: 0 0 0 3px var(--paper); }
+.edu-history .lane.main.from-dot { top: 13px; }
+.edu-history .merge { position: absolute; top: 13px; left: 14px; width: 28px; height: calc(100% - 12px); overflow: visible; }
+.edu-history .gh-branch .lane.main { bottom: -6px; }
+.edu-history .lane.branch { left: 41px; top: -1px; bottom: 40px; background: var(--gh-branch); }
+.edu-history .dot.branch { left: 34px; color: var(--gh-branch); box-shadow: 0 0 0 3px var(--paper); }
+.edu-history .gh-branch .fork { bottom: 12px; left: 14px; width: 28px; height: 29px; }
+.edu-history .merge path, .edu-history .fork path { fill: none; stroke: var(--gh-branch); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
