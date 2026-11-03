@@ -222,8 +222,6 @@ details.bib[open] > summary { border-color: var(--accent); color: var(--accent-d
 /* The recent entries deliberately read as concurrent branches, not a chronology
    in which one appointment succeeds another. */
 
-.timeline-history { margin-top: 0; }
-.timeline-history::before { top: 0; }
 .legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 26px; }
 .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--accent); margin-right: 7px; vertical-align: -1px; }
 .legend .l-ind::before { border-color: var(--energy); }
@@ -994,43 +992,6 @@ table.data.method-map { max-width: none; } .course p { max-width: 70ch; }
 }
 
 /* ================= experience: concurrent appointments as a branch graph ================= */
-.gh-note { max-width: 72ch; margin: -6px 0 18px; font-size: 14.5px; color: var(--muted); }
-.git-history { list-style: none; padding: 0; margin: 0 0 30px; --gh-main: var(--accent); --gh-lanl: var(--sky); --gh-visit: var(--rose); }
-.gh-row { display: grid; grid-template-columns: 100px 84px minmax(0, 1fr); column-gap: 18px; }
-.gh-row time { padding-top: 1px; font-size: 13.5px; font-weight: 650; line-height: 1.5; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
-.gh-row time small { font-weight: 500; color: var(--muted); font-size: 12px; }
-.gh-body { padding-bottom: 30px; min-width: 0; }
-.gh-body h3 { font-size: 16.5px; font-weight: 700; line-height: 1.4; }
-.gh-body .org { font-size: 14.5px; color: var(--muted); }
-.gh-body p { font-size: 15px; color: var(--ink-2); margin-top: 6px; max-width: 72ch; }
-.gh-body .org { margin-top: 0; }
-.gh-graph { position: relative; min-height: 100%; }
-.gh-graph .lane { position: absolute; top: 0; bottom: 0; width: 2px; border-radius: 1px; }
-.gh-graph .lane.main { left: 13px; background: var(--gh-main); }
-.gh-graph .lane.lanl { left: 69px; background: var(--gh-lanl); }
-.gh-graph .lane.visit { left: 41px; background: var(--gh-visit); }
-.gh-visit .lane.main, .gh-visit .lane.lanl { background: linear-gradient(to bottom, transparent, var(--lane-c) 22px); }
-.gh-visit .lane.main { --lane-c: var(--gh-main); } .gh-visit .lane.lanl { --lane-c: var(--gh-lanl); }
-.gh-graph .lane.visit.to-fork { top: 13px; bottom: 28px; }
-.gh-graph .lane.lanl.to-fork { top: 0; bottom: 44px; }
-.gh-graph .lane.main.to-dot { bottom: auto; height: 13px; }
-.gh-graph .dot { position: absolute; top: 5px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 3px solid currentColor; z-index: 1; }
-.gh-graph .dot.main { left: 6px; color: var(--gh-main); background: var(--gh-main); box-shadow: 0 0 0 3px var(--paper); }
-.gh-graph .dot.lanl { left: 62px; color: var(--gh-lanl); box-shadow: 0 0 0 3px var(--paper); }
-.gh-graph .dot.visit { left: 34px; color: var(--gh-visit); box-shadow: 0 0 0 3px var(--paper); }
-.gh-graph .fork { position: absolute; bottom: 0; left: 13px; width: 30px; height: 28px; overflow: visible; }
-.gh-graph .fork.wide { width: 58px; height: 44px; }
-.gh-graph .fork path { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.gh-visit .fork path { stroke: var(--gh-visit); }
-.gh-lanl .fork path { stroke: var(--gh-lanl); }
-.git-history + .timeline-history { margin-top: 6px; }
-@media (max-width: 640px) {
-  .gh-row { grid-template-columns: 84px minmax(0, 1fr); column-gap: 12px; }
-  .gh-row time { grid-column: 2; grid-row: 1; text-align: left; }
-  .gh-graph { grid-column: 1; grid-row: 1 / span 2; }
-  .gh-body { grid-column: 2; grid-row: 2; }
-}
-.legend.after-git { margin: 8px 0 22px; }
 
 /* ================= software: thread labels and the DiffOpt card ================= */
 .thread-num a { color: inherit; text-decoration: none; }
@@ -1258,14 +1219,34 @@ strong.kw { color: var(--accent-dark); font-weight: 650; }
 .scene-item { min-width: 0; }
 .scene-cap { margin: 8px 2px 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
 
-/* Education history: the double degree forks from the PUC-Rio engineering line (lower row) and merges
-   back into the engineering degree's 2017 graduation dot (upper row); the line continues below the fork. */
-.edu-history { --gh-main: var(--control); --gh-branch: var(--sky); }
-.edu-history .dot.solo { left: 6px; color: var(--gh-main); box-shadow: 0 0 0 3px var(--paper); }
-.edu-history .lane.main.from-dot { top: 13px; }
-.edu-history .merge { position: absolute; top: 13px; left: 14px; width: 28px; height: calc(100% - 12px); overflow: visible; }
-.edu-history .gh-branch .lane.main { bottom: -6px; }
-.edu-history .lane.branch { left: 41px; top: -1px; bottom: 40px; background: var(--gh-branch); }
-.edu-history .dot.branch { left: 34px; color: var(--gh-branch); box-shadow: 0 0 0 3px var(--paper); }
-.edu-history .gh-branch .fork { bottom: 12px; left: 14px; width: 28px; height: 29px; }
-.edu-history .merge path, .edu-history .fork path { fill: none; stroke: var(--gh-branch); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+
+/* Experience and education trees ({{experience}} page): one row per entry, ordered by start date.
+   Lanes are neutral grey; the earliest ongoing entry keeps lane 0 and overlapping entries branch to lanes 1–2.
+   Every entry has the same hollow node, coloured by category (research, industry, education). */
+.tree { list-style: none; padding: 0; margin: 0 0 26px; --lane: color-mix(in srgb, var(--muted) 55%, transparent); }
+.tr { display: grid; grid-template-columns: 100px 84px minmax(0, 1fr); column-gap: 18px; }
+.tr time { padding-top: 1px; font-size: 13.5px; font-weight: 650; line-height: 1.5; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+.tr time small { font-weight: 500; color: var(--muted); font-size: 12px; }
+.tb { padding-bottom: 28px; min-width: 0; }
+.tb h3 { font-size: 16.5px; font-weight: 700; line-height: 1.4; }
+.tb .org { font-size: 14.5px; color: var(--muted); }
+.tb p, .tb ul { font-size: 15px; color: var(--ink-2); margin-top: 6px; max-width: 72ch; }
+.tb .org { margin-top: 0; }
+.tb ul { padding-left: 1.1em; } .tb li + li { margin-top: 3px; }
+.tg { position: relative; min-height: 100%; }
+.tg .s { position: absolute; width: 2px; margin-left: -1px; background: var(--lane); }
+.tg .x0 { left: 13px; } .tg .x1 { left: 41px; } .tg .x2 { left: 69px; }
+.tg .s.full { top: 0; bottom: 0; } .tg .s.up { top: 0; height: 13px; } .tg .s.down { top: 13px; bottom: 0; }
+.tg .s.downfork { top: 13px; bottom: 28px; } .tg .s.fullfork { top: 0; bottom: 28px; }
+.tg .s.fade { background: linear-gradient(to bottom, transparent, var(--lane) 22px); }
+.tg .n { position: absolute; top: 6px; width: 14px; height: 14px; margin-left: -7px; box-sizing: border-box; border-radius: 50%; background: var(--paper); border: 2.5px solid var(--accent); box-shadow: 0 0 0 3px var(--paper); z-index: 1; }
+.tg .n.ind { border-color: var(--energy); } .tg .n.edu { border-color: var(--control); }
+.tg .c { position: absolute; bottom: 0; left: 13px; height: 28px; overflow: visible; }
+.tg .c.w1 { width: 28px; } .tg .c.w2 { width: 56px; }
+.tg .c path { fill: none; stroke: var(--lane); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+@media (max-width: 640px) {
+  .tr { grid-template-columns: 84px minmax(0, 1fr); column-gap: 12px; }
+  .tr time { grid-column: 2; grid-row: 1; text-align: left; }
+  .tg { grid-column: 1; grid-row: 1 / span 2; }
+  .tb { grid-column: 2; grid-row: 2; }
+}

@@ -19,7 +19,7 @@
   <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="../assets/fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="../assets/fonts/InstrumentSerif-Regular-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../assets/css/site.css?v=379364f689">
+  <link rel="stylesheet" href="../assets/css/site.css?v=7cc4258152">
   <script src="../assets/js/site.js?v=d8fec169e3" defer></script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Person","name":"Andrew Rosemberg","alternateName":"Andrew David Werner Rosemberg","url":"https://andrewrosemberg.github.io/AndrewRosemberg/","image":"https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/andrew-rosemberg.jpg","jobTitle":"PhD Candidate in Machine Learning","affiliation":[{"@type":"CollegeOrUniversity","name":"Georgia Institute of Technology"},{"@type":"Organization","name":"AI4OPT"}],"alumniOf":[{"@type":"CollegeOrUniversity","name":"Pontifical Catholic University of Rio de Janeiro"},{"@type":"CollegeOrUniversity","name":"École Centrale de Marseille"}],"knowsAbout":["Machine learning","Mathematical optimization","Stochastic programming","Differentiable optimization","Reinforcement learning","Power systems"],"sameAs":["https://github.com/andrewrosemberg","https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/","https://scholar.google.com/citations?user=jOuzK3EAAAAJ"]}
@@ -56,96 +56,117 @@
 
 <section class="wrap" style="padding-bottom:40px" aria-labelledby="exp-h">
   <h2 class="year-label" id="exp-h">Research and industry</h2>
-  <p class="gh-note">Since 2023 the appointments have run concurrently: The Georgia Tech line continues throughout, Los Alamos runs alongside it, and the Berkeley visit branched from it in 2026.</p>
-  <ol class="git-history">
-    <li class="gh-row gh-visit">
+  <div class="legend" aria-hidden="true"><span>Research</span><span class="l-ind">Industry</span><span class="l-edu">Education</span></div>
+  <ol class="tree">
+    <li class="tr">
       <time>2026<br><small>6 months</small></time>
-      <div class="gh-graph" aria-hidden="true"><i class="lane main"></i><i class="lane lanl"></i><i class="lane visit to-fork"></i><i class="dot visit"></i><svg class="fork" viewBox="0 0 28 28" preserveAspectRatio="none"><path d="M28 0 C28 15 0 13 0 28"/></svg></div>
-      <div class="gh-body">
+      <div class="tg" aria-hidden="true"><i class="s x0 full fade"></i><i class="s x2 full fade"></i><i class="s x1 downfork"></i><i class="n x1 res"></i><svg class="c w1" viewBox="0 0 28 28" preserveAspectRatio="none"><path d="M28 0 C28 15 0 13 0 28"/></svg></div>
+      <div class="tb">
         <h3>Graduate Visiting Researcher</h3><p class="org">Robot Learning Lab, UC Berkeley · with <a href="https://people.eecs.berkeley.edu/~pabbeel/">Pieter Abbeel</a></p>
         <p>Policy learning and distillation for humanoid locomotion and dexterous manipulation.</p>
       </div>
     </li>
-    <li class="gh-row gh-lanl">
+    <li class="tr">
       <time>2024–present</time>
-      <div class="gh-graph" aria-hidden="true"><i class="lane main"></i><i class="lane lanl from-top to-fork"></i><i class="dot lanl"></i><svg class="fork wide" viewBox="0 0 56 44" preserveAspectRatio="none"><path d="M56 0 C56 26 0 18 0 44"/></svg></div>
-      <div class="gh-body">
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="s x2 fullfork"></i><i class="n x2 res"></i><svg class="c w2" viewBox="0 0 56 28" preserveAspectRatio="none"><path d="M56 0 C56 15 0 13 0 28"/></svg></div>
+      <div class="tb">
         <h3>Graduate Researcher</h3><p class="org">Los Alamos National Laboratory, Los Alamos, NM</p>
         <p>Decision models inside learning pipelines: Solution sensitivities of nonconvex programs (DiffOpt.jl), optimization proxies trained with selected sensitivities, and strategic bidding through AC market clearing, with energy and robotic systems as test cases.</p>
       </div>
     </li>
-    <li class="gh-row gh-base">
+    <li class="tr">
       <time>2023–present</time>
-      <div class="gh-graph" aria-hidden="true"><i class="lane main to-dot"></i><i class="dot main"></i></div>
-      <div class="gh-body">
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="n x0 res"></i></div>
+      <div class="tb">
         <h3>Graduate Researcher</h3><p class="org">NSF AI Institute for Advances in Optimization (AI4OPT), Georgia Tech, Atlanta</p>
         <p>Policy learning for constrained sequential decisions (two-stage generalized decision rules), learned value functions for optimal power flow, and calibration of simplified decision models.</p>
       </div>
     </li>
-  </ol>
-  <div class="legend after-git" aria-hidden="true"><span>Research</span><span class="l-ind">Industry</span><span class="l-edu">Education</span></div>
-  <ol class="timeline timeline-history">
-    <li class="tl industry"><time>2020–2023<br><small>3 years</small></time><div>
-      <h3>Researcher</h3><p class="org">Invenia Labs, Cambridge, UK</p>
+    <li class="tr">
+      <time>2020–2023<br><small>3 years</small></time>
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="n x0 ind"></i></div>
+      <div class="tb">
+        <h3>Researcher</h3><p class="org">Invenia Labs, Cambridge, UK</p>
       <p>Risk-aware decision models under uncertainty for bidding in seven US electricity markets (MISO, PJM, ERCOT, CAISO, SPP, ISO-NE and NYISO). Related research: <a href="../research/portfolio-optimization/">estimating uncertainty for robust decisions</a> and <a href="../research/strategic-bidding/">strategic bidding</a>.</p>
       <ul>
         <li>Directed projects on daily bidding under price uncertainty, in which machine-learning estimates of that uncertainty define robust and distributionally robust bidding models.</li>
         <li>Contributed to a detailed market simulator for counterfactual analysis, and led the data analysis of simulation accuracy.</li>
         <li>Developed decomposition methods for large-scale integer and continuous models, and estimated unknown grid parameters with inverse optimization and heuristics.</li>
         <li>Explored exact and surrogate methods for bilevel problems such as strategic bidding and hyperparameter tuning, using automatic differentiation and automatic dualization of optimization models.</li>
-      </ul></div></li>
-    <li class="tl industry"><time>2017–2019<br><small>2.5 years</small></time><div>
-      <h3>Research Staff Member</h3><p class="org">LAMPS, Pontifical Catholic University of Rio de Janeiro · consulting projects</p>
+      </ul>
+      </div>
+    </li>
+    <li class="tr">
+      <time>2017–2019<br><small>2.5 years</small></time>
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="n x0 ind"></i></div>
+      <div class="tb">
+        <h3>Research Staff Member</h3><p class="org">LAMPS, Pontifical Catholic University of Rio de Janeiro · consulting projects</p>
       <ul>
         <li>Mathematical-programming models for optimal transmission-usage contracting for Energisa Group, one of Brazil’s largest electricity companies.</li>
         <li>Flexible software for multistage hydrothermal economic dispatch in a consulting project for FGV Energia, assessing network and capacity changes (<a href="../research/network-simplifications/">HydroPowerModels.jl</a>).</li>
-      </ul></div></li>
-    <li class="tl industry"><time>2017<br><small>6 months</small></time><div>
-      <h3>Intern</h3><p class="org">Banco BBM (BOCOM BBM), Rio de Janeiro</p>
-      <p>Fraud-risk assessment of trade notes receivable in the Data Science team; macroeconomic indicator analysis in the Economic Research team.</p></div></li>
-    <li class="tl industry"><time>2016–2017<br><small>6 months</small></time><div>
-      <h3>Research Intern</h3><p class="org">Air Liquide Medical Systems, Paris</p>
-      <p>Built the company’s first integrated simulator of a breathing-support machine, covering the CPAP and BiPAP programs of the Vendôme home ventilator, so researchers could test new designs.</p></div></li>
-    <li class="tl industry"><time>2015<br><small>5 weeks</small></time><div>
-      <h3>Intern</h3><p class="org">Northumberland, Tyne and Wear NHS Foundation Trust, Newcastle, UK</p>
-      <p>Digital consumables database for stock control, and protocols for logging supply usage.</p></div></li>
+      </ul>
+      </div>
+    </li>
+    <li class="tr">
+      <time>2017<br><small>6 months</small></time>
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="n x0 ind"></i></div>
+      <div class="tb">
+        <h3>Intern</h3><p class="org">Banco BBM (BOCOM BBM), Rio de Janeiro</p>
+      <p>Fraud-risk assessment of trade notes receivable in the Data Science team; macroeconomic indicator analysis in the Economic Research team.</p>
+      </div>
+    </li>
+    <li class="tr">
+      <time>2016–2017<br><small>6 months</small></time>
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="n x0 ind"></i></div>
+      <div class="tb">
+        <h3>Research Intern</h3><p class="org">Air Liquide Medical Systems, Paris</p>
+      <p>Built the company’s first integrated simulator of a breathing-support machine, covering the CPAP and BiPAP programs of the Vendôme home ventilator, so researchers could test new designs.</p>
+      </div>
+    </li>
+    <li class="tr">
+      <time>2015<br><small>5 weeks</small></time>
+      <div class="tg" aria-hidden="true"><i class="s x0 up"></i><i class="n x0 ind"></i></div>
+      <div class="tb">
+        <h3>Intern</h3><p class="org">Northumberland, Tyne and Wear NHS Foundation Trust, Newcastle, UK</p>
+      <p>Digital consumables database for stock control, and protocols for logging supply usage.</p>
+      </div>
+    </li>
   </ol>
 </section>
 
 <section class="wrap" style="padding-bottom:40px" aria-labelledby="edu-h">
   <h2 class="year-label" id="edu-h">Education</h2>
-  <p class="gh-note">The double degree in France branched from the engineering degree at PUC-Rio in 2014 and rejoined it for graduation in 2017.</p>
-  <ol class="git-history edu-history">
-    <li class="gh-row gh-solo">
+  <ol class="tree">
+    <li class="tr">
       <time>2023–2027<br><small>expected Spring 2027</small></time>
-      <div class="gh-graph" aria-hidden="true"><i class="dot solo"></i></div>
-      <div class="gh-body">
+      <div class="tg" aria-hidden="true"><i class="s x0 down"></i><i class="n x0 edu"></i></div>
+      <div class="tb">
         <h3>PhD in Machine Learning</h3><p class="org">H. Milton Stewart School of Industrial and Systems Engineering, Georgia Tech · AI4OPT Fellowship</p>
       <p>Advisor: <a href="https://www.isye.gatech.edu/users/pascal-van-hentenryck">Pascal Van Hentenryck</a>. Thesis topic: <a href="../research/">policy learning for constrained sequential decision-making</a>.</p>
       </div>
     </li>
-    <li class="gh-row gh-solo">
+    <li class="tr">
       <time>2018–2019</time>
-      <div class="gh-graph" aria-hidden="true"><i class="dot solo"></i></div>
-      <div class="gh-body">
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="n x0 edu"></i><svg class="c w1" viewBox="0 0 28 28" preserveAspectRatio="none"><path d="M0 0 C0 15 28 13 28 28"/></svg></div>
+      <div class="tb">
         <h3>MSc in Operations Research (Electrical Engineering)</h3><p class="org">Pontifical Catholic University of Rio de Janeiro (PUC-Rio)</p>
       <p>Advisor: <a href="https://alexandrestreet.com/">Alexandre Street</a>; co-advisor: Davi Valladão; committee: Andy Philpott, Arild Helseth, Bruno Fanzeres. Thesis: <a href="https://doi.org/10.17771/PUCRio.acad.51577"><em>A Framework for Assessing the Impacts of Network Formulations in the Operation of Hydrothermal Power Systems</em></a>. Research on decision-making under uncertainty in quantitative finance, including portfolio selection and asset–liability management, and in energy systems.</p>
       </div>
     </li>
-    <li class="gh-row gh-merge">
-      <time>2012–2017</time>
-      <div class="gh-graph" aria-hidden="true"><i class="lane main from-dot"></i><svg class="merge" viewBox="0 0 28 100" preserveAspectRatio="none"><path d="M0 0 C0 55 28 45 28 100"/></svg><i class="dot main"></i></div>
-      <div class="gh-body">
-        <h3>BEng in Mechatronics and Control Engineering</h3><p class="org">Pontifical Catholic University of Rio de Janeiro (PUC-Rio)</p>
-      <p>Project: Aircraft modeling and microcontroller programming with the AeroDesign team.</p>
-      </div>
-    </li>
-    <li class="gh-row gh-branch">
+    <li class="tr">
       <time>2014–2017</time>
-      <div class="gh-graph" aria-hidden="true"><i class="lane main"></i><i class="lane branch"></i><i class="dot branch"></i><svg class="fork" viewBox="0 0 28 28" preserveAspectRatio="none"><path d="M28 0 C28 15 0 13 0 28"/></svg></div>
-      <div class="gh-body">
+      <div class="tg" aria-hidden="true"><i class="s x0 full"></i><i class="s x1 fullfork"></i><i class="n x1 edu"></i><svg class="c w1" viewBox="0 0 28 28" preserveAspectRatio="none"><path d="M28 0 C28 15 0 13 0 28"/></svg></div>
+      <div class="tb">
         <h3>Double degree in General Engineering · BRAFITEC merit scholarship</h3><p class="org">École Centrale de Marseille, France</p>
       <p>Minor in computer science and information systems. Project: EEG-based epilepsy classification at the Fresnel Institute.</p>
+      </div>
+    </li>
+    <li class="tr">
+      <time>2012–2017</time>
+      <div class="tg" aria-hidden="true"><i class="s x0 up"></i><i class="n x0 edu"></i></div>
+      <div class="tb">
+        <h3>BEng in Mechatronics and Control Engineering</h3><p class="org">Pontifical Catholic University of Rio de Janeiro (PUC-Rio)</p>
+      <p>Project: Aircraft modeling and microcontroller programming with the AeroDesign team.</p>
       </div>
     </li>
   </ol>
