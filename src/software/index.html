@@ -1,0 +1,112 @@
+<!--
+title: Software
+description: Open-source Julia software that implements research on learning and decision-making: infrastructure for learning solution maps, decision rules for multistage policies, solution sensitivities of optimization models, and composable models of uncertainty, ambiguity, and risk.
+nav: software
+math: true
+-->
+<header class="page-hero wrap">
+  <div class="hero-mark">{{icon:software}}<p class="eyebrow">Software</p></div>
+  <h1>Open-source implementations of the research</h1>
+  <p class="lede">Each package implements one of the ideas on the <a href="{{root}}research/">research</a> page and works with optimization models as they are already written in JuMP, so that learning, sensitivity analysis, and models of uncertainty can be applied without rebuilding a model for each method. They are grouped by the idea they implement; within each group, general tools come first and their applications follow. Each package has a page on the design ideas it contributes, with an example and the research it supports.</p>
+</header>
+
+<section class="wrap thread" aria-labelledby="t1">
+  <div class="thread-head">
+    <p class="thread-num"><a href="{{root}}research/#solution-maps">Learning solution maps</a></p>
+    <h2 id="t1">Data, training, and supervision for solution maps</h2>
+    <p>Infrastructure for learning approximations of parametric optimization problems: Generating reference solutions and sensitivities from existing models, training proxies on them, and solving batches of problems on GPUs. See <a href="{{root}}research/masked-sobolev/">Learning Solution Maps</a> and <a href="{{root}}research/value-functions/">Continuation-Value Representations</a>.</p>
+  </div>
+  <article class="tool org">
+    <div class="org-media">
+      <figure><div class="tool-media"><picture><img src="{{root}}assets/img/software/learningtooptimize-pipeline.webp" alt="LearningToOptimize.jl pipeline in three panels. In the package panel, a ProblemIterator holds a table of instances, one parameter vector per identifier; solve_batch loops over them, update_model sets each parameter of the JuMP model with MOI.set, and JuMP.optimize! solves it; a Recorder then stores the primal and dual variables that pass its filter. The parameters and the recorded solutions are saved as input and output tables, published on Hugging Face, which Flux.jl reads as features and labels in Flux.train with a model, an optimizer and a loss." width="1200" height="574" loading="lazy"></picture></div><figcaption><b>LearningToOptimize.jl:</b> generate data from a parametric JuMP model, store it, train a proxy.</figcaption></figure>
+      <figure class="sobolev-figure"><div class="tool-media"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/sobolev-compact.svg"><img src="{{root}}assets/img/diagrams/sobolev.svg" alt="Masked Sobolev training: dataset solves with DiffOpt provide decisions and sensitivities; the proxy matches both through automatic differentiation." loading="lazy"></picture></div><figcaption><b>Masked Sobolev training:</b> dataset solves supply reference decisions and selected sensitivities; the proxy matches both.</figcaption></figure>
+    </div>
+    <div>
+      <div class="tool-head"><h3><a href="{{root}}software/learningtooptimize/">LearningToOptimize</a></h3><img class="stars" src="https://img.shields.io/github/stars/LearningToOptimize/LearningToOptimize.jl?style=social" alt="GitHub stars for LearningToOptimize.jl" loading="lazy"></div>
+      <p class="role">Organization lead · solution-map learning</p>
+      <p>An open-source organization for learning optimization proxies, hosting with collaborators:</p>
+      <ul class="org-list">
+        <li><a href="https://github.com/LearningToOptimize/LearningToOptimize.jl">LearningToOptimize.jl</a>: Datasets from parametric JuMP models and proxy training</li>
+        <li><a href="https://github.com/LearningToOptimize/L2OALM.jl">L2OALM.jl</a>, <a href="https://github.com/LearningToOptimize/L2ODLL.jl">L2ODLL.jl</a>, <a href="https://github.com/LearningToOptimize/L2ODC3.jl">L2ODC3.jl</a>: Primal–dual, dual, and DC3 learning</li>
+        <li><a href="https://github.com/LearningToOptimize/BatchNLPKernels.jl">BatchNLPKernels.jl</a>, <a href="https://github.com/LearningToOptimize/BatchConeKernels.jl">BatchConeKernels.jl</a>: GPU kernels for batches of problems</li>
+        <li><a href="https://huggingface.co/LearningToOptimize">Hugging Face datasets</a>: Parametric problems and sensitivity systems</li>
+      </ul>
+      <div class="soft-links"><a class="pub-link primary" href="{{root}}software/learningtooptimize/">Package page</a><a class="pub-link" href="https://github.com/LearningToOptimize">GitHub ↗</a><a class="pub-link" href="https://learningtooptimize.github.io/LearningToOptimize.jl/dev/">Docs ↗</a></div>
+    </div>
+  </article>
+</section>
+
+<section class="wrap thread" aria-labelledby="t2">
+  <div class="thread-head">
+    <p class="thread-num"><a href="{{root}}research/#policies">Policies for multistage decisions</a></p>
+    <h2 id="t2">State policies implemented by optimization, and the models that test them</h2>
+    <p>Training policies whose state targets are implemented by an optimization over the operational model, and the multistage planning models in which those policies are compared with stochastic dual dynamic programming. See <a href="{{root}}research/decision-rules/">Policies for Multistage Decisions</a> and <a href="{{root}}research/network-simplifications/">Planning and Realization Mismatch</a>.</p>
+  </div>
+  <div class="lineage">
+    <article class="tool key">
+      <div class="tool-media"><picture><img src="{{root}}assets/img/software/decisionrules-training.webp" alt="Training a state-consistent decision rule: a recurrent policy with shared weights emits targets stage by stage; independent stage problems, solved in parallel, return the multipliers that form the gradient." width="1200" height="481" loading="lazy"></picture></div>
+      <div class="tool-head"><h3><a href="{{root}}software/decisionrules/">DecisionRules.jl</a></h3><img class="stars" src="https://img.shields.io/github/stars/LearningToOptimize/DecisionRules.jl?style=social" alt="GitHub stars for DecisionRules.jl" loading="lazy"></div>
+      <p class="role">Author · policy learning</p>
+      <p>Trains two-stage generalized decision rules: A parametric policy prescribes state targets, an optimization implements them, and the multipliers of the target constraints supply the gradient. Examples cover hydro dispatch and inventory control; <a href="https://github.com/LearningToOptimize/DecisionRulesExa.jl">DecisionRulesExa.jl</a> solves the stage problems on GPUs.</p>
+      <div class="soft-links"><a class="pub-link primary" href="{{root}}software/decisionrules/">Package page</a><a class="pub-link" href="{{root}}research/decision-rules/">Project page</a><a class="pub-link" href="https://github.com/LearningToOptimize/DecisionRules.jl">GitHub ↗</a><a class="pub-link" href="https://learningtooptimize.github.io/DecisionRules.jl/dev/">Docs ↗</a></div>
+    </article>
+    <div class="link-arrow" aria-hidden="true"><span>evaluated on detailed multistage models</span></div>
+    <article class="tool">
+      <div class="tool-media"><img src="{{root}}assets/img/software/relaxation-hierarchy.svg" alt="Nested relaxations of the AC power-flow feasible set: SDP inside SOC inside network flow inside copper plate." width="560" height="300" loading="lazy"></div>
+      <div class="tool-head"><h3><a href="{{root}}software/hydropowermodels/">HydroPowerModels.jl</a></h3><img class="stars" src="https://img.shields.io/github/stars/andrewrosemberg/HydroPowerModels.jl?style=social" alt="GitHub stars for HydroPowerModels.jl" loading="lazy"></div>
+      <p class="role">Author · multistage hydrothermal planning</p>
+      <p>Multistage hydrothermal dispatch solved with SDDP over any PowerModels network formulation, from transportation models to convex relaxations of AC power flow; used to measure the cost of planning on a simplified network and as an SDDP baseline for decision rules.</p>
+      <div class="soft-links"><a class="pub-link primary" href="{{root}}software/hydropowermodels/">Package page</a><a class="pub-link" href="{{root}}research/network-simplifications/">Project page</a><a class="pub-link" href="https://github.com/andrewrosemberg/HydroPowerModels.jl">GitHub ↗</a><a class="pub-link" href="https://andrewrosemberg.github.io/HydroPowerModels.jl/latest/">Docs ↗</a></div>
+    </article>
+  </div>
+</section>
+
+<section class="wrap thread" aria-labelledby="t3">
+  <div class="thread-head">
+    <p class="thread-num"><a href="{{root}}research/#uncertainty">Uncertainty and ambiguity</a> · <a href="{{root}}research/#multi-level">Multi-level decision problems</a></p>
+    <h2 id="t3">Uncertainty, market response, and solution sensitivity</h2>
+    <p>A general engine for decisions under estimated uncertainty, its specialization to offers that are evaluated through market clearing, and the sensitivity layer that lets parameters of either be tuned through the decisions they produce. See <a href="{{root}}research/portfolio-optimization/">Uncertainty and Ambiguity</a>, <a href="{{root}}research/strategic-bidding/">Endogenous Response</a>, and <a href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models</a>.</p>
+  </div>
+  <div class="software-relations">
+    <article class="tool relation-portfolio">
+      <div class="tool-media"><img src="{{root}}assets/img/research/portfolio-backtest.svg" alt="Cumulative wealth during a rolling backtest for nominal and robust allocation strategies." width="840" height="371" loading="lazy"></div>
+      <div class="tool-head"><h3><a href="{{root}}software/portfolioopt/">PortfolioOpt.jl</a></h3><img class="stars" src="https://img.shields.io/github/stars/andrewrosemberg/PortfolioOpt.jl?style=social" alt="GitHub stars for PortfolioOpt.jl" loading="lazy"></div>
+      <p class="role">Author · uncertainty, ambiguity, and risk</p>
+      <p>Composes forecasts, uncertainty and ambiguity sets, risk measures, and constraints into nominal, robust, and distributionally robust allocation models, each compiled to a tractable reformulation, and compares them in rolling backtests.</p>
+      <div class="soft-links"><a class="pub-link primary" href="{{root}}software/portfolioopt/">Package page</a><a class="pub-link" href="{{root}}research/portfolio-optimization/">Project page</a><a class="pub-link" href="https://github.com/andrewrosemberg/PortfolioOpt.jl">GitHub ↗</a><a class="pub-link" href="https://andrewrosemberg.github.io/PortfolioOpt.jl/stable/">Docs ↗</a></div>
+    </article>
+    <div class="relation-arrow relation-right" aria-hidden="true"><span>specialized to offers in a cleared market</span></div>
+    <article class="tool relation-bids">
+      <div class="tool-media"><img src="{{root}}assets/img/software/optimalbids-bayesopt.gif" alt="Bayesian optimization fitting a Gaussian-process surrogate to a jagged profit curve." width="900" height="600" loading="lazy"></div>
+      <div class="tool-head"><h3><a href="{{root}}software/optimalbids/">OptimalBids.jl</a></h3><img class="stars" src="https://img.shields.io/github/stars/andrewrosemberg/OptimalBids.jl?style=social" alt="GitHub stars for OptimalBids.jl" loading="lazy"></div>
+      <p class="role">Author · market offers</p>
+      <p>Turns a market-clearing model into an evaluation of offers&mdash;build the market, change bids, clear, compute profit&mdash;so that gradient-based and derivative-free methods search over the same decision process.</p>
+      <div class="soft-links"><a class="pub-link primary" href="{{root}}software/optimalbids/">Package page</a><a class="pub-link" href="{{root}}research/strategic-bidding/">Project page</a><a class="pub-link" href="https://github.com/andrewrosemberg/OptimalBids.jl">GitHub ↗</a><a class="pub-link" href="https://andrewrosemberg.github.io/OptimalBids.jl/stable/">Docs ↗</a></div>
+    </article>
+    <div class="relation-arrow relation-up relation-diff-portfolio" aria-hidden="true"><span>tunes allocation parameters through the decisions they produce</span></div>
+    <div class="relation-arrow relation-up relation-diff-bids" aria-hidden="true"><span>guides search over offers through clearing sensitivities</span></div>
+    <div class="relation-arrow relation-up relation-stacked" aria-hidden="true"><span>allocation parameters and offers are tuned through the solution sensitivities below</span></div>
+    <article class="tool key relation-diff">
+      <div class="relation-diff-grid">
+        <figure class="dg-figure">{{diagram:through}}</figure>
+        <div>
+          <div class="tool-head"><h3><a href="{{root}}research/differentiable-optimization/">DiffOpt.jl</a></h3><img class="stars" src="https://img.shields.io/github/stars/jump-dev/DiffOpt.jl?style=social" alt="GitHub stars for DiffOpt.jl" loading="lazy"></div>
+          <p class="role">Contributor · solution sensitivities</p>
+          <p>Part of the JuMP ecosystem: Solution and objective sensitivities of optimization models with respect to named parameters, independent of the solver. Contributions: The module for smooth nonconvex programs at regular local solutions, objective sensitivities, and, with Joaquim Dias Garcia, the parameter-centric interface.</p>
+          <div class="soft-links"><a class="pub-link primary" href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models (with DiffOpt.jl)</a><a class="pub-link" href="https://github.com/jump-dev/DiffOpt.jl">GitHub ↗</a><a class="pub-link" href="https://jump.dev/DiffOpt.jl/stable/">Docs ↗</a></div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="wrap" style="padding-bottom:88px">
+  <p class="also">Also: <a href="https://github.com/andrewrosemberg/SquidGame.jl">SquidGame.jl</a>, strategy tournaments for repeated games such as the iterated prisoner’s dilemma, written for fun. More on <a href="https://github.com/andrewrosemberg">GitHub</a>.</p>
+  <div class="sponsor-panel">
+    <div>
+      <h3>Support these tools</h3>
+      <p>You can support maintenance of these packages through GitHub Sponsors.</p>
+    </div>
+    <a class="sponsor-btn" href="https://github.com/sponsors/andrewrosemberg"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.25.345 6.45a4.25 4.25 0 0 1 6.01-6.01L8 2.08 9.645.44a4.25 4.25 0 0 1 6.01 6.01Z"/></svg> Sponsor on GitHub</a>
+  </div>
+</section>

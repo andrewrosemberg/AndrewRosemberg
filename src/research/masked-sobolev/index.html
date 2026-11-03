@@ -1,0 +1,336 @@
+<!--
+title: Learning Solution Maps
+description: Learned approximations of solver-selected solution maps: direct matching, primal–dual completion, retained-model correction, and masked Sobolev supervision of local response.
+nav: research
+math: true
+image: assets/img/thumbs/masked-sobolev.jpg
+-->
+<header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="{{root}}research/">Research</a> / <a href="{{root}}research/#solution-maps">Learning Solution Maps</a></p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Parametric solution maps · Amortized computation · Local structure</p>
+  <h1>Learning Solution Maps</h1>
+  <p class="lede">Repeated constrained solves induce a map from context to selected decisions. Learning that map can amortize computation across related instances, but it transfers the burden of generalization from a numerical procedure to a representation. The central question is therefore not whether a forward pass is faster than a solve. It is what information the learned object must retain for the decisions, constraints, and downstream computations in which it will be used.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, Joaquim&nbsp;Dias&nbsp;Garcia, Russell&nbsp;Bent, Pascal&nbsp;Van&nbsp;Hentenryck, Pieter&nbsp;Abbeel</p>
+</header>
+{{scene:masked-sobolev}}
+
+<nav class="topic-map wrap" aria-label="Learning Solution Maps argument"><p>Argument</p><ol><li><a href="#matching"><small>01 · Selected maps</small><span>What a repeated solve supplies as supervision</span></a></li><li><a href="#completion"><small>02 · Retained structure</small><span>Constraints or a solver kept inside the construction</span></a></li><li><a href="#fidelity"><small>03 · Local fidelity</small><span>Masked Sobolev training and where it is valid</span></a></li><li><a href="#regimes"><small>04 · Problem classes</small><span>Smooth maps, many active sets, sparse solutions</span></a></li><li><a href="#policies"><small>05 · Sequential use</small><span>Several teachers, and recourse inside a policy</span></a></li><li><a href="#software"><small>06 · Software</small><span>LearningToOptimize and DiffOpt.jl</span></a></li></ol></nav>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#matching">Selected maps</a></li><li><a href="#completion">Retained structure</a></li><li><a href="#fidelity">Local fidelity</a></li><li><a href="#regimes">Problem classes</a></li><li><a href="#policies">Sequential use</a></li><li><a href="#software">Software</a></li></ol></nav><article class="proj-body">
+
+<section id="matching"><h2><span class="num">01 · Selected maps</span>Repeated solution defines the object to be approximated</h2>
+<p>Repeated optimization problems define a map from changing problem data to the decisions returned by a specified solution procedure. Let \(p\in\mathcal P\subset\mathbb R^d\) denote the data of a constrained problem with decisions \(\mathbf y\in\mathbb R^n\), objective \(f\), equality system \(c\), and inequality system \(h\). A specified solution procedure returns a selected decision</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[g(p)=\mathbf y^\star(p)\in\operatorname*{arg\,min}_{\mathbf y\in\mathbb R^n}
+\left\{f(\mathbf y;p)\ \middle|\ \begin{aligned}
+c(\mathbf y;p)&=\mathbf 0,\\[0.4em]
+h(\mathbf y;p)&\ge\mathbf 0
+\end{aligned}\right\}.\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+g(p)&=\mathbf y^\star(p),\\[0.4em]
+\mathbf y^\star(p)&\in\operatorname*{arg\,min}_{\mathbf y\in\mathbb R^n} f(\mathbf y;p)\\[0.4em]
+&\quad\begin{aligned}
+\text{s.t.}\quad c(\mathbf y;p)&=\mathbf 0,\\[0.4em]
+h(\mathbf y;p)&\ge\mathbf 0.
+\end{aligned}
+\end{aligned}\]</div>
+</div>
+<p>When the problem has several solutions, \(g\) denotes the solution the procedure returns, and the sensitivities supervised below are those of this selected map, so the choice of solution fixes the training target. Across related instances, \(p\mapsto g(p)\) is the repeated computation, and amortized optimization replaces it by a learned map \(\hat g_\theta\) evaluated in one forward pass (<a href="#ref-amos2023">Amos, 2023</a>; <a href="#ref-vanhentenryck2025">Van Hentenryck, 2025</a>; <a href="#ref-kotary2021">Kotary et al., 2021</a>).</p>
+<p>The difficulty lies in the geometry of \(g\). A constrained solution map is smooth only within regions where the active set is stable. As the active set changes, the parameter space splits into critical regions whose number can grow combinatorially with the number of constraints, so generalization from finitely many samples and constraint behavior between them are the central questions of any construction.</p>
+<p>Direct solution matching uses solved pairs \(\{(p_i,g(p_i))\}_{i=1}^N\) and empirical risk minimization,</p>
+<div class="eq">\[\min_\theta\ \underbrace{\frac1N\sum_{i=1}^N\ell\bigl(\hat g_\theta(p_i),g(p_i)\bigr)}_{\text{solution matching}}.\]</div>
+<p>Here \(\theta\) denotes the proxy weights and \(\ell\) the decision loss, giving the standard construction of optimization proxies (<a href="#ref-pan2020">Pan et al., 2020</a>; <a href="#ref-chatzos2020">Chatzos et al., 2020</a>). In imitation learning, the same objective defines behavior cloning, with the solver as the expert. It retains only the relation between an instance and a returned decision. The feasibility mechanism, the optimality system, and the selection that produced each label are absent, so low average decision error can coexist with poor interpolation between sampled regions, constraint violations, and heavy tails. Out of distribution these errors grow, because a new parameter may require an active set that none of the training pairs exhibits, even within the range the data cover. The construction also presumes that a selected solution can be computed offline for every training instance.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/masked-sobolev--direct-matching-compact.svg" width="882" height="1123"><img src="{{root}}assets/img/diagrams/masked-sobolev--direct-matching.svg" alt="Method diagram with a Dataset lane and a Training lane. Sampled parameters p enter an optimization block, min over y of f(y;p) subject to c(y;p)=0 and h(y;p)≥0, which returns the selected decision y-star equal to g(p_i). The same p_i enter the network g-hat-theta, which outputs y-hat. A loss compares y-hat with y-star, and a dashed gradient returns to the network. No derivative path appears." width="1270" height="970"></picture></div><figcaption><b>Direct matching uses the solver only to label data.</b> Each sampled \(p_i\) is solved in the Dataset lane to its selected decision \(\mathbf y^\star=g(p_i)\); in the Training lane the network is fitted to these labels through the value loss alone. No derivative information enters, and at deployment the solver is removed and only \(\hat g_\theta\) remains. The layout is that of the masked Sobolev diagram in Section 03, with every derivative path deleted.</figcaption></figure>
+</section>
+
+<section id="completion"><h2><span class="num">02 · Retained structure</span>The constrained problem, or its solver, can remain in the construction</h2>
+<p>When selected labels are unavailable, incomplete, or too costly at scale, the optimization model can supply the training signal itself. Self-supervised primal–dual learning (<a href="#ref-park2023">Park and Van Hentenryck, 2023</a>) follows an augmented-Lagrangian method with two maps: a primal map \(\hat{\mathbf y}=\hat g_\theta(p)\) and an instance-conditioned dual map \((\hat{\boldsymbol\lambda},\hat{\boldsymbol\mu})=\Lambda_\psi(p)\) for the multipliers of \(c\) and \(h\). With the dual map frozen, the primal map minimizes</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\min_\theta\ \frac1N\sum_{i=1}^N\Bigl[f(\hat{\mathbf y}_i;p_i)+\hat{\boldsymbol\lambda}_i^\top c(\hat{\mathbf y}_i;p_i)-\hat{\boldsymbol\mu}_i^\top h(\hat{\mathbf y}_i;p_i)+\frac\rho2\lVert c(\hat{\mathbf y}_i;p_i)\rVert_2^2+\frac\rho2\lVert[-h(\hat{\mathbf y}_i;p_i)]_+\rVert_2^2\Bigr].\]</div>
+<div class="eq eq-mid">\[\begin{aligned}
+\min_\theta\ \frac1N\sum_{i=1}^N\Bigl[
+&\underbrace{f(\hat{\mathbf y}_i;p_i)}_{\text{objective}}
++\underbrace{\hat{\boldsymbol\lambda}_i^\top c(\hat{\mathbf y}_i;p_i)
+-\hat{\boldsymbol\mu}_i^\top h(\hat{\mathbf y}_i;p_i)}_{\text{dual terms}}\\[0.4em]
+&+\underbrace{\frac\rho2\lVert c(\hat{\mathbf y}_i;p_i)\rVert_2^2}_{\text{equality penalty}}
++\underbrace{\frac\rho2\lVert[-h(\hat{\mathbf y}_i;p_i)]_+\rVert_2^2}_{\text{inequality penalty}}
+\Bigr].
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&\begin{aligned}
+f_i&=f(\hat{\mathbf y}_i;p_i),\\[0.4em]
+c_i&=c(\hat{\mathbf y}_i;p_i),\\[0.4em]
+h_i&=h(\hat{\mathbf y}_i;p_i),
+\end{aligned}\qquad i=1,\ldots,N,\\[0.4em]
+&\min_\theta\ \frac1N\sum_{i=1}^N\\[0.4em]
+&\quad\Bigl[f_i+\hat{\boldsymbol\lambda}_i^\top c_i
+-\hat{\boldsymbol\mu}_i^\top h_i\\[0.4em]
+&\quad+\frac\rho2\lVert c_i\rVert_2^2\\[0.4em]
+&\quad+\frac\rho2\lVert[-h_i]_+\rVert_2^2\Bigr].
+\end{aligned}\]</div>
+</div>
+<p>Here \(\psi\) denotes the dual map's weights, \(\hat{\mathbf y}_i=\hat g_\theta(p_i)\), the hatted multipliers are the dual map's outputs at \(p_i\), \(\rho&gt;0\) is the penalty coefficient, \([\,\cdot\,]_+\) is the componentwise positive part, and \(f_i,c_i,h_i\) abbreviate the corresponding evaluations at \((\hat{\mathbf y}_i,p_i)\).</p>
+<p>With the primal map frozen, the dual map is regressed onto the multiplier step of the method:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\hat{\boldsymbol\lambda}(p)&\approx\boldsymbol\lambda_k(p)+\rho\,c(\hat g_\theta(p);p),\\[0.4em]
+\hat{\boldsymbol\mu}(p)&\approx\bigl[\boldsymbol\mu_k(p)-\rho\,h(\hat g_\theta(p);p)\bigr]_+.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\hat{\boldsymbol\lambda}(p)&\approx\boldsymbol\lambda_k(p)\\[0.4em]
+&\quad+\rho\,c(\hat g_\theta(p);p),\\[0.4em]
+\hat{\boldsymbol\mu}(p)&\approx\bigl[\boldsymbol\mu_k(p)\\[0.4em]
+&\quad-\rho\,h(\hat g_\theta(p);p)\bigr]_+.
+\end{aligned}\]</div>
+</div>
+<p>Here \((\boldsymbol\lambda_k,\boldsymbol\mu_k)\) come from a copy of the dual map taken at the start of outer iteration \(k\), and \(\rho\) grows when the largest violation stops decreasing. The second network is there to hold instance-specific multipliers, which an augmented-Lagrangian method would otherwise store and update for every training instance, and which earlier Lagrangian-dual training shared across instances (<a href="#ref-fioretto2020">Fioretto et al., 2020</a>).</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/masked-sobolev--primal-dual-compact.svg" width="1000" height="1781"><img src="{{root}}assets/img/diagrams/masked-sobolev--primal-dual.svg" alt="Method diagram. The Dataset lane holds only sampled parameters p, with no solver. In the Training lane, p enters a primal network that outputs y-hat and a dual network that outputs lambda-hat and mu-hat. A primal loss, the augmented Lagrangian of f, c and h, sends a dashed gradient to the primal network. A dual loss compares the dual output with the multiplier step computed from a frozen copy of the dual network and the residuals of y-hat, and sends a dashed gradient to the dual network. The frozen copy sits between the two networks and feeds only the dual loss." width="1816" height="1033"></picture></div><figcaption><b>Primal–dual learning replaces solved labels by the constrained problem.</b> The Dataset lane contains parameter samples only. The primal map is updated through the augmented Lagrangian; the dual map is updated toward the multiplier step computed from a frozen copy of itself and the residuals of the current prediction. The two updates alternate; \(\mathcal L_\rho\) is the augmented Lagrangian displayed above, and \(\rho\) grows between outer iterations. Construction of <a href="#ref-park2023">Park and Van Hentenryck, 2023</a>, in the notation of this page.</figcaption></figure>
+<p>The criterion is self-supervised: The signal comes from the objective and the constraint residuals, without precomputed solutions. Neither this criterion nor regression makes a raw prediction feasible. When a repair, completion, or projection map is inexpensive and differentiable, or directionally differentiable, it can be composed with the proxy to recover feasible outputs (<a href="#ref-donti2021">Donti et al., 2021</a>; <a href="#ref-qiu2024">Qiu et al., 2024</a>), and the completed decision becomes the object to evaluate.</p>
+<h3>Learned coefficients of a retained model</h3>
+<p>A third construction keeps the solver as the decision engine. A map conditioned on the context \(w\) selects the coefficients \(p\) of a tractable model, and the model computes the decision:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[w\ \longmapsto\ \underbrace{p=\phi_\theta(w)}_{\text{coefficients}}
+\ \longmapsto\ \underbrace{\mathbf y^\star(p;w)}_{\text{solve}}.\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+w&\longmapsto p=\phi_\theta(w)\\[0.4em]
+&\quad\longmapsto\mathbf y^\star(p;w).
+\end{aligned}\]</div>
+</div>
+<p>The learned object is a coefficient map, judged by the induced decision against a detailed model rather than by coefficient error. This is the right allocation when a tractable model carries structure worth retaining, such as an explicit feasible region, operational logic, or an interface to another computation, while its fixed coefficients are inadequate across contexts. <a href="{{root}}research/dc2ac/">Learned Model Correction</a> develops it (<a href="#ref-rosemberg2025dc2ac">Rosemberg et al., 2025b</a>).</p>
+<p>The three constructions differ in what they keep at deployment: a direct proxy, a completed prediction, or a solve with learned coefficients. A separate requirement appears when the learned map is itself placed inside a computation that is differentiated.</p>
+</section>
+
+<section id="fidelity"><h2><span class="num">03 · Local fidelity</span>A decision-accurate proxy can transmit the wrong local response</h2>
+<p>Let \(L\) be any computation that uses the map: a downstream optimization, a controller, or the objective of a policy being trained. Its gradient passes through the Jacobian of the map,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\nabla_p L\bigl(g(p)\bigr)&=
+\underbrace{Dg(p)^\top}_{\text{response}}\,
+\underbrace{\nabla_{\mathbf y}L\bigl(g(p)\bigr)}_{\text{gradient}},\\[0.4em]
+Dg(p)&\in\mathbb R^{n\times d}.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\nabla_p L\bigl(g(p)\bigr)
+&=Dg(p)^\top\\[0.4em]
+&\quad\cdot\nabla_{\mathbf y}L\bigl(g(p)\bigr),\\[0.4em]
+Dg(p)&\in\mathbb R^{n\times d}.
+\end{aligned}\]</div>
+</div>
+<p>Here \(Dg\) is the Jacobian of the selected map; a proxy fitted to decisions leaves \(D\hat g_\theta\) unsupervised. It can predict decisions accurately and still return the wrong gradient to every computation built on it, so for a proxy that replaces a solve inside a differentiated pipeline the local response is part of the object being approximated.</p>
+<p>At a regular selected solution that response is computable. Collect the primal–dual solution in \(\mathbf z^\star(p)\) and the stationarity, feasibility, and complementarity conditions in \(F(\mathbf z,p)=\mathbf 0\). Under the linear independence constraint qualification, a second-order sufficient condition, and strict complementarity (<a href="#ref-fiacco1976">Fiacco, 1976</a>), the implicit function theorem gives</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+F_{\mathbf z}(p)&=\underbrace{\partial_{\mathbf z}F(\mathbf z^\star(p),p)}_{\text{KKT Jacobian}},
+&\qquad F_p(p)&=\partial_pF(\mathbf z^\star(p),p),\\[0.4em]
+F_{\mathbf z}(p)\,D_p\mathbf z^\star(p)&=-F_p(p),
+&\qquad D_p\mathbf z^\star(p)&=-F_{\mathbf z}(p)^{-1}F_p(p).
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+F_{\mathbf z}(p)&=\partial_{\mathbf z}F(\mathbf z^\star(p),p),\\[0.4em]
+F_p(p)&=\partial_pF(\mathbf z^\star(p),p),\\[0.4em]
+F_{\mathbf z}(p)\,D_p\mathbf z^\star(p)&=-F_p(p),\\[0.4em]
+D_p\mathbf z^\star(p)&=-F_{\mathbf z}(p)^{-1}F_p(p).
+\end{aligned}\]</div>
+</div>
+<p>Here \(F_{\mathbf z}\) and \(F_p\) denote the two partial Jacobians evaluated at the selected solution, so the sensitivity is obtained by a linear solve with the KKT matrix. The primal block of \(D_p\mathbf z^\star\) is \(Dg(p)\), a solution sensitivity. The derivative of the optimal value follows from the multipliers by the envelope theorem, and it suffices only when \(L\) depends on the inner problem through that value. The construction, its failure modes, and its implementation in existing modeling languages are treated in <a href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models</a> (<a href="#ref-rosemberg2025diffopt">Rosemberg et al., 2025a</a>).</p>
+<p>Masked Sobolev training (<a href="#ref-rosemberg2026">Rosemberg et al., 2026a</a>) supervises both objects. Sobolev training matches derivatives as well as values (<a href="#ref-czarnecki2017">Czarnecki et al., 2017</a>), derivative supervision has been used for surrogates embedded in optimization models (<a href="#ref-tsay2021">Tsay, 2021</a>), and derivative matching, explicit or through implicit regularization, has reduced generalization error on optimization-related prediction (<a href="#ref-zhang2022">Zhang et al., 2022</a>; <a href="#ref-rosemberg2024icnn">Rosemberg et al., 2024</a>); here the derivative labels are the sensitivities of a solver-selected constrained map. For each sampled \(p_i\), the solver supplies \(g(p_i)\) and a differentiable-optimization layer supplies \(Dg(p_i)\); during training, automatic differentiation supplies \(D\hat g_\theta(p_i)\), and a binary mask \(M\in\{0,1\}^{n\times d}\) selects the Jacobian entries that enter an update:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\mathcal L(\theta)=\underbrace{\frac1N\sum_{i=1}^N\ell\bigl(\hat g_\theta(p_i),g(p_i)\bigr)}_{\text{value matching}}+\gamma\,\underbrace{\frac1N\sum_{i=1}^N\ell_d\bigl(M\odot D\hat g_\theta(p_i),M\odot Dg(p_i)\bigr)}_{\text{masked Sobolev term}}.\]</div>
+<div class="eq eq-mid">\[\begin{aligned}
+\mathcal L(\theta)={}&
+\underbrace{\frac1N\sum_{i=1}^N\ell\bigl(\hat g_\theta(p_i),g(p_i)\bigr)}_{\text{value matching}}\\[0.4em]
+&+\gamma\,\underbrace{\frac1N\sum_{i=1}^N
+\ell_d\bigl(M\odot D\hat g_\theta(p_i),M\odot Dg(p_i)\bigr)}_{\text{masked Sobolev term}}.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&\mathcal L(\theta)=\\[0.4em]
+&\quad\frac1N\sum_{i=1}^N\ell\bigl(\hat g_\theta(p_i),g(p_i)\bigr)\\[0.4em]
+&\quad+\frac\gamma N\sum_{i=1}^N\ell_d\!\Bigl(
+M\odot D\hat g_\theta(p_i),\\[0.4em]
+&\qquad\qquad M\odot Dg(p_i)\Bigr).
+\end{aligned}\]</div>
+</div>
+<p>Here \(\ell_d\) measures sensitivity discrepancy, \(\gamma\ge0\) weights derivative supervision, and \(\odot\) denotes entrywise multiplication.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/sobolev-compact.svg"><img src="{{root}}assets/img/diagrams/sobolev.svg" alt="Method diagram with a Training lane and a Dataset lane. Sampled parameters p feed both a neural network and, in the Dataset lane, an optimization block whose solution store s yields the reference decision and, through the DiffOpt tool, the reference sensitivities with entries indexed by the mask. Automatic differentiation of the network gives the proxy sensitivities on the same masked entries. A loss combines decision and sensitivity discrepancies, and a red dashed gradient returns to the network." width="1270" height="910"></picture></div><figcaption><b>The solver teaches decisions and their local response; deployment keeps only the network.</b> In the Dataset lane each sampled \(p_i\) is solved and DiffOpt returns the selected sensitivities; in the Training lane automatic differentiation returns the matching entries of the proxy Jacobian, and the loss combines the value term with the masked derivative term. Dashed arrows are derivative computations. The diagram keeps the paper's symbols: its \(\mathbf x^\star\) and \(\tilde{\mathbf x}\) are \(\mathbf y^\star=g(p_i)\) and \(\hat{\mathbf y}=\hat g_\theta(p_i)\) here, and \(\mathbf s\) is the store of solved instances. Figure 1 of <a href="#ref-rosemberg2026">Rosemberg et al., 2026a</a>.</figcaption></figure>
+<p>At each update a fresh mask selects \(K\) of the \(nd\) entries uniformly, so each entry is included with probability \(K/(nd)\). Write \(A=D\hat g_\theta(p_i)-Dg(p_i)\) and, for \(K\in\{1,\ldots,nd\}\), normalize the derivative loss by the number of retained entries:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\mathcal M_K&=\left\{M\in\{0,1\}^{n\times d}:
+\sum_{j=1}^{n}\sum_{r=1}^{d}M_{jr}=K\right\},\qquad
+M\sim\operatorname{Unif}(\mathcal M_K),\\[0.4em]
+\ell_d&=\frac{\lVert M\odot A\rVert_F^2}{\lVert M\rVert_0}
+=\frac1K\lVert M\odot A\rVert_F^2,\\[0.4em]
+\mathbb E_M[\ell_d]&=\frac1K\sum_{j=1}^{n}\sum_{r=1}^{d}
+\underbrace{\mathbb E_M[M_{jr}]}_{K/(nd)}A_{jr}^2
+=\underbrace{\frac1{nd}\lVert A\rVert_F^2}_{\text{dense loss}}.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\mathcal M_K&=\Bigl\{M\in\{0,1\}^{n\times d}:\\[0.4em]
+&\quad\sum_{j=1}^{n}\sum_{r=1}^{d}M_{jr}=K\Bigr\},\\[0.4em]
+M&\sim\operatorname{Unif}(\mathcal M_K),\\[0.4em]
+\ell_d&=\frac{\lVert M\odot A\rVert_F^2}{\lVert M\rVert_0}\\[0.4em]
+&=\frac1K\lVert M\odot A\rVert_F^2,\\[0.4em]
+\mathbb E_M[\ell_d]
+&=\frac1K\sum_{j=1}^{n}\sum_{r=1}^{d}
+\mathbb E_M[M_{jr}]\,A_{jr}^2\\[0.4em]
+&=\frac1K\sum_{j=1}^{n}\sum_{r=1}^{d}\frac K{nd}\,A_{jr}^2\\[0.4em]
+&=\frac1{nd}\lVert A\rVert_F^2.
+\end{aligned}\]</div>
+</div>
+<p>Here \(\mathcal M_K\) is the set of masks with exactly \(K\) retained entries, \(\operatorname{Unif}\) is its uniform law, \(\lVert\,\cdot\,\rVert_F\) is the Frobenius norm, and \(\lVert M\rVert_0\) counts the retained entries; the expectation holds \(p_i\) and \(\theta\) fixed and establishes unbiasedness for dense Jacobian matching. The weight \(\gamma\) sets the strength of derivative supervision; the mask density sets how many Jacobian conditions act on the network in the same update. Density matters on its own because sensitivities computed in different active-set regimes impose competing conditions on one network, a contention akin to gradient conflict in constrained learning (<a href="#ref-liu2024">Liu et al., 2024</a>). A sparse mask that changes at every update lets those conditions enter gradually. The mask is uniform by design; it controls only how many entries are matched at once.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/sobolev-mask-regimes-tall.svg"><img src="{{root}}assets/img/research/sobolev-mask-regimes.svg" alt="Local sensitivities panel: a piecewise selected solution map, with shaded regions where a bound is active. Teal points and short tangents mark sample sensitivities; extending one tangent past its regime departs from the map. Jacobian masks panel: dense matching uses all n by d entries, with n outputs and d parameters, while sparse masks select different entries at successive updates." width="1334" height="543"></picture></div><figcaption><b>A sensitivity holds only inside its regime, and a sparse mask limits how many regimes compete at once.</b> Schematic, no data. In <i>Local sensitivities</i>, teal points and tangents show the local conditions supplied by samples. In <i>Jacobian masks</i>, a fresh sparse mask limits how many conditions act at once; every entry has the same inclusion probability at each update.</figcaption></figure>
+<p>The derivative term composes with the constructions of Section 02. It can be added to a self-supervised objective, and it can shape the response of a proxy whose last layer is a differentiable repair or completion, before or through that layer. In every case the solver, the sensitivity computation, and the proxy Jacobian are used only in training; inference remains one forward pass.</p>
+<h3>Where first-order labels are valid</h3>
+<p>An approximation statement identifies the regime in which a derivative at a sample describes its neighborhood. Let \(\mathcal P\) be compact and convex, and let the samples have covering radius \(\delta=\sup_{p\in\mathcal P}\min_i\lVert p-p_i\rVert\). Assume exact interpolation at the samples, an idealization that the training objective does not guarantee. If \(g\) and \(\hat g_\theta\) are Lipschitz with constants \(K_g,K_{\hat g}\), value interpolation gives the first bound below. If both are continuously differentiable with Jacobians Lipschitz with constants \(K'_g,K'_{\hat g}\) (\(L_g\) and \(M_g\) in the paper), joint value-and-Jacobian interpolation removes the constant and first-order error at every sample, and the error between samples becomes second order (<a href="#ref-rosemberg2026">Rosemberg et al., 2026a</a>, Theorems 1 and 3):</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\underbrace{\hat g_\theta(p_i)=g(p_i)\quad(i=1,\ldots,N)}_{\text{value interpolation}}
+&\quad\Longrightarrow\quad
+\sup_{p\in\mathcal P}\lVert\hat g_\theta(p)-g(p)\rVert
+\le(K_g+K_{\hat g})\,\delta,\\[0.4em]
+\underbrace{\begin{aligned}
+\hat g_\theta(p_i)&=g(p_i),\\[0.4em]
+D\hat g_\theta(p_i)&=Dg(p_i)
+\end{aligned}\quad(i=1,\ldots,N)}_{\text{first-order interpolation}}
+&\quad\Longrightarrow\quad
+\sup_{p\in\mathcal P}\lVert\hat g_\theta(p)-g(p)\rVert
+\le\tfrac12(K'_g+K'_{\hat g})\,\delta^2.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&\text{Value interpolation:}\\[0.4em]
+&\hat g_\theta(p_i)=g(p_i)\quad(i=1,\ldots,N)\\[0.4em]
+&\quad\Longrightarrow\quad
+\sup_{p\in\mathcal P}\lVert\hat g_\theta(p)-g(p)\rVert\\[0.4em]
+&\qquad\le(K_g+K_{\hat g})\,\delta,\\[0.4em]
+&\text{First-order interpolation:}\\[0.4em]
+&\begin{aligned}
+\hat g_\theta(p_i)&=g(p_i),\\[0.4em]
+D\hat g_\theta(p_i)&=Dg(p_i)
+\end{aligned}\quad(i=1,\ldots,N)\\[0.4em]
+&\quad\Longrightarrow\quad
+\sup_{p\in\mathcal P}\lVert\hat g_\theta(p)-g(p)\rVert\\[0.4em]
+&\qquad\le\tfrac12(K'_g+K'_{\hat g})\,\delta^2.
+\end{aligned}\]</div>
+</div>
+<p>The regularity conditions above give local differentiability of a suitably selected map, and networks with smooth activations of bounded curvature satisfy the proxy's conditions on compact sets. The Jacobian-Lipschitz condition requires more: The sensitivities must vary slowly over the region considered. The bounds therefore hold region by region where both maps are regular. They are not a convergence result for masked training, and they make no claim across arbitrary active-set transitions. A transition does not by itself make a derivative label useless. A sensitivity that has ceased to be the exact local derivative still helps when neighboring sensitivities are similar, while a sharp change of the Jacobian limits what matching can add. Discrete decisions, disjunctions, and other nonsmooth structure lie outside this setting and require surrogate sensitivities from relaxations, smoothing, or duality.</p>
+</section>
+
+<section id="regimes"><h2><span class="num">04 · Problem classes</span>The geometry of the selected map decides what derivative labels add</h2>
+<p>Three studies hold the comparison fixed and change the geometry of the selected map. In each, a value-only proxy and a masked Sobolev proxy share the architecture and the training pipeline, so the differences come from the derivative labels. Each study is paired with a computed two-parameter instance of the same problem class, which shows the geometry the proxy has to interpolate.</p>
+
+<h3>A smooth map: distilling a feedback controller</h3>
+<p>The first study is finite-horizon optimal control of an underactuated two-link pendulum, the Acrobot swing-up. The parameter is the initial state \(p=\mathbf x_0\), and the map returns the first action of the optimal trajectory, which makes it a feedback policy. Apart from an actuator box the constraints are the smooth dynamics, so the map rarely changes active set. The reference map is a feedback controller trained on the same objective by proximal policy optimization (<a href="#ref-schulman2017">Schulman et al., 2017</a>), and its action sensitivities with respect to the state, computed by automatic differentiation, are the derivative labels. A trained teacher makes the study an instance of policy distillation and separates the effect of first-order supervision from solver-specific multiplier and factorization conventions. Both students are trained with DAgger relabeling, and each method receives 192 runs over its hyperparameter sweep.</p>
+<p>Both highlighted runs eventually reach the teacher's level, so the labels change how quickly and how reliably learning proceeds. At a common threshold of 95% of teacher performance, the first Sobolev run crosses at iteration 1,349 and the first value-only run at iteration 3,446, about 2.5 times fewer iterations; despite a 2% higher cost per iteration, that is about 16 minutes against 40. Across the sweeps, 95.4% of Sobolev runs reach the threshold, against 4.2% of value-only runs.</p>
+<div class="fig-row">
+<figure class="fig"><div class="frame"><picture><source media="(prefers-reduced-motion: reduce)" srcset="{{root}}assets/img/research/masked-sobolev-geometry-acrobot-still.webp"><img src="{{root}}assets/img/research/masked-sobolev-geometry-acrobot.webp" alt="Computed local control map: optimal first torque over two initial angles near upright, with both initial velocities fixed to zero. A black dot visits stored initial-state samples on the nearly planar surface." width="640" height="706"></picture></div><figcaption><b>One sensitivity describes a wide neighborhood.</b> Optimal first torque of a bounded-torque swing-up over two initial angles near upright, with zero initial velocities. The dot marks a sampled initial state. Computed illustration from the paper website.</figcaption></figure>
+<figure class="fig"><div class="frame"><img src="{{root}}assets/img/research/masked-sobolev-smooth.svg" alt="Two bar charts. Top: the first run to reach 95 percent of teacher performance does so at iteration 1,349 with masked Sobolev training and 3,446 with value-only training. Bottom: 95.4 percent of Sobolev sweep runs and 4.2 percent of value-only sweep runs reach that threshold." width="534" height="386"></div><figcaption><b>Derivative labels make distillation of a smooth map faster and far less sensitive to hyperparameters.</b> First threshold crossing (top) and share of sweep runs that cross it (bottom). Data: <a href="#ref-rosemberg2026">Rosemberg et al., 2026a</a>, Section 5.1 and Table 10.</figcaption></figure>
+</div>
+<figure class="fig"><div class="frame"><img src="{{root}}assets/img/research/acrobot-distillation-curves.png" alt="Training curves of mean tip height against training iteration. Orange denotes masked Sobolev and blue denotes value-only, called Baseline in the image legend. Faint curves show the sweeps; solid curves highlight the runs compared in the paper. The black line is the teacher level, not the 95 percent threshold used in the bar chart." width="1400" height="689"></div><figcaption><b>Most Sobolev runs reach the teacher; most value-only runs do not.</b> Mean tip height against training iteration; orange is masked Sobolev, blue value-only (Baseline in the image), black the teacher level. Faint curves are the sweeps; solid curves highlight the runs compared at 95% of teacher performance, measured with a moving average. That threshold is not drawn. Figure 2 of <a href="#ref-rosemberg2026">Rosemberg et al., 2026a</a>.</figcaption></figure>
+
+<h3>Many active-set regimes: AC optimal power flow</h3>
+<p>AC optimal power flow keeps the object, a parametric solution map, and removes the simplifying structure. Demand is the parameter; the decisions collect generation, voltages, and branch flows; \(c\) holds the nonlinear power-flow equations and \(h\) the operating limits. The limits partition the demand space into active-set regimes whose number can grow combinatorially. Within a regime, KKT sensitivities describe how decisions move along the binding constraints; by themselves they do not describe the neighboring regimes, and a proxy with small decision error can still violate operating limits. Reliability is therefore judged by objective gap and constraint violation. The proxies have two hidden layers of width 320 and are trained on about 10,000 instances of three networks from the PGLib benchmark library (<a href="#ref-pglib2019">Babaeinejadsarookolaee et al., 2019</a>) with up to 6,468 buses, retaining 5% of Jacobian entries on IEEE-300 and PEGASE-1k and 25% on RTE-6k.</p>
+<p>Masked Sobolev training lowers average infeasibility on all three networks, and the tails carry the stronger result. Instance by instance, the Sobolev proxy has the larger worst-case violation on fewer than 15% of test instances, and the median improvement in worst-case violation, normalized by the largest Sobolev violation on each test set, is about 18%, 400%, and 180% on the three networks. Objective gaps stay at or below 0.22%; the value-only proxy has the smaller gap on IEEE-300 and PEGASE-1k (0.02% against 0.22%, and 0.07% against 0.15%), and the two coincide at 0.07% on RTE-6k. No repair layer is used; the remaining violations are mostly small power-flow mismatches.</p>
+<p>The gain depends on the mask. On IEEE-300, retaining 5–10% of the Jacobian entries gives the lowest infeasibility; beyond 25% infeasibility rises sharply, and dense matching has more than five times the infeasibility of the 5% mask and exceeds the value-only proxy. Because the normalization keeps the expected derivative loss fixed, the comparison changes how many conditions act at once without changing the expected weight of the derivative term. The labels add training cost and leave inference unchanged: On RTE-6k an epoch takes about 1.6 times as long.</p>
+<div class="fig-row">
+<figure class="fig"><div class="frame"><picture><source media="(prefers-reduced-motion: reduce)" srcset="{{root}}assets/img/research/masked-sobolev-geometry-dispatch-still.webp"><img src="{{root}}assets/img/research/masked-sobolev-geometry-dispatch.webp" alt="Computed two-bus AC solution map: cheaper generation over active and reactive demand rises into a plateau where the line limit binds. A black dot follows the solved demand samples. Two arrows in the inset show the competing derivative-loss gradients for the two generator outputs of a shared proxy at the current sample." width="640" height="706"></picture></div><figcaption><b>Where the line limit binds, the map bends into a plateau.</b> Optimal output of the cheaper generator in a two-bus AC network over active and reactive demand. The dot follows solved demand samples. The inset arrows show competing derivative-loss gradients from the two generator outputs of a shared proxy at the same sample. Computed illustration from the paper website.</figcaption></figure>
+<figure class="fig"><div class="frame"><img src="{{root}}assets/img/research/masked-sobolev-acopf.svg" alt="Two bar charts. Top: mean absolute infeasibility on IEEE-300, PEGASE-1k and RTE-6k is 0.0099, 0.0066 and 0.0042 with masked Sobolev training against 0.0116, 0.0098 and 0.0059 value-only. Bottom: on IEEE-300, infeasibility with 5, 10, 25 and 100 percent of Jacobian entries retained is 0.0099, 0.0094, 0.0141 and 0.0517, against a dashed value-only line at 0.0116." width="492" height="523"></div><figcaption><b>Where active sets multiply, derivative labels improve feasibility, and only with sparse masks.</b> Mean absolute infeasibility on three networks (top) and against mask density on IEEE-300 (bottom); dense matching is worse than no derivative labels. Data: <a href="#ref-rosemberg2026">Rosemberg et al., 2026a</a>, Tables 1 and 2.</figcaption></figure>
+</div>
+
+<h3>Sparse solutions: mean–variance allocation</h3>
+<p>The third study keeps the problem convex and the sensitivities locally valid, but makes them nearly uninformative. Mean–variance selection over 500 assets maximizes expected return under a second-order-cone risk limit \(\sigma_{\max}\) and a budget. In the data, fewer than 15% of assets typically receive more than 0.01% of the budget, so most sensitivities are zero or very small, and small changes of the returns or of the risk limit change which assets are active. Regression on reference portfolios gave mean gaps above 90%, so both proxies train on the portfolio objective through a feasibility-preserving output layer, the composed construction of Section 02, and the Sobolev proxy adds solver sensitivities as derivative labels.</p>
+<p>Outside the tightest risk limits, derivative labels more than halve the test gap: 8.7 ± 9.5% against 18.9 ± 20.2%. Under tight limits, \(\sigma_{\max}\le 10\%\) of the budget, where allocations are sparsest, they worsen it: 29.5 ± 26.9% against 14.7 ± 21.2%. The split points to using derivative supervision only where it is informative, for example through regime-specific models; the study does not test that remedy.</p>
+<div class="fig-row">
+<figure class="fig"><div class="frame"><picture><source media="(prefers-reduced-motion: reduce)" srcset="{{root}}assets/img/research/masked-sobolev-geometry-portfolio-still.webp"><img src="{{root}}assets/img/research/masked-sobolev-geometry-portfolio.webp" alt="Computed eight-asset portfolio map: allocation to asset A over the expected returns of assets A and B, at a fixed risk cap. The surface is flat at zero over a large region and rises sharply at its edge. A black dot follows solved return samples." width="640" height="706"></picture></div><figcaption><b>Sensitivities are zero or valid only near their sample.</b> Optimal allocation to asset A of an eight-asset portfolio over two expected returns, at a fixed risk cap. The dot follows solved samples across the flat region and its sharp edge. Computed illustration from the paper website.</figcaption></figure>
+<figure class="fig"><div class="frame"><img src="{{root}}assets/img/research/masked-sobolev-portfolio.svg" alt="Bar chart of mean test optimality gap, with standard deviations printed above the bars. Looser risk limit: masked Sobolev 8.7 percent, standard deviation 9.5, against value-only 18.9 percent, standard deviation 20.2. Tight risk limit: masked Sobolev 29.5 percent, standard deviation 26.9, against value-only 14.7 percent, standard deviation 21.2." width="471" height="353"></div><figcaption><b>Derivative labels more than halve the gap except where allocations are sparsest.</b> Mean test optimality gap with its standard deviation, by risk regime. Data: <a href="#ref-rosemberg2026">Rosemberg et al., 2026a</a>, Table 3.</figcaption></figure>
+</div>
+<p>Across the three classes, a derivative label is worth what the sensitivity at its sample says about the neighborhood. Where it describes the region the proxy must learn, the labels accelerate learning and improve constraint satisfaction, provided the mask keeps the conditions of different regimes from competing. Where it does not, they add little and can degrade the proxy. The same reading applies to multipliers and solution sensitivities used anywhere as a learning signal: The local response of an optimization model teaches to the extent that it describes the neighborhood of the point at which it is computed.</p>
+</section>
+
+<section id="policies"><h2><span class="num">05 · Sequential use</span>A policy can supply the reference map or use the learned one</h2>
+<h3>One student from several teachers</h3>
+<p>Many systems are operated by specialized controllers, each competent on part of the task and obtained by optimization, expert design, or policy-gradient training. The construction then distills a family of reference maps into one student that meets the observation and latency requirements of deployment. One application explored in this research is in-hand reorientation by a multi-fingered robot, which rotates grasped objects of different geometries about a target yaw direction while keeping a stable grasp. Even object-specific teachers are hard to construct, so supervision is uneven in quality across objects, and reusable supervision for high-dimensional dexterous control is itself a current concern (<a href="#ref-debakker2025">de Bakker et al., 2025</a>).</p>
+<p>Let \(\pi^{\mathrm{tch}}_b\) be the teacher for object \(b\) and \(\pi^{\mathrm{stu}}(\cdot\,;\theta)\) the shared student. The student observes delayed or noisy proprioception, its previous command, and an encoding of the point cloud from a wrist-mounted sensor, and acts through joint-position increments \(\mathbf y_t\in[-1/24,\,1/24]^{16}\). The object index selects the teacher and the environment but is not an input to the student, and states visited by the student are relabeled by the corresponding teacher. Action matching and its Sobolev variant use</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+e_b(o;\theta)&=\pi^{\mathrm{stu}}(o;\theta)-\pi^{\mathrm{tch}}_b(\hat o(o)),\\[0.4em]
+b&\sim\operatorname{Unif}(\mathcal I),\qquad
+o\mid b\sim\nu_\theta(\,\cdot\mid b),\\[0.4em]
+\mathcal L(\theta)&=\mathbb E_{b,o}\!\Bigl[
+\underbrace{\lVert e_b(o;\theta)\rVert_2^2}_{\text{action matching}}
++\gamma\,\underbrace{\frac1R\sum_{m=1}^R
+\lVert\nabla_o\langle v_m,e_b(o;\theta)\rangle\rVert_2^2}_{\text{projected Sobolev term}}
+\Bigr].
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&\begin{aligned}
+e_b(o;\theta)&=\pi^{\mathrm{stu}}(o;\theta)\\[0.4em]
+&\quad-\pi^{\mathrm{tch}}_b(\hat o(o)),
+\end{aligned}\\[0.4em]
+&\begin{aligned}
+b&\sim\operatorname{Unif}(\mathcal I),\\[0.4em]
+o\mid b&\sim\nu_\theta(\,\cdot\mid b),
+\end{aligned}\\[0.4em]
+&\mathcal L(\theta)=\mathbb E_{b,o}\\[0.4em]
+&\quad\Bigl[\lVert e_b(o;\theta)\rVert_2^2\\[0.4em]
+&\qquad+\frac\gamma R\sum_{m=1}^R
+\lVert\nabla_o\langle v_m,e_b(o;\theta)\rangle\rVert_2^2\Bigr].
+\end{aligned}\]</div>
+</div>
+<p>Here \(e_b\) is the action discrepancy, \(\mathcal I\) indexes the objects, \(\nu_\theta(\,\cdot\mid b)\) is the law of student-visited observations on object \(b\), \(\hat o\) selects each teacher's inputs from the common observation coordinates, and random vectors \(v_m\in\mathbb R^{16}\), \(m=1,\ldots,R\), project the action sensitivities, so that \(R\) vector–Jacobian products replace complete Jacobians, as in the stochastic projections of Sobolev training (<a href="#ref-czarnecki2017">Czarnecki et al., 2017</a>).</p>
+<figure class="fig"><div class="frame flush"><img src="{{root}}assets/img/research/masked-sobolev-dexterous.webp" alt="Three simulation frames of a four-fingered hand holding different objects, an airplane model, a rectangular box and a toy duck, each with a translucent copy of the object above it showing the target orientation." width="2370" height="582"></div><figcaption><b>One student, many geometries.</b> The shared student must reorient objects of different shapes and contact configurations from partial observations, learning from object-specific teachers of uneven quality. Author’s simulations from work at the Robot Learning Lab, UC Berkeley; held-out comparisons over repeated seeds are pending.</figcaption></figure>
+<p>Matching local responses as well as actions is the construction for teachers of uneven quality, and its criterion is held-out task success over repeated seeds at matched student architecture, observations, samples, and training budget. Optimization-based controllers and learned proxies can join the teacher set, and their local responses are exactly the sensitivities of Section 03. One boundary is structural. When a teacher acts on privileged information, two states that the student cannot distinguish can receive different teacher actions, which a memoryless student cannot represent; the study begins from compatible observations to separate the multi-teacher question from that ambiguity. In early exploration, matching local responses already raises the final success on two thirds of the objects. Its effect on learning speed is larger: the shared policy reaches 95% of the level attained by action matching in 23% fewer epochs, and early in training it succeeds up to nearly twice as often. Further work is needed to generalize to unseen objects whose geometry departs far from that of the teacher set.</p>
+<h3>Recourse inside a policy</h3>
+<p>For a state-target policy, stage recourse is itself a selected solution map. Its parameters are the incoming state, the prescribed target, and the revealed uncertainty, and \(E\) extracts the applied controls from the returned solution:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+p_t&=(\mathbf x_{t-1},\hat{\mathbf x}_t,w_t),\\[0.4em]
+&\underbrace{\mathbf y_t^\star=E\,g(p_t)}_{\text{selected recourse}},
+\qquad
+\underbrace{\hat{\mathbf y}_t=E\,\hat g_\theta(p_t)}_{\text{proxy recourse}}.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+p_t&=(\mathbf x_{t-1},\hat{\mathbf x}_t,w_t),\\[0.4em]
+\mathbf y_t^\star&=E\,g(p_t),\\[0.4em]
+\hat{\mathbf y}_t&=E\,\hat g_\theta(p_t).
+\end{aligned}\]</div>
+</div>
+<p>Here \(\mathbf y_t^\star\) and \(\hat{\mathbf y}_t\) are the selected and proxy controls, respectively. AC optimal power flow is the kind of nonconvex recourse whose solve time sets the cost of each decision of such a policy. Replacing the solve changes more than execution time. Decision error and constraint violations propagate through the realized transitions, and Jacobian error changes the signal available to the surrounding policy search. A learned solution map does not by itself define a policy; it becomes the recourse component through which a policy is realized and trained. <a href="{{root}}research/decision-rules/">Policies for Multistage Decisions</a> develops that policy.</p>
+<figure class="fig dg-figure">{{diagram:stage focus=recourse,sens}}<figcaption><b>A recourse proxy enters a sequential system through its decisions and its local response.</b> The proxy replaces the stage realization map; its output drives the realized transition, and its Jacobian carries the signal for any upstream update.</figcaption></figure>
+</section>
+
+<section id="software"><h2>Software</h2>
+<p>LearningToOptimize records the solved instances, multipliers, and sensitivity labels that this supervision needs from any parametric JuMP model, and DiffOpt.jl computes the sensitivities at each sampled solution.</p>
+{{software:project=masked-sobolev}}
+</section>
+
+<section id="references"><h2>References</h2>
+<ol class="refs">
+<li id="ref-amos2023">B. Amos. Tutorial on amortized optimization. <i>Foundations and Trends in Machine Learning</i> 16(5):592–732, 2023.</li>
+<li id="ref-pglib2019">S. Babaeinejadsarookolaee, A. Birchfield, R. D. Christie, C. Coffrin, C. DeMarco, R. Diao, M. Ferris, S. Fliscounakis, S. Greene, R. Huang, et al. The power grid library for benchmarking AC optimal power flow algorithms. Preprint arXiv:1908.02788, 2019.</li>
+<li id="ref-chatzos2020">M. Chatzos, F. Fioretto, T. W. K. Mak, P. Van Hentenryck. High-Fidelity Machine Learning Approximations of Large-Scale Optimal Power Flow. Preprint arXiv:2006.16356, 2020.</li>
+<li id="ref-czarnecki2017">W. M. Czarnecki, S. Osindero, M. Jaderberg, G. Swirszcz, R. Pascanu. Sobolev training for neural networks. <i>Advances in Neural Information Processing Systems</i> 30, 2017.</li>
+<li id="ref-debakker2025">V. de Bakker, J. Hejna, T. G. W. Lum, O. Celik, A. Taranovic, D. Blessing, G. Neumann, J. Bohg, D. Sadigh. Scaffolding dexterous manipulation with vision-language models. Preprint arXiv:2506.19212, 2025.</li>
+<li id="ref-donti2021">P. L. Donti, D. Rolnick, J. Z. Kolter. DC3: A learning method for optimization with hard constraints. <i>International Conference on Learning Representations</i>, 2021.</li>
+<li id="ref-fiacco1976">A. V. Fiacco. Sensitivity analysis for nonlinear programming using penalty methods. <i>Mathematical Programming</i> 10(1):287–311, 1976.</li>
+<li id="ref-fioretto2020">F. Fioretto, T. W. K. Mak, P. Van Hentenryck. Predicting AC optimal power flows: Combining deep learning and Lagrangian dual methods. <i>Proceedings of the AAAI Conference on Artificial Intelligence</i> 34:630–637, 2020.</li>
+<li id="ref-kotary2021">J. Kotary, F. Fioretto, P. Van Hentenryck, B. Wilder. End-to-end constrained optimization learning: A survey. <i>Proceedings of the International Joint Conference on Artificial Intelligence</i>, pp. 4475–4482, 2021.</li>
+<li id="ref-liu2024">Q. Liu, M. Chu, N. Thuerey. ConFIG: Towards conflict-free training of physics informed neural networks. Preprint arXiv:2408.11104, 2024.</li>
+<li id="ref-pan2020">X. Pan, T. Zhao, M. Chen, S. Zhang. DeepOPF: A deep neural network approach for security-constrained DC optimal power flow. <i>IEEE Transactions on Power Systems</i> 36(3):1725–1735, 2020.</li>
+<li id="ref-park2023">S. Park, P. Van Hentenryck. Self-supervised primal-dual learning for constrained optimization. <i>Proceedings of the AAAI Conference on Artificial Intelligence</i> 37(4):4052–4060, 2023.</li>
+<li id="ref-qiu2024">G. Qiu, M. Tanneau, P. Van Hentenryck. Dual conic proxies for AC optimal power flow. <i>Electric Power Systems Research</i> 236:110661, 2024.</li>
+<li id="ref-schulman2017">J. Schulman, F. Wolski, P. Dhariwal, A. Radford, O. Klimov. Proximal policy optimization algorithms. Preprint arXiv:1707.06347, 2017.</li>
+<li id="ref-tsay2021">C. Tsay. Sobolev trained neural network surrogate models for optimization. <i>Computers &amp; Chemical Engineering</i> 153:107419, 2021.</li>
+<li id="ref-vanhentenryck2025">P. Van Hentenryck. Optimization learning. Preprint arXiv:2501.03443, 2025.</li>
+<li id="ref-zhang2022">L. Zhang, Y. Chen, B. Zhang. A convex neural network solver for DCOPF with generalization guarantees. <i>IEEE Transactions on Control of Network Systems</i> 9(2):719–730, 2022.</li>
+<li id="ref-rosemberg2024icnn">A. Rosemberg, M. Tanneau, B. Fanzeres, J. Garcia, P. Van Hentenryck. Learning optimal power flow value functions with input-convex neural networks. <i>Electric Power Systems Research</i> 235:110643, 2024. <a href="https://doi.org/10.1016/j.epsr.2024.110643">DOI 10.1016/j.epsr.2024.110643</a>.</li>
+<li id="ref-rosemberg2025diffopt">A. W. Rosemberg, J. Dias Garcia, F. Pacaud, R. B. Parker, B. Legat, K. Sundar, R. Bent, P. Van Hentenryck. A general and streamlined differentiable optimization framework. Preprint <a href="https://arxiv.org/abs/2510.25986">arXiv:2510.25986</a>, 2025.</li>
+<li id="ref-rosemberg2025dc2ac">A. Rosemberg, M. Klamkin, P. Van Hentenryck. Differentiable optimization for deep learning-enhanced DC approximation of AC optimal power flow. NeurIPS 2025 Workshop on Mathematical Foundations and Operational Integration of Machine Learning for Uncertainty-Aware Decision-Making (MLxOR), <a href="https://arxiv.org/abs/2504.01970">arXiv:2504.01970</a>, 2025.</li>
+<li id="ref-rosemberg2026">A. W. Rosemberg, J. Dias Garcia, R. Bent, P. Van Hentenryck. Masked Sobolev training for feasibility-reliable optimization proxies. <i>Advances in Neural Information Processing Systems</i>, 2026. Earlier preprint: Sobolev training of end-to-end optimization proxies, <a href="https://arxiv.org/abs/2505.11342">arXiv:2505.11342</a>, 2025.</li>
+</ol>
+</section>
+{{projects:nav=masked-sobolev}}
+<section id="papers"><h2>Publication</h2>
+<p>The paper is presented at NeurIPS 2026 (<a href="https://neurips.cc/virtual/2026/loc/atlanta/poster/151801">conference poster page</a>). Its <a href="https://andrewrosemberg.github.io/NeurIPS2026-Masked-Sobolev-Optimization-Proxies/">website</a> carries interactive versions of the three computed instances above.</p>
+{{pubs:project=masked-sobolev}}
+</section>
+</article></div>

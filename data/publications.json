@@ -1,0 +1,303 @@
+[
+ {
+  "id": "rosemberg2026masked",
+  "year": 2026,
+  "type": "conference",
+  "badge": "Conference",
+  "title": "Masked Sobolev Training for Feasibility-Reliable Optimization Proxies",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Joaquim Dias Garcia",
+   "Russell Bent",
+   "Pascal Van Hentenryck"
+  ],
+  "venue": "NeurIPS 2026 · Advances in Neural Information Processing Systems, main track",
+  "note": "Earlier preprint: <em>Sobolev Training of End-to-End Optimization Proxies</em> (arXiv, 2025).",
+  "links": {
+   "site": "https://andrewrosemberg.github.io/NeurIPS2026-Masked-Sobolev-Optimization-Proxies/",
+   "neurips": "https://neurips.cc/virtual/2026/loc/atlanta/poster/151801",
+   "arxiv": "https://arxiv.org/abs/2505.11342"
+  },
+  "link_labels": {
+   "site": "Paper website",
+   "neurips": "NeurIPS page",
+   "arxiv": "arXiv"
+  },
+  "selected": true,
+  "thumb": "assets/img/thumbs/masked-sobolev.jpg",
+  "projects": [
+   "masked-sobolev"
+  ],
+  "bibtex": "@inproceedings{rosemberg2026masked,\n  title     = {Masked Sobolev Training for Feasibility-Reliable Optimization Proxies},\n  author    = {Rosemberg, Andrew W. and Dias Garcia, Joaquim and Bent, Russell and Van Hentenryck, Pascal},\n  booktitle = {Advances in Neural Information Processing Systems},\n  year      = {2026}\n}"
+ },
+ {
+  "id": "rosemberg2025general",
+  "year": 2025,
+  "type": "preprint",
+  "badge": "Preprint",
+  "title": "A General and Streamlined Differentiable Optimization Framework",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Joaquim Dias Garcia",
+   "François Pacaud",
+   "Robert B. Parker",
+   "Benoît Legat",
+   "Kaarthik Sundar",
+   "Russell Bent",
+   "Pascal Van Hentenryck"
+  ],
+  "venue": "arXiv:2510.25986 · DiffOpt.jl",
+  "links": {
+   "page": "research/differentiable-optimization/",
+   "arxiv": "https://arxiv.org/abs/2510.25986",
+   "code": "https://github.com/jump-dev/DiffOpt.jl",
+   "docs": "https://jump.dev/DiffOpt.jl/stable/"
+  },
+  "selected": true,
+  "thumb": "assets/img/thumbs/differentiable-optimization.jpg",
+  "projects": [
+   "differentiable-optimization"
+  ],
+  "bibtex": "@misc{rosemberg2025general,\n  title         = {A General and Streamlined Differentiable Optimization Framework},\n  author        = {Rosemberg, Andrew W. and Dias Garcia, Joaquim and Pacaud, Fran{\\c{c}}ois and Parker, Robert B. and Legat, Beno{\\^\\i}t and Sundar, Kaarthik and Bent, Russell and Van Hentenryck, Pascal},\n  year          = {2025},\n  eprint        = {2510.25986},\n  archivePrefix = {arXiv},\n  primaryClass  = {cs.LG}\n}"
+ },
+ {
+  "id": "rosemberg2025strategic",
+  "year": 2025,
+  "type": "journal",
+  "badge": "Journal",
+  "title": "Strategic Bidding in Energy Markets with Gradient-Based Iterative Methods",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "François Pacaud",
+   "Joaquim Dias Garcia",
+   "Robert B. Parker",
+   "Kaarthik Sundar",
+   "Russell Bent",
+   "Pascal Van Hentenryck"
+  ],
+  "venue": "Sustainable Energy, Grids and Networks, vol. 43, 101878 · presented at IREP 2025",
+  "links": {
+   "page": "research/strategic-bidding/",
+   "paper": "https://doi.org/10.1016/j.segan.2025.101878",
+   "pdf": "https://doi.org/10.2139/ssrn.5043309"
+  },
+  "link_labels": {
+   "pdf": "Preprint (SSRN)"
+  },
+  "selected": false,
+  "thumb": "assets/img/thumbs/strategic-bidding.jpg",
+  "projects": [
+   "strategic-bidding",
+   "differentiable-optimization"
+  ],
+  "bibtex": "@article{rosemberg2025strategic,\n  title   = {Strategic bidding in energy markets with gradient-based iterative methods},\n  author  = {Rosemberg, Andrew and Pacaud, Fran{\\c{c}}ois and Dias Garcia, Joaquim and Parker, Robert B. and Sundar, Kaarthik and Bent, Russell and Van Hentenryck, Pascal},\n  journal = {Sustainable Energy, Grids and Networks},\n  volume  = {43},\n  pages   = {101878},\n  year    = {2025},\n  doi     = {10.1016/j.segan.2025.101878}\n}"
+ },
+ {
+  "id": "rosemberg2025dc2ac",
+  "year": 2025,
+  "type": "workshop",
+  "badge": "Workshop",
+  "title": "Differentiable Optimization for Deep Learning-Enhanced DC Approximation of AC Optimal Power Flow",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Michael Klamkin",
+   "Pascal Van Hentenryck"
+  ],
+  "venue": "NeurIPS 2025 ML×OR workshop · arXiv:2504.01970",
+  "links": {
+   "page": "research/dc2ac/",
+   "arxiv": "https://arxiv.org/abs/2504.01970",
+   "workshop": "https://openreview.net/forum?id=Htn3s8yUOg"
+  },
+  "selected": false,
+  "thumb": "assets/img/thumbs/dc2ac.jpg",
+  "projects": [
+   "dc2ac",
+   "differentiable-optimization"
+  ],
+  "bibtex": "@misc{rosemberg2025dc2ac,\n  title         = {Differentiable Optimization for Deep Learning-Enhanced {DC} Approximation of {AC} Optimal Power Flow},\n  author        = {Rosemberg, Andrew and Klamkin, Michael and Van Hentenryck, Pascal},\n  year          = {2025},\n  eprint        = {2504.01970},\n  archivePrefix = {arXiv},\n  primaryClass  = {math.OC},\n  note          = {NeurIPS 2025 Workshop MLxOR}\n}",
+  "link_labels": {
+   "workshop": "OpenReview"
+  }
+ },
+ {
+  "id": "rosemberg2024efficiently",
+  "year": 2025,
+  "type": "workshop",
+  "badge": "Workshop",
+  "title": "Efficiently Training Deep-Learning Parametric Policies using Lagrangian Duality",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Alexandre Street",
+   "Davi M. Valladão",
+   "Pascal Van Hentenryck"
+  ],
+  "venue": "NeurIPS 2025 ML×OR workshop · arXiv:2405.14973",
+  "note": "Workshop title: <em>Training Deep-Parametric Policies Using Lagrangian Duality</em>. An extended journal version with new storage studies is in preparation.",
+  "links": {
+   "page": "research/decision-rules/",
+   "arxiv": "https://arxiv.org/abs/2405.14973",
+   "workshop": "https://openreview.net/forum?id=wrZjuRvvNz",
+   "code": "https://github.com/LearningToOptimize/DecisionRules.jl"
+  },
+  "link_labels": {
+   "workshop": "OpenReview"
+  },
+  "selected": true,
+  "thumb": "assets/img/thumbs/decision-rules.jpg",
+  "projects": [
+   "decision-rules"
+  ],
+  "bibtex": "@misc{rosemberg2024efficiently,\n  title         = {Efficiently Training Deep-Learning Parametric Policies using Lagrangian Duality},\n  author        = {Rosemberg, Andrew W. and Street, Alexandre and Vallad{\\~a}o, Davi M. and Van Hentenryck, Pascal},\n  year          = {2024},\n  eprint        = {2405.14973},\n  archivePrefix = {arXiv},\n  primaryClass  = {cs.LG}\n}"
+ },
+ {
+  "id": "rosemberg2024learning",
+  "year": 2024,
+  "type": "journal",
+  "badge": "Journal",
+  "title": "Learning Optimal Power Flow Value Functions with Input-Convex Neural Networks",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Mathieu Tanneau",
+   "Bruno Fanzeres",
+   "Joaquim Dias Garcia",
+   "Pascal Van Hentenryck"
+  ],
+  "venue": "Electric Power Systems Research, vol. 235, 110643 · presented at PSCC 2024",
+  "links": {
+   "page": "research/value-functions/",
+   "paper": "https://doi.org/10.1016/j.epsr.2024.110643",
+   "arxiv": "https://arxiv.org/abs/2310.04605"
+  },
+  "selected": true,
+  "thumb": "assets/img/thumbs/value-functions.jpg",
+  "projects": [
+   "value-functions"
+  ],
+  "bibtex": "@article{rosemberg2024learning,\n  title   = {Learning Optimal Power Flow Value Functions with Input-Convex Neural Networks},\n  author  = {Rosemberg, Andrew and Tanneau, Mathieu and Fanzeres, Bruno and Garcia, Joaquim and Van Hentenryck, Pascal},\n  journal = {Electric Power Systems Research},\n  volume  = {235},\n  pages   = {110643},\n  year    = {2024},\n  doi     = {10.1016/j.epsr.2024.110643}\n}"
+ },
+ {
+  "id": "macedo2022virtual",
+  "year": 2022,
+  "type": "conference",
+  "badge": "Conference",
+  "title": "Virtual Transactions in Electricity Markets: An Instrument for a Reliable Energy Transition Towards a Low-Carbon Operation",
+  "authors": [
+   "Danielle Macedo",
+   "Rafaela Ribeiro",
+   "Bruno Fanzeres",
+   "Andrew W. Rosemberg"
+  ],
+  "venue": "54th Brazilian Symposium of Operations Research (SBPO)",
+  "links": {
+   "paper": "https://www.researchgate.net/publication/365319078_Virtual_Transactions_in_Electricity_Markets_An_Instrument_for_a_Reliable_Energy_Transition_Towards_a_Low-Carbon_Operation"
+  },
+  "projects": [
+   "portfolio-optimization"
+  ],
+  "selected": false,
+  "thumb": "assets/img/thumbs/portfolio-optimization.jpg"
+ },
+ {
+  "id": "rosemberg2021assessing",
+  "year": 2022,
+  "type": "journal",
+  "badge": "Journal",
+  "title": "Assessing the Cost of Network Simplifications in Long-Term Hydrothermal Dispatch Planning Models",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Alexandre Street",
+   "Joaquim Dias Garcia",
+   "Davi M. Valladão",
+   "Thuener Silva",
+   "Oscar Dowson"
+  ],
+  "venue": "IEEE Transactions on Sustainable Energy, 13(1):196–206",
+  "links": {
+   "page": "research/network-simplifications/",
+   "paper": "https://doi.org/10.1109/TSTE.2021.3106810",
+   "arxiv": "https://arxiv.org/abs/2107.09755",
+   "video": "https://www.youtube.com/watch?v=0itXxcjW--s"
+  },
+  "link_labels": {
+   "video": "INFORMS talk"
+  },
+  "selected": false,
+  "thumb": "assets/img/thumbs/network-simplifications.jpg",
+  "projects": [
+   "network-simplifications"
+  ],
+  "bibtex": "@article{rosemberg2021assessing,\n  title   = {Assessing the Cost of Network Simplifications in Long-Term Hydrothermal Dispatch Planning Models},\n  author  = {Rosemberg, Andrew W. and Street, Alexandre and Dias Garcia, Joaquim and Vallad{\\~a}o, Davi M. and Silva, Thuener and Dowson, Oscar},\n  journal = {IEEE Transactions on Sustainable Energy},\n  volume  = {13},\n  number  = {1},\n  pages   = {196--206},\n  year    = {2022},\n  doi     = {10.1109/TSTE.2021.3106810}\n}"
+ },
+ {
+  "id": "rosemberg2020thesis",
+  "year": 2020,
+  "type": "thesis",
+  "badge": "MSc thesis",
+  "title": "A Framework for Assessing the Impacts of Network Formulations in the Operation of Hydrothermal Power Systems",
+  "authors": [
+   "Andrew D. W. Rosemberg"
+  ],
+  "venue": "Pontifical Catholic University of Rio de Janeiro (PUC-Rio)",
+  "note": "Advisor: Alexandre Street; co-advisor: Davi Valladão; committee: Andy Philpott, Arild Helseth, Bruno Fanzeres.",
+  "links": {
+   "paper": "https://doi.org/10.17771/PUCRio.acad.51577"
+  },
+  "projects": [
+   "network-simplifications"
+  ],
+  "selected": false,
+  "thumb": "assets/img/thumbs/network-simplifications.jpg"
+ },
+ {
+  "id": "rosemberg2019hydropowermodels",
+  "year": 2019,
+  "type": "software",
+  "badge": "Software paper",
+  "title": "HydroPowerModels.jl: A Julia/JuMP Package for Hydrothermal Economic Dispatch Optimization",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Alexandre Street",
+   "Joaquim Dias Garcia",
+   "Thuener Silva",
+   "Davi M. Valladão",
+   "Oscar Dowson"
+  ],
+  "venue": "JuliaCon Proceedings, 1(1):35",
+  "links": {
+   "paper": "https://doi.org/10.21105/jcon.00035",
+   "code": "https://github.com/andrewrosemberg/HydroPowerModels.jl",
+   "video": "https://www.youtube.com/watch?v=bnKX2uATrzA"
+  },
+  "link_labels": {
+   "video": "JuliaCon talk"
+  },
+  "projects": [
+   "network-simplifications"
+  ],
+  "bibtex": "@article{rosemberg2019hydropowermodels,\n  title   = {HydroPowerModels.jl: A Julia/JuMP Package for Hydrothermal Economic Dispatch Optimization},\n  author  = {Rosemberg, Andrew and Street, Alexandre and Garcia, Joaquim Dias and Silva, Thuener and Vallad{\\~a}o, Davi and Dowson, Oscar},\n  journal = {JuliaCon Proceedings},\n  volume  = {1},\n  number  = {1},\n  pages   = {35},\n  year    = {2019},\n  doi     = {10.21105/jcon.00035}\n}",
+  "selected": false,
+  "thumb": "assets/img/thumbs/network-simplifications.jpg"
+ },
+ {
+  "id": "rosemberg2018futures",
+  "year": 2018,
+  "type": "conference",
+  "badge": "Conference",
+  "title": "Futures Contracts Portfolio Selection via Robust Data-Driven Optimization",
+  "authors": [
+   "Andrew W. Rosemberg",
+   "Bruno B. C. C. da Costa P. Reis",
+   "Davi M. Valladão"
+  ],
+  "venue": "50th Brazilian Symposium of Operations Research (SBPO) · in Portuguese",
+  "links": {
+   "paper": "https://proceedings.science/sbpo/papers/selecao-de-carteira-de-contratos-futuros-via-otimizacao-robusta-direcionado-por-dados"
+  },
+  "projects": [
+   "portfolio-optimization"
+  ],
+  "selected": false,
+  "thumb": "assets/img/thumbs/portfolio-optimization.jpg"
+ }
+]

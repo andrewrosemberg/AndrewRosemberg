@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="330.589817pt" height="318.12pt" viewBox="0 0 330.589817 318.12" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 318.12
+L 330.589817 318.12
+L 330.589817 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 49.239375 274.962
+L 317.079375 274.962
+L 317.079375 64.29
+L 49.239375 64.29
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1"/>
+     <g id="text_1">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(65.796589 291.02)">Looser risk limit</text>
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(44.368933 306.529)">σmax &gt; 10% of budget</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2"/>
+     <g id="text_2">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(214.440833 291.02)">Tight risk limit</text>
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(187.59888 306.529)">σmax ≤ 10% of budget</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_3">
+      <path d="M 49.239375 274.962
+L 317.079375 274.962
+" clip-path="url(#p5275849467)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4">
+      <defs>
+       <path id="m7755de782a" d="M 0 0
+L -3.5 0
+" style="stroke: #687078; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m7755de782a" x="49.239375" y="274.962" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #687078" x="42.239375" y="281.15" transform="rotate(-0 42.239375 281.15)">0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_5">
+      <path d="M 49.239375 222.294
+L 317.079375 222.294
+" clip-path="url(#p5275849467)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m7755de782a" x="49.239375" y="222.294" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #687078" x="42.239375" y="228.482" transform="rotate(-0 42.239375 228.482)">10</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_7">
+      <path d="M 49.239375 169.626
+L 317.079375 169.626
+" clip-path="url(#p5275849467)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m7755de782a" x="49.239375" y="169.626" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #687078" x="42.239375" y="175.814" transform="rotate(-0 42.239375 175.814)">20</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_9">
+      <path d="M 49.239375 116.958
+L 317.079375 116.958
+" clip-path="url(#p5275849467)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m7755de782a" x="49.239375" y="116.958" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #687078" x="42.239375" y="123.146" transform="rotate(-0 42.239375 123.146)">30</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_11">
+      <path d="M 49.239375 64.29
+L 317.079375 64.29
+" clip-path="url(#p5275849467)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m7755de782a" x="49.239375" y="64.29" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #687078" x="42.239375" y="70.478" transform="rotate(-0 42.239375 70.478)">40</text>
+     </g>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="21.016" y="169.626" transform="rotate(-90 21.016 169.626)">Test optimality gap, mean (%)</text>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 61.41392 274.962
+L 110.112102 274.962
+L 110.112102 229.14084
+L 61.41392 229.14084
+z
+" clip-path="url(#p5275849467)" style="fill: #c0501f"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 204.643867 274.962
+L 253.342049 274.962
+L 253.342049 119.5914
+L 204.643867 119.5914
+z
+" clip-path="url(#p5275849467)" style="fill: #c0501f"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 112.976701 274.962
+L 161.674883 274.962
+L 161.674883 175.41948
+L 112.976701 175.41948
+z
+" clip-path="url(#p5275849467)" style="fill: #2a6fb5"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 256.206648 274.962
+L 304.90483 274.962
+L 304.90483 197.54004
+L 256.206648 197.54004
+z
+" clip-path="url(#p5275849467)" style="fill: #2a6fb5"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 49.239375 274.962
+L 49.239375 64.29
+" style="fill: none; stroke: #dddcd5; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 49.239375 274.962
+L 317.079375 274.962
+" style="fill: none; stroke: #dddcd5; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(76.729027 203.340088)">8.7</text>
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(71.02223 220.756838)">± 9.5</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(216.34538 93.790648)">29.5</text>
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(210.638583 111.207398)">± 26.9</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(124.678214 149.618728)">18.9</text>
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(118.971417 167.035478)">± 20.2</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(267.908161 171.810381)">14.7</text>
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(262.201364 189.227131)">± 21.2</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #202a33" x="49.239375" y="22.29" transform="rotate(-0 49.239375 22.29)">Optimality gap by risk regime</text>
+   </g>
+   <g id="legend_1">
+    <g id="patch_9">
+     <path d="M 60.939375 58.87192
+L 73.939375 58.87192
+L 73.939375 49.77192
+L 60.939375 49.77192
+z
+" style="fill: #c0501f"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #202a33" x="84.339375" y="58.87192" transform="rotate(-0 84.339375 58.87192)">Masked Sobolev</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 194.62 58.87192
+L 207.62 58.87192
+L 207.62 49.77192
+L 194.62 49.77192
+z
+" style="fill: #2a6fb5"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #202a33" x="218.02" y="58.87192" transform="rotate(-0 218.02 58.87192)">Value-only</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p5275849467">
+   <rect x="49.239375" y="64.29" width="267.84" height="210.672"/>
+  </clipPath>
+ </defs>
+</svg>

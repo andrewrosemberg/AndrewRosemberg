@@ -1,0 +1,157 @@
+<!--
+title: Research
+description: Learning solution maps, sequential policies, multi-level decision processes, and data-informed decisions under uncertainty and ambiguity.
+nav: research
+math: true
+-->
+<header class="page-hero wrap">
+  <div class="hero-mark">{{icon:research}}<p class="eyebrow">Research</p></div>
+  <h1>Learning and computation for adaptive decision systems</h1>
+  <p class="lede">Many decisions are made repeatedly from slightly different information, as when a robot replans its motion dozens of times a second or a power grid rebalances its generation every few minutes. Such decisions can be recomputed from scratch each time, which is reliable but expensive. They can also be predicted by a learned model, which is fast but may generalize poorly and violate the limits of the system. My research studies how learned representations and explicit computation can be combined so that decisions exploit what is shared across instances while retaining the ability to adapt to each one.</p>
+</header>
+
+<section class="section alt research-focus" id="solution-maps" aria-labelledby="maps-title">
+  <div class="wrap">
+    <div class="section-head"><div><p class="kicker area-kicker area-optimize">Repeated computation</p><h2 id="maps-title">Learning solution maps</h2></div></div>
+    <div class="research-focus-grid">
+      <div class="prose">
+        <p>A decision procedure that is run again and again, with data that change only partially each time, repeats much of its earlier computation. Because the procedure is fixed, each decision is a function of the inputs \(p\) it receives. A learned map can capture that function once instead of recomputing the decision on every call. The best action in each instance is the one of least cost among those the system allows, so the map to be learned is</p>
+        <div class="eq">\[
+          \begin{aligned}
+          \mathbf y^\star(p)\in\operatorname*{arg\,min}_{\mathbf y}\quad & f(\mathbf y;p)\\[0.4em]
+          \text{subject to}\quad & c(\mathbf y;p)=\mathbf 0,\\[0.4em]
+          & h(\mathbf y;p)\ge\mathbf 0.
+          \end{aligned}
+        \]</div>
+        <p>Here \(f\) is the cost to be minimized and \(\mathbf y^\star(p)\) is the solution returned by a fixed procedure. The equalities \(c\) encode relations that must hold exactly, such as the dynamics of a physical system, and the inequalities \(h\) express limits, for example safety margins or bounds on actions. Learning an approximation of \(p\mapsto\mathbf y^\star(p)\) amortizes the cost of repeated solves, but it transfers the burden of generalization from a procedure that is correct by construction to a representation fitted on samples. Because constrained solution maps can be smooth within locally stable active-set regimes but change behavior across their boundaries, the parameter space may split into combinatorially many critical regions, making finite-sample generalization and reliable constraint behavior central challenges. My research explores how structure from the underlying problem can be brought into the learning of these maps to meet both.</p>
+        <p class="topic-links"><a class="topic-link" href="{{root}}research/masked-sobolev/">Learning Solution Maps <span aria-hidden="true">→</span></a><a class="topic-link" href="{{root}}research/dc2ac/">Learned Model Correction <span aria-hidden="true">→</span></a><a class="topic-link soft" href="{{root}}software/learningtooptimize/">LearningToOptimize <span aria-hidden="true">→</span></a><a class="topic-link soft" href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models (with DiffOpt.jl) <span aria-hidden="true">→</span></a></p>
+      </div>
+      <figure class="dg-figure">{{diagram:stage focus=recourse}}<figcaption><b>A learned map can replace a repeated completion.</b> Context enters a decision process; a learned proxy may predict the decision directly, or provide an object that a constrained completion realizes.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="section research-focus" id="policies" aria-labelledby="policy-title">
+  <div class="wrap">
+    <div class="section-head"><div><p class="kicker area-kicker area-policy">Sequential context</p><h2 id="policy-title">Policies for multistage decisions</h2></div></div>
+    <div class="research-focus-grid">
+      <div class="prose">
+        <p>Decisions are often coupled over time. Energy used now is unavailable later, and a foothold chosen now constrains the steps that follow. When each decision changes the state from which the next one is made, a policy generates the data on which it is judged. A decision that is optimal in isolation can then be expensive downstream. A policy is therefore a solution map evaluated along the trajectory it creates. At each stage it weighs the cost of acting now against the value of the state it leaves for later:</p>
+        <div class="eq-r">
+          <div class="eq eq-wide">\[
+            \begin{aligned}
+            V_t(\mathbf x_{t-1},w_{[t]})
+              &=\min_{\mathbf x_t}\Big\{
+                \underbrace{q_t(\mathbf x_{t-1},\mathbf x_t;w_t)}_{\text{stage recourse value}}
+                +\underbrace{\mathcal V_{t+1}(\mathbf x_t;w_{[t]})}_{\text{continuation value}}\Big\},\\[0.4em]
+            q_t(\mathbf x_{t-1},\mathbf x_t;w_t)
+              &=\min_{\mathbf y_t}\ f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+              &\quad\text{subject to}\quad \mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+              &\phantom{\quad\text{subject to}\quad} h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+            \mathcal V_{t+1}(\mathbf x_t;w_{[t]})
+              &=\mathbb E_{\mathbb P}\!\left[V_{t+1}(\mathbf x_t,w_{[t+1]})\mid w_{[t]}\right],\\[0.4em]
+            V_{T+1}&\equiv0.
+            \end{aligned}
+          \]</div>
+          <div class="eq eq-mid">\[
+            \begin{aligned}
+            &V_t(\mathbf x_{t-1},w_{[t]})=\min_{\mathbf x_t}\Big\{q_t(\mathbf x_{t-1},\mathbf x_t;w_t)+\mathcal V_{t+1}(\mathbf x_t;w_{[t]})\Big\},\\[0.4em]
+            &q_t(\mathbf x_{t-1},\mathbf x_t;w_t)=\min_{\mathbf y_t}\ f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+            &\text{subject to}\\[0.4em]
+            &\quad\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+            &\quad h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+            &\mathcal V_{t+1}(\mathbf x_t;w_{[t]})=\mathbb E_{\mathbb P}\!\Big[V_{t+1}(\mathbf x_t,w_{[t+1]})\mid w_{[t]}\Big],\\[0.4em]
+            &V_{T+1}\equiv0.
+            \end{aligned}
+          \]</div>
+          <div class="eq eq-narrow">\[
+            \begin{aligned}
+            &V_t(\mathbf x_{t-1},w_{[t]})=\\[0.4em]
+            &\quad\min_{\mathbf x_t}\Big\{q_t(\mathbf x_{t-1},\mathbf x_t;w_t)\\[0.4em]
+            &\qquad{}+\mathcal V_{t+1}(\mathbf x_t;w_{[t]})\Big\},\\[0.4em]
+            &q_t(\mathbf x_{t-1},\mathbf x_t;w_t)=\\[0.4em]
+            &\quad\min_{\mathbf y_t}\ f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+            &\text{subject to}\\[0.4em]
+            &\quad\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+            &\quad h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+            &\mathcal V_{t+1}(\mathbf x_t;w_{[t]})=\\[0.4em]
+            &\quad\mathbb E_{\mathbb P}\!\Big[V_{t+1}(\mathbf x_t,w_{[t+1]})\mid w_{[t]}\Big],\\[0.4em]
+            &V_{T+1}\equiv0.
+            \end{aligned}
+          \]</div>
+        </div>
+        <p>Here \(t\in\{1,\ldots,T\}\) indexes the stages, \(V_t\) is the optimal cost from stage \(t\) onward, \(\mathbf x_t\) is the state passed to the next stage, such as stored energy or the configuration of a robot, \(\mathbf y_t\) is the recourse, the detailed actions that realize the transition, and \(w_{[t]}\) is the observed history through the current realization \(w_t\). The transition relation \(\mathcal T=\mathbf 0\) and operating constraints \(h\ge\mathbf 0\) define the admissible recourse; \(q_t\) is its least cost, with \(q_t=+\infty\) for an infeasible transition, and \(\mathcal V_{t+1}\) is the continuation value under the uncertainty law \(\mathbb P\), the counterpart of a value function in reinforcement learning.</p>
+        <p>The representation of a policy determines what is prescribed in advance, what is computed after new information arrives, and how future consequences enter the current decision. Because each decision is judged along a trajectory, its errors compound over time, and a cost incurred late must be credited to the choices made early. Training such a policy becomes expensive and unstable as the horizon grows. My research explores how reformulating the problem can expose separability across time, preserve the structure of the system in every decision, and make reliable policy learning compatible with parallel computation.</p>
+        <p class="topic-links"><a class="topic-link" href="{{root}}research/decision-rules/">Policies for Multistage Decisions <span aria-hidden="true">→</span></a><a class="topic-link" href="{{root}}research/value-functions/">Continuation-Value Representations <span aria-hidden="true">→</span></a><a class="topic-link" href="{{root}}research/network-simplifications/">Planning and Realization Mismatch <span aria-hidden="true">→</span></a><a class="topic-link soft" href="{{root}}software/decisionrules/">DecisionRules.jl <span aria-hidden="true">→</span></a><a class="topic-link soft" href="{{root}}software/hydropowermodels/">HydroPowerModels.jl <span aria-hidden="true">→</span></a></p>
+      </div>
+      <figure class="dg-figure">{{diagram:stage}}<figcaption><b>A multistage policy is a coupled information-and-decision system.</b> Observations and forecasts define the context; the policy prescribes state, recourse realizes it, the continuation value represents what remains, and multipliers and local response expose the consequences of those choices.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="section alt research-focus" id="multi-level" aria-labelledby="multi-title">
+  <div class="wrap">
+    <div class="section-head"><div><p class="kicker area-kicker area-diff">Coupled response</p><h2 id="multi-title">Multi-level decision problems</h2></div></div>
+    <div class="research-focus-grid">
+      <div class="prose">
+        <p>The outcome of a decision often depends on how another process responds to it, be it an algorithm or an agent with goals of its own. A bidding strategy, for example, submits an offer, and a market, weighing it against the offers of competitors, determines how much of it is accepted and at what price. The market solves a separate problem, and the strategy is judged only by the result. Training such a strategy is therefore a bilevel or sometimes a multi-level problem. In its simplest, bilevel form, the strategy’s decision \(p\), here the offer, is chosen to minimize an outer criterion \(L\), evaluated at the solution that the inner problem returns for it:</p>
+        <div class="eq-r">
+          <div class="eq eq-wide">\[
+            \begin{aligned}
+            \min_p\quad &\underbrace{L\big(p,\mathbf y^\star(p)\big)}_{\text{outer criterion}}\\[0.4em]
+            \text{subject to}\quad &\mathbf y^\star(p)\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p)}
+              \underbrace{f(\mathbf y;p)}_{\text{inner}}.
+            \end{aligned}
+          \]</div>
+          <div class="eq eq-mid">\[
+            \begin{aligned}
+            &\min_p\ \underbrace{L\big(p,\mathbf y^\star(p)\big)}_{\text{outer criterion}}\\[0.4em]
+            &\text{subject to}\\[0.4em]
+            &\quad\mathbf y^\star(p)\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p)}
+              \underbrace{f(\mathbf y;p)}_{\text{inner}}.
+            \end{aligned}
+          \]</div>
+          <div class="eq eq-narrow">\[
+            \begin{aligned}
+            &\min_p\ \underbrace{L\big(p,\mathbf y^\star(p)\big)}_{\text{outer criterion}}\\[0.4em]
+            &\text{subject to}\\[0.4em]
+            &\quad\mathbf y^\star(p)\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p)}
+              f(\mathbf y;p).
+            \end{aligned}
+          \]</div>
+        </div>
+        <p>Here \(\mathcal Y(p)\) is the set of decisions the inner problem allows, and \(L\) is the loss by which \(p\) is ultimately judged. The outer decision \(p\), set by a learned component, may be an offer to a market, the targets of a controller inside a policy, or the coefficients of a simplified model whose solution is implemented. When the outer criterion is the inner objective itself, the gradient of \(L\) with respect to \(p\) follows from the inner solution and its Lagrange multipliers without differentiating either. When they differ, the gradient also requires the derivative of the inner solution with respect to \(p\). The relevant learning signal is therefore determined by the response of the composite decision process, not by any learned component in isolation.</p>
+        <p>Learning the inner solution’s response to \(p\) from historical data as a generic function ignores the objective and constraints that determine it, which can make generalization to new values of \(p\) very hard. Moreover, that response is smooth only within a fixed set of active constraints, and the inner solution can jump when that set changes. My research explores how to compute the inner solution’s derivatives from models as they are written, nonconvex ones included, and when they inform the choice of \(p\). It also asks how learning can proceed where they are uninformative, for example through a prior over the outer criterion or by averaging that criterion over contexts.</p>
+        <p class="topic-links"><a class="topic-link" href="{{root}}research/strategic-bidding/">Endogenous Response <span aria-hidden="true">→</span></a><a class="topic-link" href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models (with DiffOpt.jl) <span aria-hidden="true">→</span></a><a class="topic-link" href="{{root}}research/dc2ac/">Learned Model Correction <span aria-hidden="true">→</span></a><a class="topic-link soft" href="{{root}}software/optimalbids/">OptimalBids.jl <span aria-hidden="true">→</span></a></p>
+      </div>
+      <figure class="dg-figure">
+        <div class="diagram-progression">
+          <div>{{diagram:stage focus=state,recourse}}</div>
+          <div class="diagram-progression-arrow" aria-hidden="true"><span>↓</span><small>An embedded decision process completes what is prescribed</small></div>
+          <div>{{diagram:through focus=map,opt,evals}}</div>
+        </div>
+        <figcaption><b>From a policy representation to a multi-level decision.</b> A state-target policy first separates what is prescribed from the recourse that realizes it. A multi-level formulation inserts an optimization with its own objective between an upstream map and the criterion by which its returned decision is evaluated.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="section research-focus" id="uncertainty" aria-labelledby="uncertainty-title">
+  <div class="wrap">
+    <div class="section-head"><div><p class="kicker area-kicker area-uncertainty">Estimated conditional laws</p><h2 id="uncertainty-title">Uncertainty and ambiguity</h2></div></div>
+    <div class="research-focus-grid">
+      <div class="prose">
+        <p>Distribution models estimated from data, such as scenario weights over past stock returns, or policies learned from visited trajectories, such as a controller tuned on visited paths, are judged on conditions that their training record can only partially identify. Selection against an estimate of the governing probability law tends to pick decisions whose apparent performance is inflated by estimation error. This is the selection bias by which hyperparameter search overfits its validation set or financial strategies can easily underperform out-of-sample. It grows with the capacity of the class searched, which makes it most severe for flexible learned policies. Instead of making decisions against an estimated law, one can limit the selection bias by hedging against possible outcomes without necessarily assigning a probability to each of them. This is the premise of robust optimization:</p>
+        <div class="eq-table">
+          <div><p class="eq-table-head">Stochastic programming (SO)</p><div class="eq">\[\min_u\ \mathbb E_{\xi\sim\widehat{\mathbb P}}[\ell(u,\xi)]\]</div></div>
+          <div><p class="eq-table-head">Robust optimization (RO)</p><div class="eq">\[\min_u\ \max_{\xi\in\mathcal U}\ \ell(u,\xi)\]</div></div>
+          <div><p class="eq-table-head">Distributionally robust optimization (DRO)</p><div class="eq">\[\min_u\ \sup_{\mathbb Q\in\mathcal A}\ \mathbb E_{\xi\sim\mathbb Q}[\ell(u,\xi)]\]</div></div>
+        </div>
+        <p>Here \(u\) is the decision, \(\xi\) the uncertain outcome, \(\ell\) the loss, \(\widehat{\mathbb P}\) the estimated law, \(\mathcal U\) an uncertainty set of possible outcomes, and \(\mathcal A\) an ambiguity set of plausible laws. The estimated law and both sets may depend on the information available when \(u\) is chosen. The first problem is empirical risk minimization when \(\widehat{\mathbb P}\) is the empirical law, the second is robust optimization, and the third is distributionally robust optimization. The set \(\mathcal U\) bounds each realization of \(\xi\), while \(\mathcal A\) bounds how far the law itself can depart from the estimate. Ambiguity is therefore a property of the conditional law used to construct a policy, not merely a perturbation of its eventual outcome.</p>
+        <p>While robust approaches implicitly define the risk aversion of the decision maker besides the inherent ambiguity of finite samples, RO and DRO sets are often tuned on data, inheriting at least part of the selection bias. Moreover, the conditional law can shift over time, so a set chosen in one period may become too conservative, or not conservative enough, later on. My research explores how to size ambiguity sets by the quality of the decisions they induce and how to condition them on the information available at the moment of choice.</p>
+        <p class="topic-links"><a class="topic-link" href="{{root}}research/portfolio-optimization/">Uncertainty and Ambiguity <span aria-hidden="true">→</span></a><a class="topic-link soft" href="{{root}}software/portfolioopt/">PortfolioOpt.jl <span aria-hidden="true">→</span></a></p>
+      </div>
+      <figure class="dg-figure">{{diagram:stage focus=info}}<figcaption><b>The conditional law is the information against which a decision is evaluated.</b> Observations, forecasts, and model assumptions determine the conditional law used to evaluate the current context.</figcaption></figure>
+    </div>
+  </div>
+</section>

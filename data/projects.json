@@ -1,0 +1,144 @@
+[
+  {
+    "slug": "decision-rules",
+    "featured": true,
+    "href": "research/decision-rules/",
+    "venue": "NeurIPS 2025 ML×OR workshop · journal version in preparation",
+    "title": "Policies for Multistage Decisions",
+    "summary": "A policy may prescribe a reachable state transition from observed history while an optimization over the operational model computes the controls that realize it. Two-stage generalized decision rules provide a specific policy class and train it with target-constraint multipliers.",
+    "tags": [
+      "Policy learning",
+      "Stochastic optimization",
+      "Decision rules"
+    ],
+    "thumb": "assets/img/thumbs/decision-rules.jpg",
+    "thumb_alt": "Training a state-consistent decision rule: a recurrent policy emits targets stage by stage, and the duals of independent stage problems train it.",
+    "group": "core",
+    "role": "Policies for Multistage Decisions",
+    "area": "policy"
+  },
+  {
+    "slug": "masked-sobolev",
+    "featured": false,
+    "href": "research/masked-sobolev/",
+    "venue": "NeurIPS 2026 · main track",
+    "title": "Learning Solution Maps",
+    "summary": "Optimization proxies amortize repeated solves across related problem instances. The subject compares direct prediction, repair and completion constructions, learned correction of a tractable model, and first-order supervision of solver-selected local response.",
+    "tags": [
+      "Optimization proxies",
+      "Sobolev training",
+      "Policy distillation"
+    ],
+    "thumb": "assets/img/thumbs/masked-sobolev.jpg",
+    "thumb_alt": "Masked Sobolev training: a proxy matches solver decisions and a sparse mask of their sensitivities.",
+    "anim": "assets/img/research/sobolev-workflow.gif",
+    "still": "assets/img/research/sobolev-workflow.png",
+    "group": "core",
+    "role": "Learning Solution Maps",
+    "area": "optimize"
+  },
+  {
+    "slug": "differentiable-optimization",
+    "href": "research/differentiable-optimization/",
+    "venue": "arXiv 2025 · DiffOpt.jl",
+    "title": "Differentiating Optimization Models",
+    "summary": "An outer criterion may depend on the solution of an embedded decision problem with a different objective. DiffOpt.jl computes the value and solution sensitivities of smooth, possibly nonconvex JuMP models with respect to their named parameters.",
+    "tags": [
+      "Differentiable optimization",
+      "Nonlinear programming"
+    ],
+    "thumb": "assets/img/thumbs/differentiable-optimization.jpg",
+    "thumb_alt": "Dispatch, price and generation sensitivities as functions of demand.",
+    "group": "core",
+    "role": "Multi-Level Decision Problems",
+    "featured": false,
+    "area": "diff"
+  },
+  {
+    "slug": "value-functions",
+    "href": "research/value-functions/",
+    "venue": "EPSR 2024 · PSCC 2024",
+    "title": "Continuation-Value Representations",
+    "summary": "Cutting planes bound a future cost only if it is convex. Input-convex networks trained on single-period optimal-power-flow costs, including nonconvex AC costs, matched unrestricted networks in average accuracy on grids up to 6,468 buses; their cuts are supports of the network and carry no bound on the AC cost.",
+    "tags": [
+      "Value functions",
+      "Input-convex networks",
+      "Stochastic optimization"
+    ],
+    "thumb": "assets/img/thumbs/value-functions.jpg",
+    "thumb_alt": "A convex cost curve with supporting cuts next to an unrestricted fit.",
+    "group": "core",
+    "role": "Learning useful value functions",
+    "featured": false,
+    "area": "value"
+  },
+  {
+    "slug": "dc2ac",
+    "href": "research/dc2ac/",
+    "venue": "NeurIPS 2025 ML×OR",
+    "title": "Learned Model Correction",
+    "summary": "DC optimal power flow, the linear program used in dispatch and market clearing, remains the procedure that computes the dispatch, while a network predicts per-demand line susceptances and shunt conductances that bring its solution close to AC-OPF, trained through the linear program’s solution sensitivities.",
+    "tags": [
+      "Differentiable optimization",
+      "Decision-focused learning"
+    ],
+    "thumb": "assets/img/thumbs/dc2ac.jpg",
+    "thumb_alt": "DC2AC training pipeline: demand, neural network, adjusted DC-OPF, regression against AC solutions.",
+    "group": "through",
+    "role": "Learning through mathematical decision processes",
+    "featured": false,
+    "area": "diff"
+  },
+  {
+    "slug": "strategic-bidding",
+    "href": "research/strategic-bidding/",
+    "venue": "SEGAN 2025 · IREP 2025",
+    "title": "Endogenous Response",
+    "summary": "When an agent’s outcome is determined by another agent’s optimization, as when a market operator clears producers’ offers, the decision problem is a Stackelberg game with that optimization as follower. Sensitivity-based and derivative-free search through AC clearing are compared, including when each fails.",
+    "tags": [
+      "Bilevel optimization",
+      "Differentiable optimization"
+    ],
+    "thumb": "assets/img/thumbs/strategic-bidding.jpg",
+    "thumb_alt": "Producer profit as a function of offered volume under DC market clearing.",
+    "group": "through",
+    "role": "Learning through mathematical decision processes",
+    "featured": false,
+    "area": "diff"
+  },
+  {
+    "slug": "portfolio-optimization",
+    "href": "research/portfolio-optimization/",
+    "venue": "Open source · PortfolioOpt.jl",
+    "title": "Uncertainty and Ambiguity",
+    "summary": "A decision optimized against an estimated conditional law inherits its estimation error, shift, and misspecification. This subject studies ambiguity-set calibration and the point at which a statistical description must be replaced by an endogenous response model.",
+    "tags": [
+      "Distributionally robust optimization",
+      "Ambiguity sets",
+      "Optimizer’s curse"
+    ],
+    "thumb": "assets/img/thumbs/portfolio-optimization.jpg",
+    "thumb_alt": "A budget uncertainty set for two assets next to uncertain efficient frontiers.",
+    "group": "foundations",
+    "role": "Uncertainty and Ambiguity",
+    "featured": false,
+    "area": "uncertainty"
+  },
+  {
+    "slug": "network-simplifications",
+    "href": "research/network-simplifications/",
+    "venue": "IEEE TSTE 2022 · M.Sc. thesis",
+    "title": "Planning and Realization Mismatch",
+    "summary": "Hydrothermal planning values water with SDDP on convex or linear network models while the grid obeys AC power flow. Planning with five network models and operating each policy on AC shows that relaxation tightness did not order the resulting policies.",
+    "tags": [
+      "Stochastic optimization",
+      "Convex relaxations"
+    ],
+    "thumb": "assets/img/thumbs/network-simplifications.jpg",
+    "thumb_alt": "Planned versus implemented cost for four network models.",
+    "group": "foundations",
+    "role": "Decisions under uncertainty and model mismatch",
+    "featured": false,
+    "area": "uncertainty"
+  }
+]

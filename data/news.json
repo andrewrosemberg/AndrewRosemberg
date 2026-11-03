@@ -1,0 +1,34 @@
+[
+ {
+  "date": "2026",
+  "html": "<a href=\"https://andrewrosemberg.github.io/NeurIPS2026-Masked-Sobolev-Optimization-Proxies/\">Masked Sobolev Training for Feasibility-Reliable Optimization Proxies</a> accepted to the NeurIPS 2026 main track."
+ },
+ {
+  "date": "2026",
+  "html": "Completed a six-month visit to Pieter Abbeel’s Robot Learning Lab at UC Berkeley, working on policy learning and distillation for humanoid locomotion and dexterous manipulation."
+ },
+ {
+  "date": "Dec 2025",
+  "html": "Two papers at the NeurIPS 2025 ML×OR workshop: <a href=\"{{root}}research/decision-rules/\">two-stage deep decision rules</a> and <a href=\"{{root}}research/dc2ac/\">DC2AC</a>."
+ },
+ {
+  "date": "Oct 2025",
+  "html": "New preprint, <a href=\"{{root}}research/differentiable-optimization/\"><em>A General and Streamlined Differentiable Optimization Framework</em></a>, describing solution sensitivities for nonconvex programs, now in DiffOpt.jl."
+ },
+ {
+  "date": "Aug 2025",
+  "html": "<a href=\"{{root}}teaching/\">ISyE 8803, Special Topics on Optimal Control and Learning</a>, a student-led PhD course at Georgia Tech designed with Michael Klamkin, connects mathematical programming, optimal control and reinforcement learning."
+ },
+ {
+  "date": "Jun 2025",
+  "html": "<a href=\"{{root}}research/strategic-bidding/\">Strategic bidding with gradient-based methods</a> presented at IREP 2025 and published in <em>Sustainable Energy, Grids and Networks</em>."
+ },
+ {
+  "date": "2024",
+  "html": "Joined Los Alamos National Laboratory as a graduate researcher, working on solution sensitivities of optimization models and their use in learning."
+ },
+ {
+  "date": "Jun 2024",
+  "html": "<a href=\"{{root}}research/value-functions/\">Input-convex value functions</a> presented at PSCC 2024 in Paris."
+ }
+]

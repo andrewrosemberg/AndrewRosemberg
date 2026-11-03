@@ -1,0 +1,129 @@
+<!--
+title: Andrew Rosemberg — Machine Learning & Optimization
+description: Andrew Rosemberg develops learning and optimization methods for solution maps, sequential policies, multi-level decision processes, and decisions under uncertainty and ambiguity.
+nav: home
+-->
+<section class="hero wrap" aria-labelledby="name">
+  <figure class="hero-cover">
+    <img src="{{root}}assets/img/research/decision-landscapes.webp" alt="An editorial illustration of connected decision landscapes under changing context." width="1942" height="809">
+  </figure>
+  <div class="hero-grid">
+    <div>
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span>PhD Candidate · Machine Learning · Georgia Tech</p>
+      <h1 id="name">Andrew Rosemberg</h1>
+      <p class="tagline">I work at the intersection of <strong class="kw">machine learning</strong> and <strong class="kw">mathematical optimization</strong>, developing methods for reliable, effective, and computationally efficient <strong class="kw">decision-making under uncertainty</strong>.</p>
+      <div class="subline">
+        <p>My research centers on the relationship between representations, <strong class="kw">decision policies</strong>, and computation. I study how policies and <strong class="kw">solution maps can be learned</strong>, approximated, and integrated with mathematical decision methods, exploiting information across problem instances while retaining the ability to adapt to individual circumstances. A central concern is how these choices affect <strong class="kw">generalization, decision quality, and the computational resources</strong> required to achieve them.</p>
+        <p>This perspective extends to decisions made under incomplete information, <strong class="kw">uncertainty estimated from data</strong>, and <strong class="kw">interactions with other agents</strong>. I investigate these questions through mathematical analysis, learning algorithms, and <strong class="kw">open-source computational tools</strong>.</p>
+      </div>
+      <ul class="hero-topics" aria-label="Research topics"><li>Context-conditioned policies</li><li>Multi-level decision processes</li><li>Uncertainty and ambiguity</li></ul>
+      <div class="btn-row">
+        <a class="btn primary" href="{{root}}assets/files/Andrew_Rosemberg_CV.pdf">Curriculum vitae</a>
+        <a class="btn" href="mailto:arosemberg3@gatech.edu">Email</a>
+        <a class="btn" href="https://scholar.google.com/citations?user=jOuzK3EAAAAJ">Google Scholar</a>
+        <a class="btn" href="https://github.com/andrewrosemberg">GitHub</a>
+        <a class="btn" href="https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/">LinkedIn</a>
+      </div>
+    </div>
+    <aside class="portrait" aria-label="Affiliations">
+      <img src="{{root}}assets/img/andrew-rosemberg.jpg" alt="Portrait of Andrew Rosemberg" width="648" height="648">
+      <ul class="affil">
+        <li><b>Georgia Tech</b> School of Industrial and Systems Engineering and NSF AI Institute <a href="https://www.ai4opt.org/">AI4OPT</a>, advised by <a href="https://www.isye.gatech.edu/users/pascal-van-hentenryck">Pascal Van Hentenryck</a></li>
+        <li><b>Los Alamos National Laboratory</b> Graduate researcher</li>
+        <li><b>UC Berkeley</b> Visiting researcher in Pieter Abbeel’s Robot Learning Lab, 2026</li>
+        <li><b>Previously</b> Invenia Labs and PUC-Rio</li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<section class="section alt" id="research" aria-labelledby="research-title">
+  <div class="wrap">
+    <div class="section-head">
+      <div><h2 id="research-title">Research</h2></div>
+      <a class="see-all" href="{{root}}research/">Research overview <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="areas-list topic-list">
+      <article class="area-row area-optimize" id="thread-maps">
+        <div class="area-head"><h3><a href="{{root}}research/#solution-maps">Learning solution maps</a></h3>{{scenes:mosaic=masked-sobolev}}</div>
+        <div>
+          <p class="area-claim">Repeated computation creates an opportunity to learn structure across context, without treating every instance as an unrelated problem.</p>
+          <p>A parametric procedure induces a map from context to decisions. Learning that map <strong class="kw">amortizes the cost of repeated solution</strong>, but transfers the burden of generalization from the procedure to its representation. The relevant approximation must retain the <strong class="kw">local structure that governs decisions in new contexts</strong> and the response required when it becomes one component of a larger system.</p>
+          <a class="topic-link" href="{{root}}research/masked-sobolev/">Learning Solution Maps <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+      <article class="area-row area-policy" id="thread-policies">
+        <div class="area-head"><h3><a href="{{root}}research/#policies">Policies for multistage decisions</a></h3>{{scenes:mosaic=decision-rules,value-functions,network-simplifications}}</div>
+        <div>
+          <p class="area-claim">When decisions alter the context of later decisions, computation must be allocated across time rather than repeated myopically.</p>
+          <p>A policy is a solution map evaluated along the <strong class="kw">trajectory it creates</strong>. Its representation determines what is prescribed in advance, what is computed after new information arrives, and how future consequences enter the current decision. Appropriate reformulation can expose separability, preserve prior structure, and <strong class="kw">make reliable policy learning compatible with parallel computation</strong>.</p>
+          <a class="topic-link" href="{{root}}research/decision-rules/">Policies for Multistage Decisions <span aria-hidden="true">→</span></a>
+          <a class="topic-link" href="{{root}}research/value-functions/">Continuation-Value Representations <span aria-hidden="true">→</span></a>
+          <a class="topic-link" href="{{root}}research/network-simplifications/">Planning and Realization Mismatch <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+      <article class="area-row area-diff" id="thread-response">
+        <div class="area-head"><h3><a href="{{root}}research/#multi-level">Multi-level decision problems</a></h3>{{scenes:mosaic=differentiable-optimization,strategic-bidding,dc2ac}}</div>
+        <div>
+          <p class="area-claim">A decision is often evaluated through a mechanism whose response is itself part of the problem.</p>
+          <p>Parameters can be interpreted by a model, targets can be realized by a downstream process, and the outcome of one decision can depend on the response of others. These systems are coupled even when their component objectives differ. The relevant learning signal is determined by the <strong class="kw">response of the composite decision process</strong>, not by any learned component in isolation.</p>
+          <a class="topic-link" href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models <span aria-hidden="true">→</span></a>
+          <a class="topic-link" href="{{root}}research/strategic-bidding/">Endogenous Response <span aria-hidden="true">→</span></a>
+          <a class="topic-link" href="{{root}}research/dc2ac/">Learned Model Correction <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+      <article class="area-row area-uncertainty" id="thread-uncertainty">
+        <div class="area-head"><h3><a href="{{root}}research/#uncertainty">Uncertainty and ambiguity</a></h3>{{scenes:mosaic=portfolio-optimization}}</div>
+        <div>
+          <p class="area-claim">Data provide evidence about future context; they do not identify the law on which a policy is conditioned.</p>
+          <p>Selection against an estimated model favors decisions whose apparent performance is helped by <strong class="kw">estimation error</strong>. Ambiguity is therefore a property of the <strong class="kw">conditional law used to construct a policy</strong>, not merely a perturbation of its eventual outcome. The research studies <strong class="kw">data-informed uncertainty sets</strong> and the consequences of mismatch between the model used for a decision and the mechanism that realizes it.</p>
+          <a class="topic-link" href="{{root}}research/portfolio-optimization/">Uncertainty and Ambiguity <span aria-hidden="true">→</span></a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="publications" aria-labelledby="pubs-title">
+  <div class="wrap">
+    <div class="section-head">
+      <div><h2 id="pubs-title">Selected papers</h2></div>
+      <a class="see-all" href="{{root}}publications/">All publications <span aria-hidden="true">→</span></a>
+    </div>
+    {{pubs:selected}}
+  </div>
+</section>
+
+<section class="section alt" id="news" aria-labelledby="news-title">
+  <div class="wrap news-wrap">
+    <div>
+      <div class="section-head" style="margin-bottom:24px"><div><h2 id="news-title">News</h2></div></div>
+      {{news}}
+    </div>
+    <div>
+      <div class="section-head" style="margin-bottom:24px"><div><h2>Software</h2></div><a class="see-all" href="{{root}}software/">All software <span aria-hidden="true">→</span></a></div>
+      <ul class="mini-soft">
+        <li><a href="https://github.com/LearningToOptimize"><b>LearningToOptimize</b><small>Organization lead</small><span>Infrastructure for learning solution maps: Datasets from parametric models, proxy training, and parallel computation.</span></a></li>
+        <li><a href="https://github.com/LearningToOptimize/DecisionRules.jl"><b>DecisionRules.jl</b><small>Author</small><span>Two-stage generalized decision rules implemented by a decision process and trained from the response it returns.</span></a></li>
+        <li><a href="https://github.com/jump-dev/DiffOpt.jl"><b>DiffOpt.jl</b><small>Contributor</small><span>Solution and objective sensitivities of parameterized mathematical models.</span></a></li>
+        <li><a href="https://github.com/andrewrosemberg/OptimalBids.jl"><b>OptimalBids.jl</b><small>Author</small><span>An interface for evaluating and searching decisions through a coupled clearing mechanism.</span></a></li>
+        <li><a href="https://github.com/andrewrosemberg/HydroPowerModels.jl"><b>HydroPowerModels.jl</b><small>Author</small><span>Multistage planning models for studying the consequences of planning–realization mismatch.</span></a></li>
+        <li><a href="https://github.com/andrewrosemberg/PortfolioOpt.jl"><b>PortfolioOpt.jl</b><small>Author</small><span>Risk measures and ambiguity sets for decisions under estimated uncertainty.</span></a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="experience" aria-labelledby="exp-title">
+  <div class="wrap">
+    <div class="section-head"><div><h2 id="exp-title">Experience</h2></div><a class="see-all" href="{{root}}experience/">Experience and education <span aria-hidden="true">→</span></a></div>
+    <div class="legend" aria-hidden="true"><span>Research</span><span class="l-ind">Industry</span></div>
+    <ol class="timeline">
+      <li class="tl"><time>2026</time><div><h3>Graduate Visiting Researcher</h3><p class="org">Robot Learning Lab, UC Berkeley · with Pieter Abbeel</p><p>Policy learning and distillation for humanoid locomotion and dexterous manipulation.</p></div></li>
+      <li class="tl"><time>2024–present</time><div><h3>Graduate Researcher</h3><p class="org">Los Alamos National Laboratory</p><p>Decision models inside learning pipelines: Solution sensitivities of nonconvex programs, sensitivity-supervised proxies, and strategic bidding through AC market clearing.</p></div></li>
+      <li class="tl"><time>2023–present</time><div><h3>Graduate Researcher</h3><p class="org">AI4OPT, Georgia Tech</p><p>Policy learning for constrained sequential decisions, learned value functions, and calibration of simplified decision models.</p></div></li>
+      <li class="tl industry"><time>2020–2023</time><div><h3>Researcher</h3><p class="org">Invenia Labs, Cambridge, UK</p><p>Risk-aware decision models under uncertainty for electricity-market bidding.</p></div></li>
+      <li class="tl industry"><time>2017–2019</time><div><h3>Research Staff Member</h3><p class="org">LAMPS, PUC-Rio · consulting projects</p><p>Mathematical-programming models and multistage planning software for consulting clients.</p></div></li>
+    </ol>
+  </div>
+</section>

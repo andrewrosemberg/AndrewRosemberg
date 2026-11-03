@@ -1,0 +1,214 @@
+<!--
+title: Continuation-Value Representations
+description: Convex learned representations of continuation and operating values, their use as cutting planes inside multistage decision problems, and what those cuts certify.
+nav: research
+math: true
+image: assets/img/thumbs/value-functions.jpg
+-->
+<header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="{{root}}research/">Research</a> / <a href="{{root}}research/#policies">Policies for Multistage Decisions</a></p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Continuation values · Cutting planes · Input-convex representation</p>
+  <h1>Continuation-Value Representations</h1>
+  <p class="lede">A learned value function is useful only through the planner that queries it, so its shape is as important as its accuracy. A value function that is convex in the state can be embedded in the planner without losing tractability, for example through supporting cuts built from its gradients. This work learns convex value functions from data and bounds their error between training samples.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, Mathieu&nbsp;Tanneau, Bruno&nbsp;Fanzeres, Joaquim&nbsp;Dias&nbsp;Garcia, Pascal&nbsp;Van&nbsp;Hentenryck</p>
+</header>
+{{scene:value-functions}}
+
+<nav class="topic-map wrap" aria-label="Continuation-value representations guide"><p>Argument</p><ol><li><a href="#object"><small>01 · Continuation value</small><span>The remaining cost queried by the state decision</span></a></li><li><a href="#cuts"><small>02 · Cutting planes</small><span>Why convexity makes one cut valid everywhere</span></a></li><li><a href="#representation"><small>03 · Representation</small><span>Input-convex networks, their cuts, and error between samples</span></a></li><li><a href="#study"><small>04 · Operating-value study</small><span>As accurate as an unrestricted network</span></a></li><li><a href="#policies"><small>05 · Convex critic</small><span>A learned value inside policy training</span></a></li><li><a href="#software"><small>07 · Software</small><span>LearningToOptimize</span></a></li></ol></nav>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#object">Continuation value</a></li><li><a href="#cuts">Cutting planes</a></li><li><a href="#representation">Representation</a></li><li><a href="#study">Operating-value study</a></li><li><a href="#policies">Convex critic</a></li><li><a href="#software">Software</a></li></ol></nav><article class="proj-body">
+
+<section id="object"><h2><span class="num">01 · Continuation value</span>The state decision queries the remaining cost</h2>
+<p>A decision's future cost depends on the state it leaves for subsequent decisions. At stage \(t\), the incoming state \(\mathbf x_{t-1}\) and the realization \(w_t\) are observed; the outgoing state \(\mathbf x_t\) and the recourse decisions \(\mathbf y_t\) are then selected. Because the state contains every quantity that couples consecutive stages, the future cost depends on the recourse only through \(\mathbf x_t\), and the Bellman recursion separates into two minimizations:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+V_t(\mathbf x_{t-1},w_{[t]})
+&=\min_{\mathbf x_t\in\mathbb R^{n_x}}\Big\{
+\underbrace{q_t(\mathbf x_{t-1},\mathbf x_t;w_t)}_{\text{recourse value}}
++\underbrace{\mathcal V_{t+1}(\mathbf x_t;w_{[t]})}_{\text{continuation}}\Big\},\\[0.4em]
+q_t(\mathbf x_{t-1},\mathbf x_t;w_t)
+&=\min_{\mathbf y_t\in\mathbb R^{n_y}} f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+&\quad\text{subject to }\ \mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf0,\\[0.4em]
+&\phantom{\quad\text{subject to }\ }h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf0,\\[0.4em]
+\mathcal V_{t+1}(\mathbf x_t;w_{[t]})
+&=\mathbb E_{\mathbb P}\!\left[V_{t+1}(\mathbf x_t,w_{[t+1]})\mid w_{[t]}\right],\qquad V_{T+1}\equiv0.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&V_t(\mathbf x_{t-1},w_{[t]})\\[0.4em]
+&\quad=\min_{\mathbf x_t\in\mathbb R^{n_x}}\left\{\begin{aligned}
+&q_t(\mathbf x_{t-1},\mathbf x_t;w_t)\\[0.4em]
+&\quad{}+\mathcal V_{t+1}(\mathbf x_t;w_{[t]})
+\end{aligned}\right\},\\[0.4em]
+&q_t(\mathbf x_{t-1},\mathbf x_t;w_t)\\[0.4em]
+&\quad=\min_{\mathbf y_t\in\mathbb R^{n_y}}f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+&\quad\text{subject to}\\[0.4em]
+&\qquad\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf0,\\[0.4em]
+&\qquad h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf0,\\[0.4em]
+&\mathcal V_{t+1}(\mathbf x_t;w_{[t]})\\[0.4em]
+&\quad=\mathbb E_{\mathbb P}\!\left[V_{t+1}(\mathbf x_t,w_{[t+1]})\mid w_{[t]}\right],\\[0.4em]
+&V_{T+1}\equiv0.
+\end{aligned}\]</div>
+</div>
+<p>The stage recourse value \(q_t\) is the least operating cost of a proposed transition; \(f\) is the stage cost, \(\mathcal T=\mathbf0\) encodes the transition, \(h\ge\mathbf0\) gives the operating constraints defining \(\mathcal Y_t\), \(n_x,n_y\) are the state and recourse dimensions, \(w_{[t]}=(w_1,\dots,w_t)\) is the observed history, and \(\mathbb P\) is the uncertainty law. The continuation value \(\mathcal V_{t+1}\), with \(V_{T+1}\equiv0\), is the expected optimal cost of the remaining stages given the outgoing state and the observed history. Exact evaluation is intractable in general: With \(B\) realizations at each uncertain stage there are \(B^{T-1}\) paths, and a grid with \(m\) values per state component has \(m^{n_x}\) points, with \(n_x\) the state dimension.</p>
+<p>An approximation of \(\mathcal V_{t+1}\) therefore becomes a term of the stage minimization, and its structure determines what that minimization is. It decides whether the term can be written with linear inequalities over continuous variables, which leaves the stage problem in the class of the operating model, whether it needs integer variables, or whether only local solutions are available.</p>
+<figure class="fig dg-figure">{{diagram:stage focus=value}}<figcaption><b>The continuation value enters the stage problem through the outgoing state.</b> Its representation is queried by the state decision at every stage, so its structure is a property of the decision problem as much as of the approximation.</figcaption></figure>
+</section>
+
+<section id="cuts"><h2><span class="num">02 · Cutting planes</span>Convexity makes a cut computed at one state valid at every state</h2>
+<p>Stochastic dual dynamic programming (<a href="#ref-pereira1991">Pereira and Pinto, 1991</a>) represents the continuation value under stagewise-independent uncertainty by a maximum of affine functions and solves, at each stage,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\min_{\mathbf x_t,\mathbf y_t,\vartheta}\quad
+&\underbrace{f(\mathbf x_t,\mathbf y_t)}_{\text{stage cost}}+\vartheta\\[0.4em]
+\text{subject to}\quad
+&\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf0,\\[0.4em]
+&h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf0,\\[0.4em]
+&\vartheta\ge\alpha_k+\boldsymbol\beta_k^\top\mathbf x_t,\qquad k=1,\dots,K,\\[0.4em]
+&\mathbf x_t\in\mathbb R^{n_x},\quad\mathbf y_t\in\mathbb R^{n_y},\quad\vartheta\in\mathbb R.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&\min_{\mathbf x_t,\mathbf y_t,\vartheta}\quad f(\mathbf x_t,\mathbf y_t)+\vartheta\\[0.4em]
+&\text{subject to}\\[0.4em]
+&\quad\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf0,\\[0.4em]
+&\quad h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf0,\\[0.4em]
+&\quad\vartheta\ge\alpha_k+\boldsymbol\beta_k^\top\mathbf x_t,\\[0.4em]
+&\qquad k=1,\dots,K,\\[0.4em]
+&\quad\mathbf x_t\in\mathbb R^{n_x},\quad\mathbf y_t\in\mathbb R^{n_y},\\[0.4em]
+&\quad\vartheta\in\mathbb R.
+\end{aligned}\]</div>
+</div>
+<p>Here \(\vartheta\) is the epigraph variable for the maximum of \(K\) cuts, with intercepts \(\alpha_k\) and slopes \(\boldsymbol\beta_k\).</p>
+<p>A cut is computed at a visited state \(\mathbf x^k\) by solving the next-stage problems with a copy of the incoming state fixed to \(\mathbf x^k\). With exact downstream values, jointly convex stage problems, affine state-fixing constraints, and strong duality, the multiplier \(\boldsymbol\mu_{t+1}\), signed as the sensitivity to the fixed state, is a subgradient of the next-stage value, and its probability-weighted average \(\boldsymbol\beta_k=\mathbb E_{t+1}[\boldsymbol\mu_{t+1}]\) is a subgradient of the continuation value at \(\mathbf x^k\). Convexity then turns local information into a global statement:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\mathcal V_{t+1}(\mathbf x)&\ge
+\underbrace{\mathcal V_{t+1}(\mathbf x^k)+\boldsymbol\beta_k^\top(\mathbf x-\mathbf x^k)}_{\text{supporting cut}},\qquad\forall\mathbf x,\\[0.4em]
+\boldsymbol\beta_k&\in\partial\mathcal V_{t+1}(\mathbf x^k).
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\mathcal V_{t+1}(\mathbf x)&\ge\mathcal V_{t+1}(\mathbf x^k)\\[0.4em]
+&\quad{}+\boldsymbol\beta_k^\top(\mathbf x-\mathbf x^k),\quad\forall\mathbf x,\\[0.4em]
+\boldsymbol\beta_k&\in\partial\mathcal V_{t+1}(\mathbf x^k).
+\end{aligned}\]</div>
+</div>
+<p>Here \(\partial\) denotes the convex subdifferential. In SDDP's backward pass, these solves use the current downstream cuts, and the resulting affine functions lower-bound the continuation value under the same convexity and duality assumptions. Solves at a sampled state improve the approximation across the state space, and each stage remains a convex program with its operating constraints. Under the standard sampling assumptions together with stagewise-independent uncertainty, the first-stage bound is nondecreasing as cuts accumulate and can be compared with the simulated cost of the policy (<a href="#ref-shapiro2009">Shapiro et al., 2009</a>; <a href="#ref-fullner2025">Füllner and Rebennack, 2025</a>).</p>
+<p>For nonconvex stages, the multipliers of a local optimum need not define a global supporting plane, and exact Lagrangian cuts need nonconvex subproblems solved to global optimality (<a href="#ref-zou2019">Zou et al., 2019</a>). Applications therefore take cuts from a convex relaxation or approximation and operate the detailed model with them; <a href="{{root}}research/network-simplifications/">Planning and Realization Mismatch</a> shows that neither a tight bound nor a tighter relaxation guarantees the better operated policy (<a href="#ref-brigatto2017">Brigatto et al., 2017</a>; <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>).</p>
+<p>The cutting-plane machinery needs a convex function from which to take cuts. It does not require that function to be the value of a convex model of the system, which leaves room for a convex function learned from the detailed model.</p>
+</section>
+
+<section id="representation"><h2><span class="num">03 · Representation</span>An input-convex network carries convexity without a convex model</h2>
+<p>An input-convex neural network (<a href="#ref-amos2017">Amos et al., 2017</a>) is convex in its input by construction. The architecture used here carries the input to every layer through skip connections,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\mathbf a^{l}&=\operatorname{ReLU}\!\Big(
+\underbrace{W^{l}\mathbf a^{l-1}}_{\text{convex}}
++\underbrace{U^{l}p+\mathbf d^{l}}_{\text{affine}}\Big),\\[0.4em]
+\mathbf a^{0}&=p,\qquad W^{l}\ge0,\qquad l=1,\dots,L.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\mathbf a^{l}&=\operatorname{ReLU}\!\Big(W^{l}\mathbf a^{l-1}\\[0.4em]
+&\quad{}+U^{l}p+\mathbf d^{l}\Big),\\[0.4em]
+\mathbf a^{0}&=p,\\[0.4em]
+W^{l}&\ge0,\qquad l=1,\dots,L.
+\end{aligned}\]</div>
+</div>
+<p>Here \(\mathbf a^{l}\) is the output of layer \(l\) of \(L\), \(W^{l}\) and \(U^{l}\) are weight matrices, \(\mathbf d^{l}\) is a bias vector, and \(p\) collects the supplied problem data. In a stage problem, \(p\) may contain incoming and outgoing states and the realized uncertainty; in the study below it contains nodal demand. The rectified linear unit is convex and nondecreasing, so a nonnegative combination of convex outputs of the previous layer remains convex. The skip weights \(U^{l}\) enter affinely and may take either sign, which permits decreasing slopes. A scalar output layer with the same sign restriction gives a convex piecewise-affine prediction \(\hat q(p)\). Training keeps \(W^{l}\) nonnegative by projected gradient updates.</p>
+<p>An unrestricted network is generally nonconvex in its input. Embedded in a decision problem, it is either queried as a gray-box function, which yields local solutions only, or, with rectified linear units, written as a mixed-integer program with a binary variable per unit (<a href="#ref-fischetti2018">Fischetti and Jo, 2018</a>; <a href="#ref-anderson2020">Anderson et al., 2020</a>). An input-convex network can be retained in two convex forms: the whole network through its matrix products and the epigraphs of its activations, exact without integer variables when the network value is minimized (<a href="#ref-liu2026">Liu et al., 2026</a>); or cuts generated at queried states,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\ell(\mathbf x)&=
+\underbrace{\widehat{\mathcal V}_{t+1}(\bar{\mathbf x})+\boldsymbol\beta^\top(\mathbf x-\bar{\mathbf x})}_{\text{network cut}}
+\le\widehat{\mathcal V}_{t+1}(\mathbf x),\qquad\forall\mathbf x,\\[0.4em]
+\boldsymbol\beta&\in\partial\widehat{\mathcal V}_{t+1}(\bar{\mathbf x}).
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\ell(\mathbf x)&=\widehat{\mathcal V}_{t+1}(\bar{\mathbf x})\\[0.4em]
+&\quad{}+\boldsymbol\beta^\top(\mathbf x-\bar{\mathbf x})\\[0.4em]
+&\le\widehat{\mathcal V}_{t+1}(\mathbf x),\quad\forall\mathbf x,\\[0.4em]
+\boldsymbol\beta&\in\partial\widehat{\mathcal V}_{t+1}(\bar{\mathbf x}).
+\end{aligned}\]</div>
+</div>
+<p>Here \(\bar{\mathbf x}\) is the queried state and \(\ell\) is its supporting affine cut, which enters the stage problem exactly as the cuts of Section 02. The subgradient, obtained by automatic differentiation, takes the place of the cut slope \(\boldsymbol\beta_k\). Which form solves faster depends on the application and on the size of the network. To serve as a continuation value, the network must be trained on costs that include every later stage.</p>
+<figure class="fig method-figure"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/value-functions--icnn-cuts-compact.svg"><img src="{{root}}assets/img/diagrams/value-functions--icnn-cuts.svg" alt="Dataset lane: solves of a detailed model produce sampled values. Training lane: an input-convex network is fitted to those values, and after each gradient step its hidden-to-hidden weights are projected onto the nonnegative orthant. Deployment lane: a stage problem that keeps its recourse constraints proposes a state x-bar; the trained network, evaluated there with automatic differentiation, gives a value and a subgradient that form a cut added to the stage problem." width="915.5" height="494.5"></picture></div><figcaption><b>Values of the detailed model train a convex network whose subgradients become cuts.</b> Its hidden-to-hidden weights are kept nonnegative. At decision time, the network value and an automatic-differentiation subgradient at the queried state form a cut in a stage problem that keeps its recourse constraints. The skip weights from the input, omitted from the drawing, are unrestricted. Architecture after Fig. 2 of Rosemberg et al. (2024).</figcaption></figure>
+
+<h3>What the cuts certify</h3>
+<p>Each cut is an exact support of the network, so it lies below \(\widehat{\mathcal V}_{t+1}\) at every state, and the maximum of any collection of cuts is a lower approximation of the network that tightens as cuts are added. That is the property the cutting-plane algorithm uses. The cuts carry no guaranteed bound on the cost of the detailed model when that cost is nonconvex: Wherever the detailed cost falls below the fitted function, a cut of the fit can exceed it. Convexity of the representation also does not make the stage problem convex; the retained operating constraints still decide that.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/value-functions-cuts-schematic-tall.svg"><img src="{{root}}assets/img/research/value-functions-cuts-schematic.svg" alt="Schematic with Convex fit and Unrestricted fit panels. The blue convex fit has three supporting cuts that stay below it; near a dip in the data-model cost, one cut exceeds that cost, shaded red. The orange unrestricted fit oscillates around the same cost curve; its tangent exceeds the fit elsewhere, shaded red." width="1009" height="366"></picture></div><figcaption><b>A cut bounds the function it was taken from.</b> Schematic, no data. In the “Convex fit” panel, every cut lies below the fit, but a cut can exceed the data-model cost where that cost dips below the fit. In the “Unrestricted fit” panel, a tangent can exceed the fit itself and need not provide a lower bound.</figcaption></figure>
+
+<h3>Error between samples</h3>
+<p>When the reference value is convex, sampled values and multipliers bound the error of a convex approximation between the samples. Consider a convex operating value \(q(p)\) with affine right-hand-side perturbations and a strong dual, for example \(q(p)=\min_{\mathbf y}\{\mathbf c^\top\mathbf y:A\mathbf y\ge p\}\), so that an optimal multiplier is a subgradient of \(q\). Let \(\{(p_i,\boldsymbol\mu_i,z_i)\}_{i=1}^N\) be sampled parameters, optimal multipliers, and values, \(P=\operatorname{conv}\{p_1,\dots,p_N\}\), and \(\Omega(p)=\{\boldsymbol\omega\ge0:\sum_i\omega_i=1,\ \sum_i\omega_ip_i=p\}\). The samples define a lower and an upper envelope,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+q^-(p)&=\max_{1\le i\le N}\Big\{\underbrace{z_i+\boldsymbol\mu_i^\top(p-p_i)}_{\text{supporting plane}}\Big\},\\[0.4em]
+q^+(p)&=\min_{\boldsymbol\omega\in\mathbb R^N}\ \underbrace{\sum_{i=1}^N\omega_i z_i}_{\text{average}}\\[0.4em]
+&\quad\text{subject to }\ \omega_i\ge0,\quad i=1,\dots,N,\\[0.4em]
+&\phantom{\quad\text{subject to }\ }\sum_{i=1}^N\omega_i=1,\\[0.4em]
+&\phantom{\quad\text{subject to }\ }\sum_{i=1}^N\omega_i p_i=p.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+q^-(p)&=\max_{1\le i\le N}\big\{z_i+\boldsymbol\mu_i^\top(p-p_i)\big\},\\[0.4em]
+q^+(p)&=\min_{\boldsymbol\omega\in\mathbb R^N}\sum_{i=1}^N\omega_i z_i\\[0.4em]
+&\quad\text{subject to}\\[0.4em]
+&\qquad\omega_i\ge0,\quad i=1,\dots,N,\\[0.4em]
+&\qquad\sum_{i=1}^N\omega_i=1,\\[0.4em]
+&\qquad\sum_{i=1}^N\omega_i p_i=p.
+\end{aligned}\]</div>
+</div>
+<p>The network envelopes \(\hat q^-,\hat q^+\) are built the same way from the network values \(\hat z_i=\hat q(p_i)\) and subgradients \(\hat{\boldsymbol\mu}_i\in\partial\hat q(p_i)\). If \(q\) and \(\hat q\) are convex and finite on \(P\), then for every \(p\in P\)</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[|\hat q(p)-q(p)|\le\max\Big\{
+\underbrace{\hat q^+(p)-q^-(p)}_{\text{overestimation}},\quad
+\underbrace{q^+(p)-\hat q^-(p)}_{\text{underestimation}}\Big\}.\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&|\hat q(p)-q(p)|\\[0.4em]
+&\quad\le\max\left\{\begin{aligned}&\hat q^+(p)-q^-(p),\\[0.4em]&q^+(p)-\hat q^-(p)\end{aligned}\right\}.
+\end{aligned}\]</div>
+</div>
+<p>This follows because supporting subgradients place each function above its lower envelope and Jensen's inequality places it below its upper envelope. If, in addition, the network matches the values and shares a supporting subgradient at every sample, \(\hat q(p_i)=z_i=q(p_i)\) and \(\boldsymbol\mu_i\in\partial\hat q(p_i)\cap\partial q(p_i)\), then \(|\hat q(p)-q(p)|\le\max_i\lVert\boldsymbol\mu_i\rVert_*\operatorname{diam}(P)\) on \(P\), with \(\lVert\cdot\rVert_*\) the dual of the norm that defines \(\operatorname{diam}(P)\). The bound is computed from samples alone, tightens on the convex hull of any subset of the samples, and shows how matching the multipliers of the reference model, in addition to its values, controls the error between samples. It extends the guarantee of <a href="#ref-zhang2022">Zhang et al. (2022)</a> to general input-convex networks (paper Theorems 1 and 2; proposal Theorem 3.1).</p>
+<p>The statement has two boundaries. It requires a convex reference: The DC and SOC operating values are convex in demand on their feasible domains, but the AC value is not, so neither envelope is guaranteed to enclose it. It holds only on \(P\): With hundreds of demand coordinates, the hull of the training inputs need not contain most test points. In the IEEE-300 study, 22% of the test instances lay inside it with 400 or 6,500 training instances and 43% with 20,000, and the input-convex and unrestricted networks performed alike, with similar mean errors inside and outside the hull and worst errors up to about twice as large outside it at 20,000 training instances (paper Table 3). Yet many nonconvex problems have values that are convex over regions of their parameter space, or nearly convex overall, which makes such generalization statements useful beyond these boundaries.</p>
+</section>
+
+<section id="study"><h2><span class="num">04 · Operating-value study</span>A convex representation matches an unrestricted network on the values of a nonconvex model</h2>
+<p>The completed study tests whether convexity costs accuracy when the network learns the value of a large constrained operating problem. Each value describes one operating period of an optimal power flow and plays the role of the stage recourse value \(q_t\). Three formulations of increasing fidelity are learned: the DC approximation, a linear program; the SOC relaxation (<a href="#ref-jabr2006">Jabr, 2006</a>), convex and nonlinear; and the AC model, nonconvex, on which the systems are operated. The input is active and reactive nodal demand; network data, limits, and generation costs are fixed.</p>
+<p>The systems are four PGLib-OPF cases (<a href="#ref-pglib2019">Babaeinejadsarookolaee et al., 2019</a>): IEEE-300, PEGASE-1k, PEGASE-2k, and RTE-6k, with 300, 1,354, 2,869, and 6,468 buses. For each, 50,000 instances scale nominal demand by a uniform system-wide factor and independent bus-level log-normal noise with mean one and standard deviation 5%, over a range chosen to avoid AC infeasibility; infeasible instances are excluded and the remaining instances are split 40%, 30%, and 30% into training, validation, and test sets. The input-convex and unrestricted networks share one architecture and differ only in the sign restriction. Error is \(|\hat z-z^\ast|/|z^\ast|\) against the solver value \(z^\ast\), averaged geometrically.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/value-functions-ac-errors-tall.svg"><img src="{{root}}assets/img/research/value-functions-ac-errors.svg" alt="Dot plot of AC-OPF value errors in percent on a log scale for four systems. Mean errors: input-convex network 0.39, 0.33, 0.24, 0.25; unrestricted network 0.39, 0.68, 0.27, 0.33; SOC relaxation value 1.98, 1.32, 0.80, 0.33; DC approximation value 7.35, 2.91, 3.02, 3.05. Worst errors: input-convex 15.81, 2.37, 8.59, 2.71; unrestricted 14.56, 1.95, 8.89, 3.08; SOC 16.47, 1.89, 9.13, 0.36; DC 21.95, 3.49, 8.88, 3.67." width="1010" height="513"></picture></div><figcaption><b>On average, a convex network learned from AC values matches the unrestricted network and is closer to the AC value than the SOC and DC values.</b> Absolute errors relative to the AC-OPF value on test instances (Rosemberg et al., 2024, Table 2, AC rows), shown as geometric means and worst cases. The worst-case panel does not show the same advantage: SOC has lower worst error than the convex network on PEGASE-1k and RTE-6k.</figcaption></figure>
+<p>On the AC values, the two networks tie on IEEE-300 (0.39%), and the input-convex network is lower on the other three systems. Its mean error is also below that of the SOC relaxation's optimal value on all four systems and well below the DC approximation's (2.91% to 7.35%). Across the three formulations, its mean errors stay below 0.5% except on the SOC model of PEGASE-2k, where training did not converge (1.03%). The relaxation keeps an advantage the network lacks: Its value is a valid lower bound on the AC value.</p>
+<p>Worst errors are much larger and are not uniformly improved by convexity. On IEEE-300 both networks exceed 14%, about 40 times their mean, and on the other systems the worst errors range from 1.95% to 8.89%. The paper attributes the accuracy on AC values to their approximate convexity: Along segments between extreme points of the sampled demand set on IEEE-300, the AC operating cost is mostly convex in the load, with isolated departures (paper Fig. 4), consistent with the tightness of convex relaxations for many systems (<a href="#ref-molzahn2019">Molzahn and Hiskens, 2019</a>). Training on a tail risk measure of the prediction error, such as its conditional value at risk, instead of its empirical mean may reduce the worst errors.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/value-functions-rte6k-errors-tall.png"><img src="{{root}}assets/img/research/value-functions-rte6k-errors.png" alt="Two paper panels of signed AC-OPF value errors on RTE-6k: Error Distribution – AC and Error vs Total Load – AC. ICNN is blue; the unrestricted network, labeled NN, is orange. ICNN errors are more concentrated in the distribution panel. In the total-load panel, both networks have larger errors near the ends of the demand range." width="1200" height="400"></picture></div><figcaption><b>Error grows at the ends of the demand range.</b> Signed AC-OPF value error \((\hat z-z^\ast)/|z^\ast|\) on RTE-6k, in the “Error Distribution – AC” and “Error vs Total Load – AC” panels; positive values overestimate. ICNN is blue; the unrestricted network (NN) is orange. From Rosemberg et al. (2024), Fig. 5(c). The input-convex errors are more concentrated, but for both networks accuracy depends on how densely the training data cover the operating region.</figcaption></figure>
+</section>
+
+<section id="policies"><h2><span class="num">05 · Convex critic</span>A learned continuation value inside policy training</h2>
+<p>The windowed construction in <a href="{{root}}research/decision-rules/#continuation">Policies for Multistage Decisions</a> trains a state policy over windows of \(H\) stages and closes each window with a critic \(\widehat{\mathcal V}^{\pi}\) of the policy's remaining cost (<a href="#ref-konda1999">Konda and Tsitsiklis, 1999</a>); the construction and its trade-off between update cost and critic bias are developed there.</p>
+<p>The convex representation of Section 03 is a natural critic. Its targets then come from policy evaluation or temporal-difference updates rather than from single-period operating values, and its subgradients play the role of \(\nabla\mathcal V_{t+1}\). Convexity is required only when the critic is also queried inside a convex decision problem; within policy training it acts as a structural prior on the continuation value. When the continuation value is instead computed on a simplified planning model and used to operate a detailed one, the question becomes the mismatch that substitution creates, treated in <a href="{{root}}research/network-simplifications/">Planning and Realization Mismatch</a>.</p>
+</section>
+
+<section id="software"><h2>Software</h2>
+<p>LearningToOptimize generates operating-value datasets from parametric JuMP models, trains input-convex networks with nonnegative weights, and tests whether a query lies in the hull of the training inputs.</p>
+{{software:project=value-functions}}
+</section>
+
+<section id="references"><h2>References</h2>
+<ol class="refs">
+<li id="ref-amos2017">B. Amos, L. Xu, J. Z. Kolter. Input convex neural networks. <i>International Conference on Machine Learning</i>, PMLR, pp. 146–155, 2017.</li>
+<li id="ref-anderson2020">R. Anderson, J. Huchette, W. Ma, C. Tjandraatmadja, J. P. Vielma. Strong mixed-integer programming formulations for trained neural networks. <i>Mathematical Programming</i> 183:3–39, 2020.</li>
+<li id="ref-pglib2019">S. Babaeinejadsarookolaee, A. Birchfield, R. D. Christie, C. Coffrin, C. DeMarco, R. Diao, M. Ferris, S. Fliscounakis, S. Greene, R. Huang, et al. The power grid library for benchmarking AC optimal power flow algorithms. Preprint, arXiv:1908.02788, 2019.</li>
+<li id="ref-brigatto2017">A. Brigatto, A. Street, D. M. Valladão. Assessing the cost of time-inconsistent operation policies in hydrothermal power systems. <i>IEEE Transactions on Power Systems</i> 32(6):4541–4550, 2017.</li>
+<li id="ref-fischetti2018">M. Fischetti, J. Jo. Deep neural networks and mixed integer linear optimization. <i>Constraints</i> 23:296–309, 2018.</li>
+<li id="ref-fullner2025">C. Füllner, S. Rebennack. Stochastic dual dynamic programming and its variants: A review. <i>SIAM Review</i> 67(3):415–539, 2025.</li>
+<li id="ref-jabr2006">R. A. Jabr. Radial distribution load flow using conic programming. <i>IEEE Transactions on Power Systems</i> 21(3):1458–1459, 2006.</li>
+<li id="ref-konda1999">V. Konda, J. Tsitsiklis. Actor-critic algorithms. <i>Advances in Neural Information Processing Systems</i> 12, 1999.</li>
+<li id="ref-liu2026">Y. Liu, F. Oliveira, J. Kronqvist. ICNN-enhanced 2SP: Leveraging input convex neural networks for solving two-stage stochastic programming. <i>EURO Journal on Computational Optimization</i> 14:100141, 2026.</li>
+<li id="ref-molzahn2019">D. K. Molzahn, I. A. Hiskens. A survey of relaxations and approximations of the power flow equations. <i>Foundations and Trends in Electric Energy Systems</i> 4(1–2):1–221, 2019.</li>
+<li id="ref-pereira1991">M. V. F. Pereira, L. M. V. G. Pinto. Multi-stage stochastic optimization applied to energy planning. <i>Mathematical Programming</i> 52:359–375, 1991.</li>
+<li id="ref-shapiro2009">A. Shapiro, D. Dentcheva, A. Ruszczyński. <i>Lectures on Stochastic Programming: Modeling and Theory</i>. SIAM, 2009.</li>
+<li id="ref-zhang2022">L. Zhang, Y. Chen, B. Zhang. A convex neural network solver for DCOPF with generalization guarantees. <i>IEEE Transactions on Control of Network Systems</i> 9(2):719–730, 2022.</li>
+<li id="ref-zou2019">J. Zou, S. Ahmed, X. A. Sun. Stochastic dual dynamic integer programming. <i>Mathematical Programming</i> 175(1–2):461–502, 2019.</li>
+<li id="ref-rosemberg2024">A. W. Rosemberg, M. Tanneau, B. Fanzeres, J. Dias Garcia, P. Van Hentenryck. Learning optimal power flow value functions with input-convex neural networks. <i>Electric Power Systems Research</i> 235:110643, 2024.</li>
+<li id="ref-rosemberg2022">A. W. Rosemberg, A. Street, J. Dias Garcia, D. M. Valladão, T. Silva, O. Dowson. Assessing the cost of network simplifications in long-term hydrothermal dispatch planning models. <i>IEEE Transactions on Sustainable Energy</i> 13(1):196–206, 2022.</li>
+</ol>
+</section>
+{{projects:nav=value-functions}}
+<section id="papers"><h2>Publication</h2>
+{{pubs:project=value-functions}}
+</section>
+</article></div>

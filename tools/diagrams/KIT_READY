@@ -1,0 +1,12 @@
+Kit ready 2026-11-01. Gates (python3 tools/diagrams/gate.py OUTDIR; draw.io 32.6.1 export vs the paper PDF,
+compare -fuzz 10% AE / RMSE, same page size in all three):
+
+A  Sobolev  (diagram_sobolev.pdf, source embedded)   200 dpi AE 37 px (0.007 %)  RMSE 0.0045 | 600 dpi AE 324 (0.007 %)  RMSE 0.0059
+B  DC2AC    (diagram.pdf, source embedded)           200 dpi AE 179 px (0.034 %) RMSE 0.0096 | 600 dpi AE 1408 (0.030 %) RMSE 0.0124
+   (content scale 0.19 % smaller in draw.io 32's PDF; rebuild rasterized at 200.38 / 601.14 dpi to compare)
+C  TS-DDR   (diagram_qualify_tsddr.pdf, rebuilt by measurement)
+                                                    200 dpi AE 5714 px (0.71 %) RMSE 0.035  | 600 dpi AE 36955 (0.51 %) RMSE 0.046
+   all 484 shape outlines within 0.05 px; all 165 glyphs within 0.68 px (mean 0.23 px)
+
+Residuals: MathJax 4 (draw.io 32) vs MathJax 3 accent/superscript placement (<= 0.5 px at 12 px type) and,
+for C, whole-pixel snapping of HTML label positions. Overlays: scratchpad/diagram-gate/final/*-overlay-*.png

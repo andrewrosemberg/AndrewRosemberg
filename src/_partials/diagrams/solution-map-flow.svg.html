@@ -1,0 +1,34 @@
+<svg class="method-diagram" viewBox="0 0 1120 660" role="img" aria-labelledby="proxy-title proxy-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="proxy-title">Value-only training of a selected optimization proxy</title>
+  <desc id="proxy-desc">An offline constrained solve maps sampled contexts to selected solutions. During training, a neural proxy maps the same contexts to predicted decisions, and only prediction value error is minimized. No automatic differentiation or first-order label appears in the construction. At deployment the proxy maps a new context to a decision.</desc>
+  <style>
+    .method-diagram{width:100%;height:auto;background:#fff;color:#1f2730}.outline{fill:none;stroke:#202a33;stroke-width:2}.divider{fill:none;stroke:#202a33;stroke-width:1.7;stroke-dasharray:8 7}.arrow{fill:none;stroke:#202a33;stroke-width:2}.context{fill:#f9e4c9;stroke:#d79a00;stroke-width:2}.network{fill:#dfeafa;stroke:#5d88c6;stroke-width:2}.output{fill:#dfeafa;stroke:#5d88c6;stroke-width:2}.reference{fill:#fae4c6;stroke:#d79a00;stroke-width:2}.loss{fill:#f8d9d4;stroke:#c65a52;stroke-width:2}.deploy{fill:#eee8f5;stroke:#7551a7;stroke-width:2}.text{font:500 17px Inter,Arial,sans-serif;fill:#202a33}.small{font:600 13px Inter,Arial,sans-serif;letter-spacing:.1em;fill:#4d5862}.math{font:italic 29px Georgia,serif;fill:#202a33}.sub{font:italic 20px Georgia,serif;fill:#202a33}.note{font:500 15px Inter,Arial,sans-serif;fill:#4d5862}.node{fill:#dfeafa;stroke:#5d88c6;stroke-width:1.6}.edge{stroke:#9cb7dc;stroke-width:1.1}.brace{fill:none;stroke:#202a33;stroke-width:2}
+  </style>
+  <defs><marker id="direct-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#202a33"/></marker></defs>
+  <rect x="18" y="18" width="1084" height="624" class="outline"/>
+  <text x="48" y="62" class="math" style="font-size:34px">Training</text>
+  <path d="M20 372H624" class="divider"/>
+  <text x="48" y="418" class="math" style="font-size:34px">Offline</text>
+  <ellipse cx="152" cy="178" rx="64" ry="20" class="context"/><path d="M88 178V282C88 207 216 207 216 282V178" class="context"/><ellipse cx="152" cy="282" rx="64" ry="20" class="context"/><text x="152" y="235" text-anchor="middle" class="math">pᵢ</text>
+  <path d="M216 229H278" class="arrow" marker-end="url(#direct-arrow)"/>
+  <g class="edge"><path d="M300 151L354 124M300 151L354 160M300 151L354 196M300 185L354 124M300 185L354 160M300 185L354 196M300 219L354 160M300 219L354 196M300 219L354 232M300 253L354 196M300 253L354 232M300 253L354 268M379 124L432 151M379 124L432 185M379 160L432 151M379 160L432 185M379 160L432 219M379 196L432 151M379 196L432 185M379 196L432 219M379 232L432 185M379 232L432 219M379 232L432 253M379 268L432 219M379 268L432 253M457 151L510 172M457 185L510 172M457 185L510 210M457 219L510 210M457 253L510 210"/></g>
+  <g class="node"><circle cx="300" cy="151" r="12"/><circle cx="300" cy="185" r="12"/><circle cx="300" cy="219" r="12"/><circle cx="300" cy="253" r="12"/><circle cx="366" cy="124" r="12"/><circle cx="366" cy="160" r="12"/><circle cx="366" cy="196" r="12"/><circle cx="366" cy="232" r="12"/><circle cx="366" cy="268" r="12"/><circle cx="444" cy="151" r="12"/><circle cx="444" cy="185" r="12"/><circle cx="444" cy="219" r="12"/><circle cx="444" cy="253" r="12"/><circle cx="522" cy="172" r="12"/><circle cx="522" cy="210" r="12"/></g>
+  <path d="M282 293Q282 313 302 313H504Q524 313 524 293" class="brace"/><text x="403" y="345" text-anchor="middle" class="math">ĝθ</text>
+  <path d="M534 191H603" class="arrow" marker-end="url(#direct-arrow)"/>
+  <rect x="613" y="149" width="104" height="84" class="output"/><text x="665" y="201" text-anchor="middle" class="math">x̃</text>
+  <path d="M665 233V288" class="arrow" marker-end="url(#direct-arrow)"/>
+  <rect x="553" y="300" width="224" height="56" rx="10" class="loss"/><text x="665" y="335" text-anchor="middle" class="math" style="font-size:24px">ℓᵥ = ‖x̃ − x⋆‖²</text>
+  <path d="M152 302V476" class="arrow" marker-end="url(#direct-arrow)"/>
+  <rect x="58" y="493" width="220" height="107" class="reference"/><text x="168" y="535" text-anchor="middle" class="math" style="font-size:25px">min f(x;pᵢ)</text><text x="168" y="570" text-anchor="middle" class="math" style="font-size:25px">s.t. c(x;pᵢ)=0</text><path d="M58 608Q58 621 74 621H262Q278 621 278 608" class="brace"/><text x="168" y="638" text-anchor="middle" class="sub">g</text>
+  <path d="M278 547H361" class="arrow" marker-end="url(#direct-arrow)"/>
+  <ellipse cx="423" cy="501" rx="55" ry="18" class="context"/><path d="M368 501V570C368 606 478 606 478 570V501" class="context"/><ellipse cx="423" cy="570" rx="55" ry="18" class="context"/><text x="423" y="545" text-anchor="middle" class="math">s</text>
+  <path d="M478 547H530" class="arrow" marker-end="url(#direct-arrow)"/>
+  <rect x="542" y="514" width="88" height="66" class="reference"/><text x="586" y="556" text-anchor="middle" class="math">x⋆</text>
+  <path d="M586 514V382H646V356" class="arrow" marker-end="url(#direct-arrow)"/>
+  <ellipse cx="780" cy="202" rx="43" ry="14" class="context"/><path d="M737 202V254C737 278 823 278 823 254V202" class="context"/><ellipse cx="780" cy="254" rx="43" ry="14" class="context"/><text x="780" y="235" text-anchor="middle" class="sub">p</text>
+  <path d="M823 228H850" class="arrow" marker-end="url(#direct-arrow)"/>
+  <g class="edge"><path d="M868 192L906 175M868 192L906 204M868 222L906 204M868 222L906 233M868 252L906 233M868 252L906 262M924 175L962 192M924 204L962 192M924 204L962 222M924 233L962 222M924 233L962 252M924 262L962 252M980 192L1018 207M980 222L1018 207M980 222L1018 237M980 252L1018 237"/></g>
+  <g class="node"><circle cx="868" cy="192" r="10"/><circle cx="868" cy="222" r="10"/><circle cx="868" cy="252" r="10"/><circle cx="915" cy="175" r="10"/><circle cx="915" cy="204" r="10"/><circle cx="915" cy="233" r="10"/><circle cx="915" cy="262" r="10"/><circle cx="971" cy="192" r="10"/><circle cx="971" cy="222" r="10"/><circle cx="971" cy="252" r="10"/><circle cx="1027" cy="207" r="10"/><circle cx="1027" cy="237" r="10"/></g>
+  <path d="M850 279Q850 297 868 297H1027Q1045 297 1045 279" class="brace"/><text x="947" y="326" text-anchor="middle" class="math" style="font-size:24px">ĝθ</text>
+  <path d="M1040 222H1057" class="arrow" marker-end="url(#direct-arrow)"/><rect x="1058" y="192" width="30" height="58" class="output"/><text x="1073" y="228" text-anchor="middle" class="sub">ŷ</text>
+</svg>

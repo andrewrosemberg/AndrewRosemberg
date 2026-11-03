@@ -1,0 +1,77 @@
+<!--
+title: HydroPowerModels.jl
+description: A Julia package for multistage hydrothermal planning by stochastic dual dynamic programming over any PowerModels.jl network formulation, with separate formulations for computing cuts and for operating the system.
+nav: software
+math: true
+-->
+<header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="{{root}}software/">Software</a> / HydroPowerModels.jl</p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Multistage planning · SDDP · Network formulations</p>
+  <h1>HydroPowerModels.jl</h1>
+  <p class="lede">Long-horizon hydrothermal planning is solved with stochastic dual dynamic programming, which needs convex stage problems, while the network that is operated is not convex. HydroPowerModels.jl builds the multistage model from network and reservoir data with any PowerModels.jl formulation, and lets the formulation that computes the cuts differ from the formulation that is operated, so the cost of a simplification is measured on the system it simplifies.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong> · Author, with Alexandre&nbsp;Street, Joaquim&nbsp;Dias&nbsp;Garcia, Thuener&nbsp;Silva, Davi&nbsp;M.&nbsp;Valladão, Oscar&nbsp;Dowson</p>
+  <div class="btn-row"><a class="btn primary" href="https://github.com/andrewrosemberg/HydroPowerModels.jl">GitHub ↗</a><a class="btn" href="https://andrewrosemberg.github.io/HydroPowerModels.jl/latest/">Documentation ↗</a><img class="stars" src="https://img.shields.io/github/stars/andrewrosemberg/HydroPowerModels.jl?style=social" alt="GitHub stars for HydroPowerModels.jl" style="height:20px;width:auto;align-self:center"></div>
+</header>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#design">Design</a></li><li><a href="#example">Example</a></li><li><a href="#research">Research</a></li><li><a href="#citation">Citation</a></li></ol></nav><article class="proj-body">
+
+<section id="design"><h2><span class="num">01 · Design</span>The network formulation is an argument, twice</h2>
+
+<h3>Any network formulation in one multistage model</h3>
+<p>The package builds an SDDP.jl policy graph whose stage problems are instantiated by PowerModels.jl inside each subproblem, with the network formulation and the problem builder passed as arguments (<code>model_constructor_grid</code>, <code>post_method</code>). The hydro layer is written once on top of whatever network PowerModels returns: reservoir volumes with bounds and violation penalties, turbined outflow and spillage along cascades, sampled inflows, hydro generation tied to the network's generator variables, and load shedding at a deficit cost. The formulations are those of PowerModels.jl, from polar AC power flow and its semidefinite, second-order-cone and quadratic-convex relaxations to the DC approximation, with or without losses, and the network-flow model.</p>
+<p>A study of network models then becomes a sweep over one argument: The data, the inflow scenarios, the hydro constraints and the SDDP configuration stay fixed while only the network changes. The policy graph and the network builder are themselves arguments (<code>build_graph</code>, <code>build_opf_model</code>), so discounting, cyclic graphs or a custom grid model enter the same way.</p>
+<figure class="fig inset"><div class="frame"><img src="{{root}}assets/img/software/relaxation-hierarchy.svg" alt="Nested regions: a copper plate region contains a network-flow region, which contains an SOC relaxation, which contains an SDP relaxation, which contains the nonconvex AC feasible set." width="560" height="300"></div><figcaption><b>Network models ordered by their feasible sets.</b> The AC power-flow set lies inside its semidefinite and second-order-cone relaxations, which lie inside the network-flow and copper-plate models. Approximations such as DC power flow sit outside this order. Any of the PowerModels formulations can be the planning model and any can be the operating model. Schematic.</figcaption></figure>
+
+<h3>Cuts on one formulation, operation on another</h3>
+<p>The planning and operating formulations, and their solvers, are separate parameters: <code>model_constructor_grid_backward</code> and <code>model_constructor_grid_forward</code>, <code>optimizer_backward</code> and <code>optimizer_forward</code>. When they differ, the package builds two policy graphs over the same data. Training runs SDDP with the backward pass on the planning graph, where the cuts are computed, and the forward pass on the operating graph, where the visited states are generated; after each iteration the cuts are copied to the operating graph. Simulation operates the operating graph with those cuts. In the notation of <a href="{{root}}research/network-simplifications/">Planning and Realization Mismatch</a>, each operated stage solves</p>
+<div class="eq">\[\begin{gathered}\min_{\mathbf x_t,\mathbf y_t}\ f(\mathbf x_t,\mathbf y_t)+\widehat{\mathcal V}_{t+1}(\mathbf x_t)\\ \text{s.t.}\quad\mathbf y_t\in\mathcal Y_t^{\mathrm{op}}(\mathbf x_{t-1},\mathbf x_t;w_t),\end{gathered}\]</div>
+<p>with the cuts of \(\widehat{\mathcal V}_{t+1}\) computed on \(\mathcal Y^{\mathrm{plan}}\) at the states that operation visits.</p>
+<p>The quality of a simplified planning model is the cost it induces on the system that is operated. Measuring that cost requires exactly this pairing, and making it a parameter turns the assessment of any planning model against any operating model into one run.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/network-simplifications-policies-tall.svg"><img src="{{root}}assets/img/research/network-simplifications-policies.svg" alt="For each planning network model on a 3-bus loop and a 28-bus system, an open marker for the expected cost under the planning model and a filled marker for the expected cost when the same cuts are operated under AC power flow. The planned costs follow the inclusion order of the relaxations; the operated costs do not." width="1003" height="392"></picture></div><figcaption><b>Planned and operated cost of the policies induced by each planning model, computed with the package.</b> Open marker: expected cost under the planning model; filled marker: expected cost when the same cuts operate the system under AC power flow. Data: Rosemberg et al. (2022), Tables I and II, as on <a href="{{root}}research/network-simplifications/#study">Planning and Realization Mismatch</a>. The order of the planned costs does not survive operation under AC.</figcaption></figure>
+
+<h3>A baseline for learned policies</h3>
+<p>The same pairing is the stochastic dual dynamic programming baseline against which <a href="{{root}}research/decision-rules/">Policies for Multistage Decisions</a> compares trained policies: cuts computed on the second-order-cone relaxation or on the DC approximation, with forward passes and evaluation under AC power flow. The hydro case of <a href="{{root}}software/decisionrules/">DecisionRules.jl</a> reads the package's input format, a PowerModels network file, a reservoir file and an inflow table, so the learned policy and SDDP see identical data.</p>
+
+<h3>Solutions in PowerModels' terms</h3>
+<p>Inputs are a PowerModels network file and a reservoir file, validated against JSON schemas. Each simulated stage returns the PowerModels solution, with generation, flows, voltages and nodal multipliers, together with the reservoir trajectories, so prices and flows are compared across formulations directly. A statistical stopping rule, <code>SimulationStalling</code>, ends training when a t-test cannot distinguish the simulated costs of successive policies.</p>
+</section>
+
+<section id="example"><h2><span class="num">02 · Example</span>Plan on DC power flow, operate under AC</h2>
+<p>The example below follows the package's three-bus inconsistency example: cuts are computed on the DC approximation with a linear solver, while forward passes and the final simulation run the polar AC model with a nonlinear solver.</p>
+<div class="code"><pre><code><span class="k">using</span> HydroPowerModels, HiGHS, Ipopt
+
+data = HydroPowerModels.parse_folder(<span class="s">"testcases/case3"</span>)   <span class="c"># PowerModels.json, hydro.json, inflows.csv</span>
+
+params = create_param(;
+    stages = 12,
+    model_constructor_grid = DCPPowerModel,           <span class="c"># planning: computes the cuts</span>
+    model_constructor_grid_forward = ACPPowerModel,   <span class="c"># operation: visits states, realizes costs</span>
+    post_method = PowerModels.build_opf,
+    optimizer = HiGHS.Optimizer,
+    optimizer_forward = optimizer_with_attributes(Ipopt.Optimizer, <span class="s">"tol"</span> =&gt; 1e-6),
+    stage_hours = 24 * 30,
+)
+
+m = hydro_thermal_operation(data, params)
+HydroPowerModels.train(m; iteration_limit = 100)
+results = HydroPowerModels.simulate(m, 100)              <span class="c"># 100 scenarios operated under AC</span>
+
+results[:simulations][1][1][:objective]                  <span class="c"># stage-1 cost of the first scenario</span></code></pre></div>
+<p style="margin-top:18px">Dropping the forward arguments plans and operates on the same model. Changing <code>model_constructor_grid</code> to another formulation, such as <code>SOCWRPowerModel</code> with a conic solver, while keeping the AC forward model, gives the next point of the comparison.</p>
+</section>
+
+<section id="research"><h2><span class="num">03 · Research</span>Where the package carries the theory</h2>
+<ul>
+<li><a href="{{root}}research/network-simplifications/"><b>Planning and Realization Mismatch</b></a>. The comparison of planning network models under AC operation is a sweep over the planning formulation with the operating formulation held at AC power flow.</li>
+<li><a href="{{root}}research/decision-rules/"><b>Policies for Multistage Decisions</b></a>. The SDDP baselines of the hydrothermal comparison compute cuts on the conic relaxation or the DC approximation and operate under AC power flow, the paired configuration of this package.</li>
+</ul>
+</section>
+
+<section id="citation"><h2><span class="num">04 · Citation</span>How to cite</h2>
+<p>The package was developed as part of the author's master's thesis. Its repository asks users to cite the package paper:</p>
+{{bib:rosemberg2019hydropowermodels}}
+<p style="margin-top:18px">For the assessment of planning network models under AC operation:</p>
+{{bib:rosemberg2021assessing}}
+</section>
+
+</article></div>

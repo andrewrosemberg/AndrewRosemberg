@@ -1,0 +1,391 @@
+<!--
+title: Policies for Multistage Decisions
+description: Policies that prescribe the next state of a constrained system while the operating model realizes it, trained as a two-stage stochastic program with gradients from target multipliers.
+nav: research
+math: true
+image: assets/img/thumbs/decision-rules.jpg
+-->
+<header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="{{root}}research/">Research</a> / <a href="{{root}}research/#policies">Policies for Multistage Decisions</a></p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Multistage stochastic programs · State targets · Dual gradients</p>
+  <h1>Policies for Multistage Decisions</h1>
+  <p class="lede">A decision made now changes the state from which later decisions are made. Its cost is incurred along a trajectory, under dynamics and operating limits that must hold at every step as uncertainty is revealed. Learning a policy is then a problem of credit assignment under hard constraints. Because the state contains every quantity that links the present to the future, each stage separates into choosing where the system goes next and computing the actions that take it there. Reinforcement learning, model-based control and stochastic programming divide these computations differently, and the division fixes what must be approximated and the signal that trains it.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, Alexandre&nbsp;Street, Davi&nbsp;M.&nbsp;Valladão, Russell&nbsp;Bent, Pascal&nbsp;Van&nbsp;Hentenryck</p>
+</header>
+{{scene:decision-rules}}
+
+<nav class="topic-map wrap" aria-label="Policies guide"><p>Argument</p><ol><li><a href="#system"><small>01 · Sequential system</small><span>State, recourse, and future cost</span></a></li><li><a href="#targets"><small>02 · State-target policies</small><span>Prescribe the transition and retain its realization</span></a></li><li><a href="#evaluation"><small>03 · Training</small><span>Two-stage equivalence and the dual gradient</span></a></li><li><a href="#realization"><small>04 · Exact realization</small><span>Reachable targets separate the stages</span></a></li><li><a href="#hydro"><small>05 · Nearly convex network</small><span>Comparison with SDDP and model-free agents</span></a></li><li><a href="#battery"><small>06 · No accurate surrogate</small><span>Training without an accurate convex surrogate</span></a></li><li><a href="#implicit"><small>07 · Implicit dynamics</small><span>Penalized and causal targets</span></a></li><li><a href="#continuation"><small>08 · Long horizons</small><span>Windows closed by a learned value</span></a></li><li><a href="#scope"><small>09 · Scope</small><span>Limits, and what relaxes them</span></a></li><li><a href="#software"><small>10 · Software</small><span>DecisionRules.jl and HydroPowerModels.jl</span></a></li></ol></nav>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#system">Sequential system</a></li><li><a href="#targets">State-target policies</a></li><li><a href="#evaluation">Training</a></li><li><a href="#realization">Exact realization</a></li><li><a href="#hydro">Nearly convex network</a></li><li><a href="#battery">No accurate surrogate</a></li><li><a href="#implicit">Implicit dynamics</a></li><li><a href="#continuation">Long horizons</a></li><li><a href="#scope">Scope</a></li><li><a href="#software">Software</a></li></ol></nav><article class="proj-body">
+
+<section id="system"><h2><span class="num">01 · Sequential system</span>State, recourse, and future cost are coupled at every stage</h2>
+<p>Decisions made over time are coupled by the state carried from one stage to the next stage. At stage \(t\), the decision maker observes the incoming state \(\mathbf x_{t-1}\) and the realization \(w_t\), then selects the outgoing state \(\mathbf x_t\) and recourse decisions \(\mathbf y_t\). The state collects the observable quantities that couple consecutive stages, such as stored energy, the configuration of a mechanism, or the output of a ramp-limited unit. With stage cost \(f(\mathbf x_t,\mathbf y_t)\), the multistage stochastic program is</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{aligned}
+&\min_{(\mathbf x_1,\mathbf y_1)\in\mathcal X_1}\bigg\{f_1+\mathbb E_2\bigg[\min_{(\mathbf x_2,\mathbf y_2)\in\mathcal X_2}\Big\{f_2+\mathbb E_3\Big[\cdots+\mathbb E_T\Big[\min_{(\mathbf x_T,\mathbf y_T)\in\mathcal X_T}f_T\Big]\Big]\Big\}\bigg]\bigg\},\\[0.4em]
+&\mathcal X_t=\big\{(\mathbf x_t,\mathbf y_t):\ \mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\ \ h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0\big\},\qquad t=1,\dots,T.
+\end{aligned}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+&\min_{(\mathbf x_1,\mathbf y_1)\in\mathcal X_1}\bigg\{f_1+\mathbb E_2\bigg[\min_{(\mathbf x_2,\mathbf y_2)\in\mathcal X_2}\Big\{f_2\\[0.4em]
+&\qquad+\mathbb E_3\Big[\cdots+\mathbb E_T\Big[\min_{(\mathbf x_T,\mathbf y_T)\in\mathcal X_T}f_T\Big]\Big]\Big\}\bigg]\bigg\},\\[0.4em]
+&\mathcal X_t=\big\{(\mathbf x_t,\mathbf y_t):\\[0.4em]
+&\qquad\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+&\qquad h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0\big\},\qquad t=1,\dots,T.
+\end{aligned}
+\]</div>
+</div>
+<p>Here \(f_t=f(\mathbf x_t,\mathbf y_t)\), \(\mathcal X_t\) is the feasible state–recourse pair set at the given \(\mathbf x_{t-1}\) and \(w_t\), and \(\mathbb E_t[\cdot]=\mathbb E_{\mathbb P}[\cdot\mid w_{[t-1]}]\) integrates over \(w_t\) under the uncertainty law \(\mathbb P\); \(w_{[t]}=(w_1,\dots,w_t)\) is the observed history, with \(w_1\) fixed and \(\mathbf x_0\) given. For a proposed transition, the admissible recourse decisions satisfy the dynamics and the operating constraints,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\mathcal Y_t(\mathbf x_{t-1},\mathbf x_t;w_t)=\big\{\mathbf y\in\mathbb R^{n_y}:\ \mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y)=\mathbf 0,\ \ h(\mathbf x_t,\mathbf y,w_t)\ge\mathbf 0\big\}.
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+&\mathcal Y_t(\mathbf x_{t-1},\mathbf x_t;w_t)=\big\{\mathbf y\in\mathbb R^{n_y}:\\[0.4em]
+&\qquad\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y)=\mathbf 0,\\[0.4em]
+&\qquad h(\mathbf x_t,\mathbf y,w_t)\ge\mathbf 0\big\}.
+\end{aligned}
+\]</div>
+</div>
+<p>Here \(n_y\) is the recourse dimension, \(\mathcal T=\mathbf 0\) encodes the dynamics, and \(h\ge\mathbf 0\) collects the operating constraints; the transition may be explicit or implicit, and the feasible set may be nonconvex. A policy is nonanticipative: Its stage-\(t\) decisions may depend on \(\mathbf x_{t-1}\) and the history \(w_{[t]}\), never on later realizations. Because the state carries every interstage coupling, the Bellman recursion separates the stage into an inner recourse problem and an outer choice of the next state,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{aligned}
+V_t(\mathbf x_{t-1},w_{[t]})
+&=\min_{\mathbf x_t\in\mathbb R^{n_x}}\Big\{
+\underbrace{q_t(\mathbf x_{t-1},\mathbf x_t;w_t)}_{\text{recourse cost}}
++\underbrace{\mathcal V_{t+1}(\mathbf x_t;w_{[t]})}_{\text{future cost}}\Big\},\\[0.4em]
+q_t(\mathbf x_{t-1},\mathbf x_t;w_t)
+&=\min_{\mathbf y_t}\big\{f(\mathbf x_t,\mathbf y_t):\ \mathbf y_t\in\mathcal Y_t(\mathbf x_{t-1},\mathbf x_t;w_t)\big\},\\[0.4em]
+\mathcal V_{t+1}(\mathbf x_t;w_{[t]})
+&=\mathbb E_{\mathbb P}\big[V_{t+1}(\mathbf x_t,w_{[t+1]})\mid w_{[t]}\big],\qquad V_{T+1}\equiv0.
+\end{aligned}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+&V_t(\mathbf x_{t-1},w_{[t]})=\\[0.4em]
+&\qquad\min_{\mathbf x_t\in\mathbb R^{n_x}}\big\{q_t(\mathbf x_{t-1},\mathbf x_t;w_t)+\mathcal V_{t+1}(\mathbf x_t;w_{[t]})\big\},\\[0.4em]
+&q_t(\mathbf x_{t-1},\mathbf x_t;w_t)=\\[0.4em]
+&\qquad\min_{\mathbf y_t}\big\{f(\mathbf x_t,\mathbf y_t):\ \mathbf y_t\in\mathcal Y_t(\mathbf x_{t-1},\mathbf x_t;w_t)\big\},\\[0.4em]
+&\mathcal V_{t+1}(\mathbf x_t;w_{[t]})=\\[0.4em]
+&\qquad\mathbb E_{\mathbb P}\big[V_{t+1}(\mathbf x_t,w_{[t+1]})\mid w_{[t]}\big],\qquad V_{T+1}\equiv0.
+\end{aligned}
+\]</div>
+</div>
+<p>Here \(n_x\) is the state dimension, \(V_t\) is the optimal cost from stage \(t\) onward at the given state and history, \(\mathcal V_{t+1}\) is its conditional continuation value, and \(q_t\) is the least operating cost of a transition, with \(q_t=+\infty\) when no admissible recourse exists. State decisions, recourse decisions, and the expected future cost are the three computations that any practical method must approximate, retain, or leave implicit.</p>
+<figure class="fig dg-figure wide">{{diagram:stage}}<figcaption><b>A method is defined by which stage computations it represents and which it solves.</b> State decisions are balanced against the future value; recourse decisions realize the chosen transition. Forward paths carry targets and decisions; backward paths carry values, multipliers, and solution sensitivities.</figcaption></figure>
+<p>Stochastic dual dynamic programming (SDDP) approximates the expected future cost by cutting planes built from the values and multipliers of stage problems (<a href="#ref-pereira1991">Pereira and Pinto, 1991</a>; <a href="#ref-fullner2025">Füllner and Rebennack, 2025</a>). With convex stages, every cut underestimates the future cost everywhere, operating constraints are enforced exactly, and the first-stage value bounds the optimum. It is the method used to plan large hydro-dominated power systems (<a href="#ref-maceira2018">Maceira et al., 2018</a>). It requires convex stage problems and, classically, stagewise-independent uncertainty. Its later-stage cuts are accurate only near the states visited in training, so practice re-solves it from the realized state as time advances.</p>
+<p>Operating models are often nonconvex, as alternating-current (AC) power flow is. Exact Lagrangian cuts then need nonconvex subproblems solved to global optimality (<a href="#ref-zou2019">Zou et al., 2019</a>), so in practice cuts are computed on a convex relaxation or approximation of the network and the system is operated with them on its nonconvex model; <a href="{{root}}research/network-simplifications/">Planning and Realization Mismatch</a> shows what that substitution costs (<a href="#ref-brigatto2017">Brigatto et al., 2017</a>; <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>).</p>
+<p>Decision rules approximate the policy instead. Affine rules in the observed uncertainty come from adjustable robust optimization (<a href="#ref-bental2004">Ben-Tal et al., 2004</a>; <a href="#ref-kuhn2011">Kuhn et al., 2011</a>), and liftings of the uncertainty give nonlinear rules (<a href="#ref-georghiou2015">Georghiou et al., 2015</a>). Two-stage linear decision rules restrict only the state decision to an affine map and keep optimization for the recourse; they dispense with stagewise independence (<a href="#ref-bodur2022">Bodur and Luedtke, 2022</a>; <a href="#ref-nazare2023">Nazare and Street, 2023</a>). The affine class limits the trajectories the rule can represent, and its Benders training relies on linear recourse. Model-free policy gradients need neither a differentiable model nor a value function, but they must learn feasibility and long-horizon credit from sampled costs.</p>
+</section>
+
+<section id="targets"><h2><span class="num">02 · State-target policies</span>Prescribe the transition and retain its realization</h2>
+<p>Either computation of a stage, the next state or the actions that reach it, can be represented by a learned map. Policies in reinforcement learning and model-based control usually emit the actions, and the transition then determines the state. Two-stage linear decision rules represent the other computation: an affine map emits the state, and the operating model computes the controls that implement it. With any parametric map in place of the affine one, the two forms are</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{array}{ccc}
+\begin{aligned}
+\hat{\mathbf x}&=\pi(w;\theta)\approx\operatorname*{arg\,min}_{\mathbf x}\big\{q(\mathbf x^-,\mathbf x;w)+\mathcal V(\mathbf x;w)\big\},\\[0.4em]
+\mathbf y^\star&\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(\mathbf x^-,\hat{\mathbf x};w)}f(\hat{\mathbf x},\mathbf y),
+\end{aligned}
+&\quad\equiv\quad&
+\begin{aligned}
+\mathbf y&=\tilde\pi(w;\theta)\approx\operatorname*{arg\,min}_{\mathbf y:\,(\mathbf x,\mathbf y)\in\mathcal X(\mathbf x^-;w)}\big\{f(\mathbf x,\mathbf y)+\mathcal V(\mathbf x;w)\big\},\\[0.4em]
+\mathbf x&:\ (\mathbf x,\mathbf y)\in\mathcal X(\mathbf x^-;w).
+\end{aligned}
+\end{array}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+\hat{\mathbf x}&=\pi(w;\theta)\approx\operatorname*{arg\,min}_{\mathbf x}\big\{q(\mathbf x^-,\mathbf x;w)+\mathcal V(\mathbf x;w)\big\},\\[0.4em]
+\mathbf y^\star&\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(\mathbf x^-,\hat{\mathbf x};w)}f(\hat{\mathbf x},\mathbf y),\\[0.6em]
+&\ \,\equiv\\[0.6em]
+\mathbf y&=\tilde\pi(w;\theta)\approx\operatorname*{arg\,min}_{\mathbf y:\,(\mathbf x,\mathbf y)\in\mathcal X(\mathbf x^-;w)}\big\{f(\mathbf x,\mathbf y)+\mathcal V(\mathbf x;w)\big\},\\[0.4em]
+\mathbf x&:\ (\mathbf x,\mathbf y)\in\mathcal X(\mathbf x^-;w).
+\end{aligned}
+\]</div>
+</div>
+<p>Here the stage index is dropped, \(\mathbf x^-\) is the incoming state, and \(w\) is the information observed so far. The map \(\pi\) emits targets and \(\tilde\pi\) emits actions, both with learned weights \(\theta\), and each approximates the minimizer it replaces: \(\pi\) the state that balances recourse cost against future cost, \(\tilde\pi\) the action that balances stage cost against future cost. In the action form, \(\mathbf x\) follows from the transition, and the pair must lie in \(\mathcal X\); in the state form, \(\mathbf y^\star\) is a selected minimizing control. Since the action and the realized uncertainty together determine the outgoing state, prescribing states instead of actions does not change the best attainable expected cost, so the choice between the two forms leaves the problem unchanged and changes only what must be learned. Methods based on the state form often rely on a working hypothesis: In highly constrained problems, feasible states are easier to predict than feasible actions. A rule that emits controls must keep them feasible for coupled operating constraints, such as the power-flow equations, at every realization; that is itself the problem studied under <a href="{{root}}research/masked-sobolev/">Learning Solution Maps</a>. States are typically lower-dimensional, their reachable sets often admit simple descriptions, and their trajectories, which accumulate the actions, vary more smoothly than the actions that implement them. Where the hypothesis fails, as in weakly constrained problems, the roles can be inverted in flexible frameworks, such as the one developed in this research.</p>
+<p>A policy is the complete nonanticipative map from observed information to implemented decisions, recourse solve included. A decision rule is a member of a parameterized class, here the map \(\pi_t(\cdot;\theta)\) that emits targets. We propose two-stage generalized decision rules (TS-GDR), a generalization of two-stage linear decision rules to any differentiable parametric family. Its deep instance, two-stage deep decision rules (TS-DDR), uses one recurrent network for every stage,</p>
+<div class="eq">\[
+(\hat{\mathbf x}_t,\boldsymbol\zeta_t)=\pi(w_t,\hat{\mathbf x}_{t-1},\boldsymbol\zeta_{t-1};\theta).
+\]</div>
+<p>Here the latent state \(\boldsymbol\zeta_t\) summarizes the history. As with recurrent policies in reinforcement learning, the number of parameters does not grow with the horizon, every stage trains the same rule, and the trained rule serves later stages and realized states without retraining. As for any parametric policy, learning such a rule requires an estimate of its expected cost over the trajectories it induces, and gradient-based training also requires the derivative of that cost with respect to \(\theta\).</p>
+</section>
+
+<section id="evaluation"><h2><span class="num">03 · Training</span>A fixed rule induces a two-stage program, and its multipliers give the gradient</h2>
+<p>Evaluating a policy on the nested program generally requires the conditional minimizations of the Bellman recursion. A fixed rule removes this nesting: Its expected cost can be computed scenario by scenario, so training becomes a two-stage stochastic program whose first stage is \(\theta\). For a sampled path \(\mathbf w=(w_1,\dots,w_T)\), the controls that implement the prescribed states are optimized over the whole path,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{alignedat}{2}
+\mathcal Q(\mathbf w;\theta)=\min_{\mathbf x,\mathbf y}\quad&\sum_{t=1}^T f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+\text{subject to}\quad&\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+&h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+&\mathbf x_t=\pi_t(w_{[t]},\mathbf x_0;\theta)&\quad&(:\boldsymbol\lambda_t),\qquad t=1,\dots,T.
+\end{alignedat}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{alignedat}{2}
+\mathcal Q(\mathbf w;\theta)=\min_{\mathbf x,\mathbf y}\quad&\sum_{t=1}^T f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+\text{subject to}\quad&\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+&h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+&\mathbf x_t=\pi_t(w_{[t]},\mathbf x_0;\theta)\quad(:\boldsymbol\lambda_t),\\[0.4em]
+&\qquad\qquad t=1,\dots,T.
+\end{alignedat}
+\]</div>
+</div>
+<p>Here \(\mathbf x=(\mathbf x_1,\dots,\mathbf x_T)\) and \(\mathbf y=(\mathbf y_1,\dots,\mathbf y_T)\) collect the path variables, and \(\boldsymbol\lambda_t\) is the target multiplier, signed as a value sensitivity to the right-hand side.</p>
+<p><b>Two-stage equivalence.</b> Suppose the state contains every quantity coupling consecutive stages, every prescribed state is reachable from the previous prescribed state for almost every history, each stage problem attains its minimum with an integrable cost, and minimizing controls are selected measurably. Then the cost of operating the policy in the multistage program equals \(\mathbb E[\mathcal Q(\mathbf w;\theta)]\), and training is the two-stage stochastic program \(\min_\theta\mathbb E[\mathcal Q(\mathbf w;\theta)]\).</p>
+<p>To see this, let \(V^\pi_t\) be the remaining cost from stage \(t\) when the states follow the rule, \(\hat{\mathbf x}_t=\pi_t(w_{[t]},\mathbf x_0;\theta)\), with \(V^\pi_{T+1}=0\). Substituting the rule into the Bellman recursion removes the choice of the next state, and the tower property collapses the nested expectations:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{aligned}
+V^\pi_t&=\min_{\mathbf y_t\in\mathcal Y_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)}\big\{f(\hat{\mathbf x}_t,\mathbf y_t)+\mathbb E_{t+1}[V^\pi_{t+1}]\big\}=q_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)+\mathbb E_{t+1}[V^\pi_{t+1}],\\[0.4em]
+V^\pi_1&=q_1+\mathbb E_2\big[q_2+\mathbb E_3[\cdots+\mathbb E_T[q_T]]\big]=\mathbb E\Big[\sum_{t=1}^T q_t\Big]=\mathbb E[\mathcal Q(\mathbf w;\theta)].
+\end{aligned}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+V^\pi_t&=\min_{\mathbf y_t\in\mathcal Y_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)}\big\{f(\hat{\mathbf x}_t,\mathbf y_t)+\mathbb E_{t+1}[V^\pi_{t+1}]\big\}\\[0.4em]
+&=q_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)+\mathbb E_{t+1}[V^\pi_{t+1}],\\[0.4em]
+V^\pi_1&=q_1+\mathbb E_2\big[q_2+\mathbb E_3[\cdots+\mathbb E_T[q_T]]\big]\\[0.4em]
+&=\mathbb E\Big[\sum_{t=1}^T q_t\Big]=\mathbb E[\mathcal Q(\mathbf w;\theta)].
+\end{aligned}
+\]</div>
+</div>
+<p>The recursion for \(V^\pi_t\) holds because, with every state fixed, changing \(\mathbf y_t\) cannot affect a later feasible set or cost. The final equality holds because the feasible set of the full-path problem is the Cartesian product of the stage sets and its objective is their sum; each stage minimizer uses only adjacent targets and the current realization, so the full-path problem adds no foresight. The equivalence requires neither convex stages nor stagewise-independent uncertainty.</p>
+<p>Write \(Q(\mathbf w,\hat{\mathbf x})\) for the recourse value at fixed targets, so that \(\mathcal Q(\mathbf w;\theta)=Q(\mathbf w,\hat{\mathbf x}(\mathbf w;\theta))\). The targets enter only as right-hand sides of the constraints \(\mathbf x_t=\hat{\mathbf x}_t:\boldsymbol\lambda_t\), and multipliers are signed as sensitivities of the optimal value to the right-hand side.</p>
+<p><b>Dual gradient.</b> Suppose a selected second-stage local minimizer satisfies linear independence of the active constraint gradients, a second-order sufficient condition, and strict complementarity, and the formulation is twice continuously differentiable. Write \(Q_{\mathrm{loc}}\) for the recourse value along this regular branch and \(\mathcal Q_{\mathrm{loc}}(\mathbf w;\theta)=Q_{\mathrm{loc}}(\mathbf w,\hat{\mathbf x}(\mathbf w;\theta))\). Then</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\frac{d\mathcal Q_{\mathrm{loc}}(\mathbf w;\theta)}{d\theta}=\sum_{t=1}^T\frac{\partial Q_{\mathrm{loc}}}{\partial\hat{\mathbf x}_t}\frac{d\hat{\mathbf x}_t}{d\theta}=\sum_{t=1}^T\boldsymbol\lambda_t^{\top}\frac{d\hat{\mathbf x}_t}{d\theta}.
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+\frac{d\mathcal Q_{\mathrm{loc}}(\mathbf w;\theta)}{d\theta}
+&=\sum_{t=1}^T\frac{\partial Q_{\mathrm{loc}}}{\partial\hat{\mathbf x}_t}\frac{d\hat{\mathbf x}_t}{d\theta}\\[0.4em]
+&=\sum_{t=1}^T\boldsymbol\lambda_t^{\top}\frac{d\hat{\mathbf x}_t}{d\theta}.
+\end{aligned}
+\]</div>
+</div>
+<p>The terms arising from the primal and dual solutions cancel at a KKT point, so the multiplier is the derivative of the recourse value with respect to the target. It is a value derivative, and no solution sensitivity is computed; <a href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models</a> treats the case where the solution sensitivity is needed. For convex recourse, \(\boldsymbol\lambda_t\) is a subgradient by strong duality. For a nonconvex stage, it is the local sensitivity at the solution returned, which is the information needed to improve the policy along the trajectories it visits. The mini-batch gradient is a vector–Jacobian product through the network; the KKT system of the stage problem is never differentiated, as it would be if the optimization were treated as a layer (<a href="#ref-agrawal2019">Agrawal et al., 2019</a>).</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/decision-rules--two-stage-compact.svg"><img src="{{root}}assets/img/diagrams/decision-rules--two-stage.svg" alt="The recurrent policy is unrolled over stages 1 to T; one weight box theta feeds every copy, and each copy reads the uncertainty w_t and the previous target and latent state, and emits the next target and latent state. All targets enter a single recourse problem over the whole horizon, whose target constraints x_t equal to x-hat_t carry the multipliers lambda_t, the derivatives of its value with respect to the targets. The multipliers lambda_1 to lambda_T are collected into the gradient with respect to theta, the sum over t of lambda_t transposed times the policy Jacobian." loading="eager"></picture></div><figcaption><b>A fixed rule induces a two-stage program.</b> The recurrent rule, with the same weights \(\theta\) in every copy, fixes every target of a sampled path; one recourse problem over the whole horizon implements them, with \(w_t\) and the targets (red) as its parameters. The multipliers of the target constraints (dashed) form the gradient with respect to the shared weights. Adapted from Fig. 1 of the paper.</figcaption></figure>
+<h3>Relation to return-based policy gradients</h3>
+<p>Policy-gradient methods optimize the same expected cost \(V^\pi_1=\mathbb E[\sum_t f_t]\) under different assumptions on the policy, the transition, and the constraints. With \(\mathcal I_t=(\mathbf x_{t-1},w_{[t]})\) the observed inputs, \(V^{\mathbf w}_t=\sum_{k\ge t}f_k\) the cost-to-go along the sampled scenario \(\mathbf w\), so that \(V^\pi_1=\mathbb E[V^{\mathbf w}_1]\) and, for a state-target rule, \(V^{\mathbf w}_1=\mathcal Q(\mathbf w;\theta)\), \(b_t\) a baseline, and \(\mathcal V^\pi_{t+1}\) the continuation value of the policy, with \(\mathbf x_t\) given by the transition, the three forms are evaluated at the sampled control in the stochastic case and at \(\mathbf y_t=\tilde\pi_t(\mathcal I_t;\theta)\) in the deterministic case:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{alignedat}{2}
+\nabla_\theta V^\pi_1&=\mathbb E_{\mathbb P,\tilde\pi_\theta}\bigg[\sum_{t=1}^T\nabla_\theta\log\tilde\pi_t(\mathbf y_t\mid\mathcal I_t;\theta)\,(V^{\mathbf w}_t-b_t)\bigg],&\qquad&\text{(likelihood ratio)}\\[0.4em]
+\nabla_\theta V^\pi_1&=\mathbb E_{\mathbb P}\bigg[\sum_{t=1}^T\Big(\frac{\partial\tilde\pi_t}{\partial\theta}\Big)^{\!\top}\nabla_{\mathbf y}\big[f_t+\mathcal V^\pi_{t+1}(\mathbf x_t;w_{[t]})\big]\bigg],&&\text{(deterministic)}\\[0.4em]
+\nabla_\theta V^\pi_1&=\mathbb E_{\mathbb P}\bigg[\sum_{t=1}^T\Big(\frac{d\hat{\mathbf x}_t}{d\theta}\Big)^{\!\top}\boldsymbol\lambda_t\bigg].&&\text{(state target)}
+\end{alignedat}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+\nabla_\theta V^\pi_1&=\mathbb E_{\mathbb P,\tilde\pi_\theta}\bigg[\sum_{t=1}^T\nabla_\theta\log\tilde\pi_t(\mathbf y_t\mid\mathcal I_t;\theta)\,(V^{\mathbf w}_t-b_t)\bigg],\\[0.4em]
+\nabla_\theta V^\pi_1&=\mathbb E_{\mathbb P}\bigg[\sum_{t=1}^T\Big(\frac{\partial\tilde\pi_t}{\partial\theta}\Big)^{\!\top}\nabla_{\mathbf y}\big[f_t+\mathcal V^\pi_{t+1}(\mathbf x_t;w_{[t]})\big]\bigg],\\[0.4em]
+\nabla_\theta V^\pi_1&=\mathbb E_{\mathbb P}\bigg[\sum_{t=1}^T\Big(\frac{d\hat{\mathbf x}_t}{d\theta}\Big)^{\!\top}\boldsymbol\lambda_t\bigg].
+\end{aligned}
+\]</div>
+</div>
+<p>The first expectation includes the control density \(\tilde\pi_t(\cdot\mid\mathcal I_t;\theta)\) as well as the exogenous law \(\mathbb P\); the other two integrate over \(\mathbb P\) with their respective deterministic policies. The likelihood-ratio form (<a href="#ref-williams1992">Williams, 1992</a>) needs only a differentiable policy density, and pays in variance. The deterministic form (<a href="#ref-silver2014">Silver et al., 2014</a>) needs \(\nabla_{\mathbf y}\big(f_t+\mathcal V^\pi_{t+1}\big)\), learned by a critic or obtained by differentiating the trajectory, whose accuracy degrades with stiffness and discontinuities (<a href="#ref-suh2022">Suh et al., 2022</a>). The third form is pathwise as well, but its action is a target: The solver delivers feasibility, so the hard operating constraints hold at every stage by construction, whereas constrained policy search enforces expected cumulative constraints or penalties (<a href="#ref-achiam2017">Achiam et al., 2017</a>). The multiplier \(\boldsymbol\lambda_t\) is the exact local sensitivity of the sampled trajectory cost to the stage-\(t\) target, which is the credit a return-based estimator must learn from samples.</p>
+</section>
+
+<section id="realization"><h2><span class="num">04 · Exact realization</span>Reachable targets separate the stages</h2>
+<p>The equivalence assumes that every prescribed state is reachable. A policy is <b>state-consistent</b> if, for every stage and almost every history, \(\mathcal Y_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)\neq\emptyset\), with \(\hat{\mathbf x}_0=\mathbf x_0\). Every interstage state is then fixed, each remaining decision appears in one stage, and the second stage separates into the recourse problems of the stage diagram,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{alignedat}{2}
+q_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)=\min_{\mathbf x_{t-1},\mathbf x_t,\mathbf y_t}\quad&f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+\text{subject to}\quad&\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+&h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+&\mathbf x_{t-1}=\hat{\mathbf x}_{t-1}&\quad&(:\boldsymbol\mu_t),\\[0.4em]
+&\mathbf x_t=\hat{\mathbf x}_t&&(:\bar{\boldsymbol\lambda}_t),\qquad t=1,\dots,T.
+\end{alignedat}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{alignedat}{2}
+&\mathrlap{q_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)=}\\[0.4em]
+&\quad\min_{\mathbf x_{t-1},\mathbf x_t,\mathbf y_t}\quad&&f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+&\quad\text{subject to}\quad&&\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+&&&h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+&&&\mathbf x_{t-1}=\hat{\mathbf x}_{t-1}\quad(:\boldsymbol\mu_t),\\[0.4em]
+&&&\mathbf x_t=\hat{\mathbf x}_t\quad(:\bar{\boldsymbol\lambda}_t),\quad t=1,\dots,T.
+\end{alignedat}
+\]</div>
+</div>
+<p>Here \(\boldsymbol\mu_t\) and \(\bar{\boldsymbol\lambda}_t\) are the incoming- and outgoing-state value sensitivities, respectively, and \(Q(\mathbf w,\hat{\mathbf x})=\sum_{t=1}^T q_t\). A target is the outgoing state of one stage and the incoming state of the next stage, so</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\boldsymbol\lambda_t=\nabla_{\hat{\mathbf x}_t}q_t+\nabla_{\hat{\mathbf x}_t}q_{t+1}=\bar{\boldsymbol\lambda}_t+\boldsymbol\mu_{t+1},\quad t=1,\dots,T,\qquad q_{T+1}\equiv0,\quad\boldsymbol\mu_{T+1}=\mathbf 0.
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+&\boldsymbol\lambda_t=\nabla_{\hat{\mathbf x}_t}q_t+\nabla_{\hat{\mathbf x}_t}q_{t+1}=\bar{\boldsymbol\lambda}_t+\boldsymbol\mu_{t+1},\\[0.4em]
+&\qquad t=1,\dots,T,\qquad q_{T+1}\equiv0,\quad\boldsymbol\mu_{T+1}=\mathbf 0.
+\end{aligned}
+\]</div>
+</div>
+<p>The \(T\) stage problems of a path are independent once its targets are known, so they are solved in parallel across stages and sampled paths. They are also the problems solved at execution: Training evaluates the controls that will be implemented and reads their value derivatives from the same solves.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/decision-rules--parallel-stages-compact.svg"><img src="{{root}}assets/img/diagrams/decision-rules--parallel-stages.svg" alt="The same recurrent policy as above, unrolled over stages 1, 2, and T, with shared weights theta. Below it, separate stage problems q_1, q_2, and q_T: each receives the two adjacent targets and its own w_t, fixes its incoming state to the previous target with multiplier mu_t and its outgoing state to its target with multiplier lambda-bar_t, and receives nothing from any other stage problem. The multipliers combine as lambda_t equals lambda-bar_t plus mu_{t+1}, with lambda_T equal to lambda-bar_T, and their sum over stages forms the gradient with respect to theta." loading="eager"></picture></div><figcaption><b>State-consistent targets separate the second stage into stage problems solved in parallel.</b> Adjacent targets and the current realization define each stage problem \(q_t\), and no stage problem receives anything from another. Each target is priced twice, as the outgoing state of its stage (\(\bar{\boldsymbol\lambda}_t\)) and as the incoming state of the next stage (\(\boldsymbol\mu_{t+1}\)), and the sums form the gradient with respect to the shared weights. Each copy of the rule includes the map into the reachable interval described below.</figcaption></figure>
+<p>State consistency is enforced by construction when the reachable set has an explicit description. For storage, substituting the extreme feasible controls into the energy or water balance gives an interval \([\underline{\mathbf x}_t,\overline{\mathbf x}_t]\) that depends on the previous target and the current realization, and the network output \(\mathbf a_t\in[0,1)^{n_x}\), with \(n_x\) the state dimension, may be mapped into it to enforce feasibility,</p>
+<div class="eq">\[
+\begin{aligned}
+\hat{\mathbf x}_t&=\underline{\mathbf x}_t+\mathbf r_t\odot\mathbf a_t,&\qquad\mathbf r_t&=\overline{\mathbf x}_t-\underline{\mathbf x}_t,\\[0.4em]
+\underline{\mathbf x}_t&=\underline{\mathbf x}_t(\hat{\mathbf x}_{t-1};w_t),&\qquad\overline{\mathbf x}_t&=\overline{\mathbf x}_t(\hat{\mathbf x}_{t-1};w_t).
+\end{aligned}
+\]</div>
+<p>Here \(\mathbf r_t\) is the componentwise width of the reachable interval, and \(\odot\) denotes componentwise multiplication. A ramp-limited generator is handled the same way, with its output as a state and its ramp window as the interval. Priced emergency service in the nodal balances, identical for every compared policy, keeps the remaining stage constraints feasible for every reachable target. Because the bounds depend on the previous target, the derivative of the map is a recursion over all earlier targets,</p>
+<div class="eq">\[
+\begin{aligned}
+\frac{d\hat{\mathbf x}_t}{d\theta}
+&=\operatorname{diag}(\mathbf r_t)\frac{d\mathbf a_t}{d\theta}+A_t\frac{d\hat{\mathbf x}_{t-1}}{d\theta},\\[0.4em]
+A_t&=\frac{\partial\underline{\mathbf x}_t}{\partial\hat{\mathbf x}_{t-1}}+\operatorname{diag}(\mathbf a_t)\frac{\partial\mathbf r_t}{\partial\hat{\mathbf x}_{t-1}}.
+\end{aligned}
+\]</div>
+<p>Here \(A_t\) is the state-transition Jacobian at fixed \(\mathbf a_t\) and \(w_t\), while \(d\mathbf a_t/d\theta\) includes the recurrent network and its preceding targets; together they carry how a target today changes what is reachable later. Treating the bounds as constants, in the spirit of truncated backpropagation through time (<a href="#ref-williams1990">Williams and Peng, 1990</a>), leaves the forward policy unchanged and removes that path from every stage. The multiplier prices a target only in the two stages it couples, so its effect on later stages reaches the gradient through this recursion and through the recurrent policy.</p>
+</section>
+
+<section id="hydro"><h2><span class="num">05 · Nearly convex network</span>Where SDDP is near optimal, the policy comes within 0.15% of it without a convex model and improves on every model-free agent</h2>
+<p>The first problem class is the class in which SDDP was developed: Weekly decisions on how much water to release from reservoirs and how much fuel to burn, over a multi-year horizon. The instance is the Bolivian system, with 28 buses, 31 branches, and 34 generators, of which 11 are hydro units in three cascades; every dispatch satisfies the AC power-flow equations. Inflows have 15 equiprobable joint realizations per week, independent across weeks. Policies are trained over 126 weeks and scored over the first 96; checkpoints are selected on 10 validation paths, and all policies are compared on the same 490 test paths.</p>
+<p>The baselines are SDDP whose cuts are computed on the second-order-cone relaxation (SDDP-SOC-AC) or on the direct-current approximation (SDDP-DC-AC) of the network, with forward passes and the final simulation on the AC model; the affine rule (TS-LDR), trained with the same dual gradients, schedule, and reachable map, so that only the functional form differs; and REINFORCE, PPO, TD3, and SAC (<a href="#ref-williams1992">Williams, 1992</a>; <a href="#ref-schulman2017">Schulman et al., 2017</a>; <a href="#ref-fujimoto2018">Fujimoto et al., 2018</a>; <a href="#ref-haarnoja2018">Haarnoja et al., 2018</a>), which act through the same reachable map and the same AC stage problem. The backward bound of SDDP-SOC-AC lies only 0.24% below its AC simulation, so the relaxation is nearly tight on this essentially radial network, and SDDP with conic cuts is the benchmark to approach.</p>
+<p>SDDP-SOC-AC attains a mean cost of 313,550, and TS-DDR, trained from random initialization with no convex model, 314,029: 0.15% higher, a gap an order of magnitude smaller than the spread across scenarios. TS-DDR is cheaper than SDDP-DC-AC in 447 of the 490 test paths. The affine rule, trained with the same gradients, is 17.46% above the benchmark, so the expressive policy is required. No policy sheds load.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/decision-rules-hydro-tall.svg"><img src="{{root}}assets/img/research/decision-rules-hydro.svg" alt="Horizontal bars of mean AC operating cost above SDDP with conic cuts on 490 paired test scenarios: TS-DDR 0.15%, SDDP-DC-AC 0.35%, SAC 2.42%, REINFORCE 16.53%, TD3 16.55%, PPO 16.81%, affine rule 17.46%. Each trained rule decides in 0.03 s per week; SDDP-DC-AC takes 1.6 h per solve." width="765" height="372" loading="eager"></picture></div><figcaption><b>Within 0.15% of SDDP with conic cuts, and below every model-free agent.</b> Mean AC operating cost over 96 weeks and 490 paired test scenarios, relative to SDDP with conic cuts (313,550). The right column gives computation per weekly decision: 0.03 s for the trained rules and a 1.6 h re-solve for SDDP-DC-AC. Source: storage manuscript, Table I. Dots mark the two near-reference bar ends; TS-DDR is 0.15% above the benchmark.</figcaption></figure>
+<p>SAC settles 2.42% above the benchmark and is costlier than TS-DDR in every test scenario, while REINFORCE, PPO, and TD3 remain near the cost of their initial policies, 16.5% to 16.8% above. Each agent observes the incoming storage, the current inflow, and the stage, a sufficient statistic under stagewise-independent inflows, and used 69,000 training episodes, 4.6 times the 15,040 scenarios used by TS-DDR. The decision rule reaches 316,400 after 4 minutes of training, below the final cost that every agent attains after 3 to 17 hours. The value of water released in week \(t\) materializes many weeks later. Return-based estimators must learn that credit from noisy samples, whereas \(\boldsymbol\lambda_t\) is the local marginal effect of the week-\(t\) target on the cost of the whole trajectory.</p>
+<figure class="fig"><div class="frame"><img src="{{root}}assets/img/research/decision-rules-hydro-training.webp" alt="Training curves of 96-week AC cost on ten validation scenarios against training time in hours, on a square-root axis. TS-DDR falls from about 326,000 to about 314,000 within 0.4 hours, ending beside the stars of the final SDDP-SOC-AC and SDDP-DC-AC policies at 1.1 and 1.6 hours. REINFORCE, PPO, TD3, and the affine rule stay near 364,000 to 368,000; SAC drops sharply near 4.5 hours and settles near 321,000 by 15 hours." width="1035" height="750" loading="eager"></div><figcaption><b>Return-based agents learn slowly or not at all on a 126-week horizon.</b> AC cost of the greedy policy over 96 weeks on the ten validation scenarios, every method from its first update, against time on a square-root axis. Stars mark the final SDDP policies at their solution time; dashed verticals mark the TS-DDR phase boundaries. Source: storage manuscript.</figcaption></figure>
+<p>The duals price each target in the two stages it couples, and the reachable-map recursion propagates most of the long-horizon signal back from the impacted stages to where the decisions are made. Treating the bounds as constants leaves 26.5% of the gradient norm over an eight-week horizon and 5.9% over 126 weeks, with cosine similarity to the full gradient falling from 0.879 to 0.673. All reported policies use the full derivative.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/decision-rules-credit-tall.svg"><img src="{{root}}assets/img/research/decision-rules-credit.svg" alt="Two bar panels comparing the truncated gradient, with reachable bounds treated as constants, to the full gradient: its norm is 26.5% of the full norm at an 8-week horizon and 5.9% at 126 weeks; its cosine with the full gradient is 0.879 and 0.673." width="777" height="212" loading="eager"></picture></div><figcaption><b>Long-horizon credit flows through the reachable map.</b> Gradient with the reachable bounds treated as constants, compared with the full gradient, at two horizons of the hydrothermal problem. The norm panel reports a percentage of the full gradient norm; the cosine panel reports directional agreement. Source: storage manuscript supplement, Section S-V. The discrepancy grows with the horizon because the truncated gradient omits the state-transition Jacobian of every stage.</figcaption></figure>
+<p>Training time and decision time are different quantities. TS-DDR trained once, in 0.4 hours on three GPUs, and each weekly decision then takes 0.03 seconds: one network evaluation and one stage solve. SDDP-SOC-AC took 1.1 hours, and operational practice repeats that solution, at least in part, from the realized state at each planning cycle, because its later-stage cuts are accurate only near visited states.</p>
+</section>
+
+<section id="battery"><h2><span class="num">06 · No accurate surrogate</span>Without an accurate convex surrogate, training against the detailed model leaves the smallest residual</h2>
+<p>The second problem class has no convex surrogate that is both accurate and tractable. A 793-bus network with 159 batteries, 82 dispatchable generators, and 30 renewable units is operated over 13 hourly stages: A renewable-rich period, a lull, and a five-hour regional stress in which active and reactive demand rise by 20%. Energy stored early must be carried through the lull and delivered through a congested AC network, where losses, voltage, and reactive limits make a stored megawatt-hour worth different amounts at different buses. The deterministic instances admit a full-horizon AC solution, agreed on by two nonlinear solvers; excess cost is measured against this best-known operation, which is not a certified optimum.</p>
+<p>Without ramp limits, TS-DDR operates 0.31% above the reference with no unserved energy; SDDP-DC-AC follows at 0.70%; the affine rule reaches 4.55% and sheds 21 MWh; SDDP-SOC-AC costs 61.98% more and sheds 494 MWh. With storage held at its incoming level, the single-hour conic relaxation is 3.4–6.6% below the AC cost outside the lull and 52–83% below it during the stress, when voltage and reactive limits bind: The relaxation is least accurate in the hours in which stored energy is most valuable, and its cuts undervalue retention. SDDP-DC-AC converges well, yet continuing it from 165 to 575 iterations lowers its excess only from 0.85% to 0.70%. That residual is the cost of valuing storage with an approximate network, which further iterations do not remove. TS-DDR, trained against the AC model, passes below the final SDDP-DC-AC policy after 8 minutes and reaches 0.31% after 1.5 hours; the SDDP solution itself takes 5.4 hours.</p>
+<p>Generator ramp limits make each dispatchable output a state, raising the state dimension from 159 to 241. TS-DDR operates 2.37% above the reference without unserved energy; SDDP-DC-AC operates 4.76% above it and sheds 36 MWh; SDDP-SOC-AC and the affine rule exceed 100%. The larger state lengthens training: SDDP-DC-AC is solved in 20.6 hours, while TS-DDR matches its policy after about 4 hours and reaches 2.37% after 18.5 hours.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/decision-rules-battery-tall.svg"><img src="{{root}}assets/img/research/decision-rules-battery.svg" alt="Two logarithmic dot plots of excess AC cost over the best-known full-horizon reference. Without ramp limits, a 159-dimensional state: TS-DDR 0.31%, SDDP-DC-AC 0.70%, TS-LDR 4.55% with 21.27 MWh shed, SDDP-SOC-AC 61.98% with 494.23 MWh shed. With ramp limits, a 241-dimensional state: TS-DDR 2.37%, SDDP-DC-AC 4.76% with 36.47 MWh shed, TS-LDR 112.09% with 796.43 MWh shed, SDDP-SOC-AC 101.99% with 875 MWh shed. TS-DDR sheds no energy in either case; SDDP-DC-AC sheds none without ramp limits." width="932" height="270" loading="eager"></picture></div><figcaption><b>Training against the AC model leaves the smallest residual.</b> Dots show excess AC cost over the best-known full-horizon solution on a logarithmic axis; the adjacent labels give cost excess and unserved energy. The panels distinguish operation without and with ramp limits. SDDP-SOC-AC (blue) and SDDP-DC-AC (teal) compute cuts on the conic relaxation and the DC approximation, respectively; TS-LDR (gray) is the affine rule. Source: storage manuscript, Table II.</figcaption></figure>
+<p>The small residual of SDDP-DC-AC depends on the operating conditions. In a variant whose stressed region has more resistive lines, with their DC model unchanged, and higher reactive demand, the DC problem represents almost none of the scarcity that stored energy must cover, so its prices and cut slopes give little value to retention. The converged SDDP-DC-AC policy then operates 17.07% above the AC reference and sheds 147.2 MWh; TS-DDR, trained from scratch on the variant, operates 1.52% above it after 3.2 hours of training and sheds 4.8 MWh.</p>
+<p>The stochastic instance uses the ramp-limited variant with a milder 2% stress and uncertain demand: 850 equiprobable realizations at each hour, independent across hours, about \(10^{38}\) paths. Every SDDP iteration solves the backward problem of each realization at every stage, whereas a TS-DDR update solves one problem per sampled path, whatever the size of the support. No full-horizon solution can serve as a reference once uncertainty is revealed along the horizon, so costs are measured against the mean perfect-information AC cost of the test paths, which no nonanticipative policy can be expected to attain. The forward cost of SDDP-DC-AC stays about 50% above this reference for the first 4.3 hours and settles near 11% after 5.6 hours; TS-DDR is below it from the start of training, reaches that level on the validation paths after 2.1 hours, and continues to 6.7% after 4.7 hours. On 100 test paths, TS-DDR operates 7.4% above it and sheds 18 MWh; SDDP-DC-AC operates 11.1% above it and sheds 76 MWh.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/decision-rules-battery-training-tall.webp"><img src="{{root}}assets/img/research/decision-rules-battery-training-wide.webp" alt="Four training-curve panels of AC cost excess on logarithmic axes against time on square-root axes. Deterministic, no ramp limits: TS-DDR falls below 1% within minutes and ends near 0.3% at 1.5 hours, while SDDP-DC-AC fluctuates near 0.7% up to about 5.4 hours, the affine rule stalls near 4.5%, and SDDP-SOC-AC stays near 60%. Deterministic, ramp limits: TS-DDR ends near 2.4% after about 18.5 hours, below SDDP-DC-AC near 5% at 20.6 hours. Stochastic demand: TS-DDR reaches about 6.7% after 4.7 hours, while SDDP-DC-AC stays near 50% for about 4.3 hours and then settles near 11%. Scarcity invisible to the DC model: two TS-DDR runs with different learning rates fall below the SDDP-DC-AC forward cost, which settles near 17%, within half an hour; the larger rate reaches about 1.5% after 3.2 hours." width="2200" height="1407" loading="eager"></picture></div><figcaption><b>Training against the AC model passes the best SDDP policy in every battery instance.</b> AC cost of the decision rules along training and AC forward cost of SDDP iterations, as excess over the full-horizon AC reference in the deterministic panels and over the mean perfect-information cost of the test paths in the stochastic one, where TS-DDR is scored on validation paths and SDDP-DC-AC is averaged over 16 consecutive iterations. The variant panel compares two TS-DDR learning rates. For SDDP the time is a solution time, possibly incurred again at each re-solve; for the decision rules it is a training time, incurred once. Logarithmic cost axes, square-root time axes. Source: storage manuscript and its supplement.</figcaption></figure>
+</section>
+
+<section id="implicit"><h2><span class="num">07 · Implicit dynamics</span>When the reachable set has no closed form, targets are penalized or corrected causally</h2>
+<p>Every result above uses strict targets mapped into closed-form reachable intervals. Many dynamics provide no such description. An implicit integrator, such as backward Euler, defines the next state through a nonlinear equation,</p>
+<div class="eq">\[
+\mathbf x_t-\mathbf x_{t-1}=\Delta t\,F_{\mathrm c}(\mathbf x_t,\mathbf y_t,w_t).
+\]</div>
+<p>Here \(F_{\mathrm c}\) is the continuous-time vector field and \(\Delta t\) is the step length; the reachable set is the image of the control set under the solution map of that equation, and even membership requires a solve. Stability-constrained dispatch (<a href="#ref-gan2000">Gan et al., 2000</a>) and transient gas flow (<a href="#ref-zlotnik2015">Zlotnik et al., 2015</a>) lead to such relations, and so do the stiff mechanical systems for which implicit steps are chosen. Underactuation and contact confine the reachable set to a lower-dimensional set, so a full-state target emitted by an unconstrained network is infeasible almost surely, and no construction is known that keeps every such target reachable. The separation of Section 04 is then lost.</p>
+<p>The general construction imposes targets through penalized slacks,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{alignedat}{2}
+Q^\delta(\mathbf w,\hat{\mathbf x})=\min_{\mathbf x,\mathbf y,\boldsymbol\delta}\quad&\sum_{t=1}^T\big[f(\mathbf x_t,\mathbf y_t)+C^\delta_t\lVert\boldsymbol\delta_t\rVert\big]\\[0.4em]
+\text{subject to}\quad&\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+&h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+&\mathbf x_t+\boldsymbol\delta_t=\hat{\mathbf x}_t&\quad&(:\boldsymbol\lambda_t),\qquad t=1,\dots,T.
+\end{alignedat}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{alignedat}{2}
+&\mathrlap{Q^\delta(\mathbf w,\hat{\mathbf x})=}\\[0.4em]
+&\quad\min_{\mathbf x,\mathbf y,\boldsymbol\delta}\quad&&\sum_{t=1}^T\big[f(\mathbf x_t,\mathbf y_t)+C^\delta_t\lVert\boldsymbol\delta_t\rVert\big]\\[0.4em]
+&\quad\text{subject to}\quad&&\mathcal T(\mathbf x_{t-1},\mathbf x_t,w_t,\mathbf y_t)=\mathbf 0,\\[0.4em]
+&&&h(\mathbf x_t,\mathbf y_t,w_t)\ge\mathbf 0,\\[0.4em]
+&&&\mathbf x_t+\boldsymbol\delta_t=\hat{\mathbf x}_t\quad(:\boldsymbol\lambda_t),\\[0.4em]
+&&&\qquad\qquad t=1,\dots,T.
+\end{alignedat}
+\]</div>
+</div>
+<p>Here \(\boldsymbol\delta_t\) is an unrestricted target discrepancy and \(C^\delta_t>0\) its penalty coefficient; the multipliers still differentiate the penalized value, and the penalty bounds them in the dual norm by \(C^\delta_t\). When reachable targets exist and the policy class can emit them, an infinite penalty makes the two formulations share their optimum. A finite penalty that dominates the target multipliers of the strict problem, \(C^\delta_t>\lVert\boldsymbol\lambda_t\rVert_*\), leaves the value unchanged at reachable targets; it preserves the optimum only if it also exceeds what the full-path corrections gain from later observations. At intermediate, unreachable targets, however, the full-path optimizer chooses its corrections using later observations, so the penalized cost is a training surrogate and no longer the cost of a nonanticipative implementation.</p>
+<p>The causal alternative solves the stages in sequence, as the policy is operated. Stage \(t\) receives the realized state \(\mathbf x^\star_{t-1}\), solves a target controller, and passes on \(\mathbf x^\star_t=X_t(\mathbf x^\star_{t-1},\hat{\mathbf x}_t;w_t)\); the policy can then read the realized state. Let \(q^\delta_t\) be the penalized value of stage \(t\), \(\mathcal Q^\delta(\mathbf w;\theta)=\sum_tq^\delta_t\) the cost of this causal rollout, and \(V^{\mathbf w}_{t+1}(\mathbf x^\star_t)\) the cost-to-go along the sampled scenario, with later targets responding to \(\mathbf x^\star_t\). A target now also moves the state handed to every later stage, so the gradient adds solution sensitivities to the multipliers,</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\frac{d\mathcal Q^\delta}{d\theta}=\sum_{t=1}^T\bigg[\bar{\boldsymbol\lambda}_t^{\top}+\frac{dV^{\mathbf w}_{t+1}}{d\mathbf x^\star_t}\frac{\partial X_t}{\partial\hat{\mathbf x}_t}\bigg]\frac{\partial\pi_t}{\partial\theta},\qquad V^{\mathbf w}_{T+1}\equiv0.
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+&\frac{d\mathcal Q^\delta}{d\theta}=\sum_{t=1}^T\bigg[\bar{\boldsymbol\lambda}_t^{\top}+\frac{dV^{\mathbf w}_{t+1}}{d\mathbf x^\star_t}\frac{\partial X_t}{\partial\hat{\mathbf x}_t}\bigg]\frac{\partial\pi_t}{\partial\theta},\\[0.4em]
+&\qquad V^{\mathbf w}_{T+1}\equiv0.
+\end{aligned}
+\]</div>
+</div>
+<p>Here \(\bar{\boldsymbol\lambda}_t=\nabla_{\hat{\mathbf x}_t}q_t^\delta\) is the penalized stage-value derivative, and \(\partial\pi_t/\partial\theta\) is taken at fixed inputs, including the carried memory. Unrolled, a target reaches stage \(k\) through a product of up to \(T-1\) stage sensitivities, which, as in recurrent networks, can shrink or grow geometrically, and whose factors carry solver error and are undefined where the active set changes. With strict reachable targets, \(\partial X_t/\partial\hat{\mathbf x}_t=I\) and \(\partial X_t/\partial\mathbf x^\star_{t-1}=0\), and the expression reduces to the separated dual signal. Windows of several stages solved jointly lie between the two extremes: Inside a window, the coupling reaches each target through its multiplier, and only window boundaries are chained, so the window length trades the size of each problem against the length of the chain.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/decision-rules--causal-stages-compact.svg"><img src="{{root}}assets/img/diagrams/decision-rules--causal-stages.svg" alt="Two consecutive stages of the causal rollout with penalized targets. Stage 1 receives the initial state, stage 2 the state realized by stage 1; each stage problem implements its target up to a penalized discrepancy delta_t and passes its realized state both to the next stage problem and to the next copy of the policy. Under each stage problem, its target multiplier lambda-bar_t and its solution sensitivities, the derivatives of the realized state X_t with respect to the target and to the incoming state. A dashed chain of derivatives dV^{\mathbf w}_{t+1}/dx-star_t runs backward from each stage to the previous one, and the gradient with respect to theta sums the multiplier and the later-stage effect over the stages." loading="eager"></picture></div><figcaption><b>Decomposed by stages, the penalized problem is solved in sequence.</b> Stage \(t\) receives the realized state \(\mathbf x^\star_{t-1}\), implements its target up to the penalized discrepancy \(\boldsymbol\delta_t\), and hands \(\mathbf x^\star_t\) to the next stage and to the rule. The gradient of a target adds to its multiplier \(\bar{\boldsymbol\lambda}_t\) its effect on the later stages, which the dashed chain \(dV^{\mathbf w}_{t+1}/d\mathbf x^\star_t\) carries backward along the path through the solution sensitivities of each stage problem (purple). On phones, \(F^\delta_t=f(\mathbf x_t,\mathbf y_t)+C^\delta_t\lVert\boldsymbol\delta_t\rVert\) abbreviates the penalized stage cost.</figcaption></figure>
+<p>Contact adds a further obstruction. Unilateral contact imposes, for each gap \(d_i(\mathbf q)\) and normal force \(\gamma_{n,i}\),</p>
+<div class="eq">\[
+d_i(\mathbf q)\ge0,\qquad\gamma_{n,i}\ge0,\qquad d_i(\mathbf q)\,\gamma_{n,i}=0.
+\]</div>
+<p>These conditions make each time-stepping stage a mathematical program with complementarity constraints (<a href="#ref-stewart1996">Stewart and Trinkle, 1996</a>). At its solutions, linear independence of the active constraints fails and the multipliers are not unique, so neither the dual gradient nor the solution sensitivities are defined. Fixing the contact schedule makes each stage smooth within its mode and leaves the schedule to an outer search; relaxing complementarity to \(d_i(\mathbf q)\gamma_{n,i}\le\epsilon\) restores regular solutions at a controlled loss of contact accuracy (<a href="#ref-scholtes2001">Scholtes, 2001</a>).</p>
+<figure class="fig"><div class="fig-row"><div class="frame"><img src="{{root}}assets/img/research/decision-rules-contact-stance.webp" alt="Author illustration of a quadruped in stance. Both visible feet touch the ground; arrows at the feet mark contact forces f_i and the foot positions are p_i. Curved arrows mark joint angles q_j. B is the body frame and W the world frame; x, y, and z mark their coordinate axes." width="1400" height="898" loading="eager"></div><div class="frame"><img src="{{root}}assets/img/research/decision-rules-contact-swing.webp" alt="Author illustration of the same quadruped stepping up. Translucent leg positions show a foot swinging from p_t above the lower ground to p_{t+k} on the step. The swing foot has no contact force before landing; the other visible foot remains on the ground." width="1400" height="726" loading="eager"></div></div><figcaption><b>A change of contact configuration changes the admissible forces and transitions.</b> In stance, the feet in contact at \(p_i\) carry forces \(f_i\), whose normal components are the \(\gamma_{n,i}\) above; joint angles \(q_j\) and the body frame \(B\) are measured in the world frame \(W\). In swing, a foot leaves contact at \(p_t\), carries no contact force, and lands at \(p_{t+k}\) on the step. A policy influences the contact configuration through the trajectory it prescribes. Author illustrations.</figcaption></figure>
+<p>Discrete operating modes in energy systems, such as unit commitment, pose the same difficulty. Which of the strict, penalized, and causal formulations each class of dynamics admits, and when the smaller problems of a decomposition repay the sensitivities they must propagate, is decided by the operating cost and constraint satisfaction of the implemented decisions on the intended model.</p>
+</section>
+
+<section id="continuation"><h2><span class="num">08 · Long horizons</span>A learned continuation value closes a shorter training window</h2>
+<p>Training from complete trajectories assigns credit through every subsequent stage, so the cost of each update grows with the horizon. A learned value can replace the unobserved tail of a shorter rollout (<a href="#ref-konda1999">Konda and Tsitsiklis, 1999</a>). For a window of \(H\) stages beginning at stage \(k\), a state-consistent rule is trained on</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[
+\begin{aligned}
+&\min_\theta\ \mathbb E_{\mathbb P}\bigg[\underbrace{\sum_{t=k}^{\ell}q_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)}_{\text{window cost}}+\underbrace{\widehat{\mathcal V}^{\pi}_{\ell+1}(\mathbf b_\ell;\psi)}_{\text{critic}}\bigg],\\[0.4em]
+&\mathbf b_\ell=(\hat{\mathbf x}_\ell,\boldsymbol\zeta_\ell,w_{[\ell]}),\qquad\ell=k+H-1\le T.
+\end{aligned}
+\]</div>
+<div class="eq eq-narrow">\[
+\begin{aligned}
+&\min_\theta\ \mathbb E_{\mathbb P}\bigg[\sum_{t=k}^{\ell}q_t(\hat{\mathbf x}_{t-1},\hat{\mathbf x}_t;w_t)+\widehat{\mathcal V}^{\pi}_{\ell+1}(\mathbf b_\ell;\psi)\bigg],\\[0.4em]
+&\mathbf b_\ell=(\hat{\mathbf x}_\ell,\boldsymbol\zeta_\ell,w_{[\ell]}),\qquad\ell=k+H-1\le T.
+\end{aligned}
+\]</div>
+</div>
+<p>Here \(\ell\) is the last stage of the window, \(\mathbf b_\ell\) collects its boundary state, carried memory, and observed history, and \(\psi\) parameterizes a critic of the current policy's remaining cost. The critic is held fixed during the actor update, and its derivatives at the window boundary supplement the dual signal; in the causal decomposition of Section 07, they replace the cross-window term that would otherwise chain the sensitivities of every later window. The critic trades the exactness of the full-path gradient for windows that need not cover the horizon.</p>
+<p><a href="{{root}}research/value-functions/">Continuation-Value Representations</a> develops a convex critic for this role, whose subgradients play the role of \(\nabla\mathcal V_{t+1}\), the conditional average \(\mathbb E_{t+1}[\boldsymbol\mu_{t+1}]\) of the incoming-state multipliers, in the stage diagram. On the storage problems above, the window length trades the cost of each update against the bias of the critic, and windowed and full-horizon training can be compared on the same instances.</p>
+</section>
+
+<section id="scope"><h2><span class="num">09 · Scope</span>The method gives no optimality bound and keeps one stage solve per decision</h2>
+<p>The method provides no bound on the optimal cost, unlike SDDP. Its training effort grows with the dimension of the state, as the ramp-limited instance showed. Its strict form requires the reachable set in closed form, and the output maps used so far either never attain the endpoints of the interval, which optimal storage operation often visits, or lose their derivative there. Each decision still requires one stage solve of the operating model, 2.5 to 3.9 seconds on average on the battery network.</p>
+<p>When that solve exceeds the decision time, a learned recourse map can replace it, and its feasibility and local response then enter the policy; <a href="{{root}}research/masked-sobolev/">Learning Solution Maps</a> treats that approximation. When the targets are tracked by a controller with its own objective, such as model predictive control, the multipliers no longer give the gradient of the policy's cost, and the solution sensitivities of the controller are needed (<a href="#ref-amos2018">Amos et al., 2018</a>); <a href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models</a> supplies them for smooth nonconvex models. When the recourse is selected by another agent's optimization, the composition becomes the object of <a href="{{root}}research/strategic-bidding/">Endogenous Response</a>.</p>
+</section>
+
+<section id="software"><h2>Software</h2>
+<p>DecisionRules.jl trains state-target policies through stage problems written in JuMP with the dual gradient of Section 03, and the hydrothermal case ships in its <code>examples/HydroPowerModels</code>. The SDDP baselines, which compute cuts on a convex network model and operate under AC power flow, are built with PowerModels and SDDP.jl, the packages on which HydroPowerModels.jl composes planning and operating formulations.</p>
+{{software:project=decision-rules}}
+</section>
+
+<section id="references"><h2>References</h2>
+<ol class="refs">
+<li id="ref-achiam2017">J. Achiam, D. Held, A. Tamar, P. Abbeel. Constrained Policy Optimization. <i>International Conference on Machine Learning</i> 22–31, 2017.</li>
+<li id="ref-agrawal2019">A. Agrawal, B. Amos, S. Barratt, S. Boyd, S. Diamond, J. Z. Kolter. Differentiable Convex Optimization Layers. <i>Advances in Neural Information Processing Systems</i> 32, 2019.</li>
+<li id="ref-amos2018">B. Amos, I. Jimenez, J. Sacks, B. Boots, J. Z. Kolter. Differentiable MPC for End-to-End Planning and Control. <i>Advances in Neural Information Processing Systems</i> 31, 2018.</li>
+<li id="ref-bental2004">A. Ben-Tal, A. Goryashko, E. Guslitzer, A. Nemirovski. Adjustable Robust Solutions of Uncertain Linear Programs. <i>Mathematical Programming</i> 99(2):351–376, 2004.</li>
+<li id="ref-bodur2022">M. Bodur, J. R. Luedtke. Two-Stage Linear Decision Rules for Multi-Stage Stochastic Programming. <i>Mathematical Programming</i> 191(1):347–380, 2022.</li>
+<li id="ref-brigatto2017">A. Brigatto, A. Street, D. M. Valladão. Assessing the Cost of Time-Inconsistent Operation Policies in Hydrothermal Power Systems. <i>IEEE Transactions on Power Systems</i> 32(6):4541–4550, 2017.</li>
+<li id="ref-fujimoto2018">S. Fujimoto, H. van Hoof, D. Meger. Addressing Function Approximation Error in Actor-Critic Methods. <i>Proceedings of the 35th International Conference on Machine Learning</i> 1587–1596, 2018.</li>
+<li id="ref-fullner2025">C. Füllner, S. Rebennack. Stochastic Dual Dynamic Programming and Its Variants: A Review. <i>SIAM Review</i> 67(3):415–539, 2025.</li>
+<li id="ref-gan2000">D. Gan, R. J. Thomas, R. D. Zimmerman. Stability-Constrained Optimal Power Flow. <i>IEEE Transactions on Power Systems</i> 15(2):535–540, 2000.</li>
+<li id="ref-georghiou2015">A. Georghiou, W. Wiesemann, D. Kuhn. Generalized Decision Rule Approximations for Stochastic Programming via Liftings. <i>Mathematical Programming</i> 152(1–2):301–338, 2015.</li>
+<li id="ref-haarnoja2018">T. Haarnoja, A. Zhou, P. Abbeel, S. Levine. Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor. <i>International Conference on Machine Learning</i> 1861–1870, 2018.</li>
+<li id="ref-konda1999">V. Konda, J. Tsitsiklis. Actor-Critic Algorithms. <i>Advances in Neural Information Processing Systems</i> 12, 1999.</li>
+<li id="ref-kuhn2011">D. Kuhn, W. Wiesemann, A. Georghiou. Primal and Dual Linear Decision Rules in Stochastic and Robust Optimization. <i>Mathematical Programming</i> 130(1):177–209, 2011.</li>
+<li id="ref-maceira2018">M. E. P. Maceira, D. D. J. Penna, A. L. Diniz, R. J. Pinto, A. C. G. Melo, C. V. Vasconcellos, C. B. Cruz. Twenty Years of Application of Stochastic Dual Dynamic Programming in Official and Agent Studies in Brazil: Main Features and Improvements on the NEWAVE Model. <i>Power Systems Computation Conference</i> 1–7, 2018.</li>
+<li id="ref-nazare2023">F. Nazare, A. Street. Solving Multistage Stochastic Linear Programming via Regularized Linear Decision Rules: An Application to Hydrothermal Dispatch Planning. <i>European Journal of Operational Research</i> 309(1):345–358, 2023.</li>
+<li id="ref-pereira1991">M. V. F. Pereira, L. M. V. G. Pinto. Multi-Stage Stochastic Optimization Applied to Energy Planning. <i>Mathematical Programming</i> 52:359–375, 1991.</li>
+<li id="ref-scholtes2001">S. Scholtes. Convergence Properties of a Regularization Scheme for Mathematical Programs with Complementarity Constraints. <i>SIAM Journal on Optimization</i> 11(4):918–936, 2001.</li>
+<li id="ref-schulman2017">J. Schulman, F. Wolski, P. Dhariwal, A. Radford, O. Klimov. Proximal Policy Optimization Algorithms. Preprint, arXiv:1707.06347, 2017.</li>
+<li id="ref-silver2014">D. Silver, G. Lever, N. Heess, T. Degris, D. Wierstra, M. Riedmiller. Deterministic Policy Gradient Algorithms. <i>Proceedings of the 31st International Conference on Machine Learning</i> 387–395, 2014.</li>
+<li id="ref-stewart1996">D. E. Stewart, J. C. Trinkle. An Implicit Time-Stepping Scheme for Rigid Body Dynamics with Inelastic Collisions and Coulomb Friction. <i>International Journal for Numerical Methods in Engineering</i> 39(15):2673–2691, 1996.</li>
+<li id="ref-suh2022">H. J. Suh, M. Simchowitz, K. Zhang, R. Tedrake. Do Differentiable Simulators Give Better Policy Gradients? <i>Proceedings of the 39th International Conference on Machine Learning</i> 20668–20696, 2022.</li>
+<li id="ref-williams1992">R. J. Williams. Simple Statistical Gradient-Following Algorithms for Connectionist Reinforcement Learning. <i>Machine Learning</i> 8(3):229–256, 1992.</li>
+<li id="ref-williams1990">R. J. Williams, J. Peng. An Efficient Gradient-Based Algorithm for On-Line Training of Recurrent Network Trajectories. <i>Neural Computation</i> 2(4):490–501, 1990.</li>
+<li id="ref-zlotnik2015">A. Zlotnik, M. Chertkov, S. Backhaus. Optimal Control of Transient Flow in Natural Gas Networks. <i>Proceedings of the 54th IEEE Conference on Decision and Control</i> 4563–4570, 2015.</li>
+<li id="ref-zou2019">J. Zou, S. Ahmed, X. A. Sun. Stochastic Dual Dynamic Integer Programming. <i>Mathematical Programming</i> 175(1–2):461–502, 2019.</li>
+<li id="ref-rosemberg2022">A. W. Rosemberg, A. Street, J. D. Garcia, D. M. Valladão, T. Silva, O. Dowson. Assessing the Cost of Network Simplifications in Long-Term Hydrothermal Dispatch Planning Models. <i>IEEE Transactions on Sustainable Energy</i> 13(1):196–206, 2022.</li>
+</ol>
+</section>
+
+{{projects:nav=decision-rules}}
+
+<section id="papers"><h2>Publication</h2>
+{{pubs:project=decision-rules}}
+</section>
+</article></div>

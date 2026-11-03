@@ -1,4 +1,7 @@
-__site/
+_site/
+.venv/
 .DS_Store
+__pycache__/
+tmp/
 node_modules/
-package-lock.json
+.editorial/

@@ -1,0 +1,36 @@
+<svg class="method-diagram" viewBox="0 0 1120 680" role="img" aria-labelledby="pd-title pd-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="pd-title">Self-supervised primal-dual completion</title>
+  <desc id="pd-desc">A common context feeds primal and dual maps. Their candidate decision and multipliers are evaluated by an augmented-Lagrangian criterion containing the original objective and residual. Dashed update paths return to both learned maps. At deployment, the primal path and any explicit completion provide the decision.</desc>
+  <style>
+    .method-diagram{width:100%;height:auto;background:#fff}.outer{fill:none;stroke:#202a33;stroke-width:2}.divider{fill:none;stroke:#202a33;stroke-width:1.7;stroke-dasharray:8 7}.arrow{fill:none;stroke:#202a33;stroke-width:2}.update{fill:none;stroke:#a35e5a;stroke-width:2;stroke-dasharray:7 6}.context{fill:#f9e4c9;stroke:#d79a00;stroke-width:2}.blue{fill:#dfeafa;stroke:#5d88c6;stroke-width:1.7}.green{fill:#e3f0ee;stroke:#57926d;stroke-width:1.7}.loss{fill:#f8d9d4;stroke:#c65a52;stroke-width:2}.deploy{fill:#eee8f5;stroke:#7551a7;stroke-width:2}.text{font:500 17px Inter,Arial,sans-serif;fill:#202a33}.small{font:600 13px Inter,Arial,sans-serif;letter-spacing:.1em;fill:#4d5862}.math{font:italic 28px Georgia,serif;fill:#202a33}.note{font:500 15px Inter,Arial,sans-serif;fill:#4d5862}.edgeblue{stroke:#9cb7dc;stroke-width:1.1}.edgegreen{stroke:#98c7a4;stroke-width:1.1}.nodeblue{fill:#dfeafa;stroke:#5d88c6;stroke-width:1.6}.nodegreen{fill:#e3f0ee;stroke:#57926d;stroke-width:1.6}.brace{fill:none;stroke:#202a33;stroke-width:2}
+  </style>
+  <defs><marker id="pd-arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#202a33"/></marker><marker id="pd-update" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10Z" fill="#a35e5a"/></marker></defs>
+  <rect x="18" y="18" width="1084" height="644" class="outer"/>
+  <text x="48" y="62" class="math" style="font-size:34px">Training</text>
+  <line x1="20" y1="495" x2="1100" y2="495" class="divider"/>
+  <!-- common instance -->
+  <ellipse cx="142" cy="178" rx="62" ry="20" class="context"/><path d="M80 178V306C80 231 204 231 204 306V178" class="context"/><ellipse cx="142" cy="306" rx="62" ry="20" class="context"/><text x="142" y="247" text-anchor="middle" class="math">pᵢ</text>
+  <path d="M204 226H255V155H277" class="arrow" marker-end="url(#pd-arrow)"/><path d="M204 258H255V348H277" class="arrow" marker-end="url(#pd-arrow)"/>
+  <!-- primal net -->
+  <g class="edgeblue"><path d="M294 132L334 112M294 132L334 150M294 132L334 188M294 170L334 112M294 170L334 150M294 170L334 188M294 208L334 150M294 208L334 188M294 208L334 226M354 112L394 132M354 112L394 170M354 150L394 132M354 150L394 170M354 150L394 208M354 188L394 170M354 188L394 208M354 226L394 208M414 132L454 151M414 170L454 151M414 170L454 189M414 208L454 189"/></g>
+  <g class="nodeblue"><circle cx="294" cy="132" r="11"/><circle cx="294" cy="170" r="11"/><circle cx="294" cy="208" r="11"/><circle cx="344" cy="112" r="11"/><circle cx="344" cy="150" r="11"/><circle cx="344" cy="188" r="11"/><circle cx="344" cy="226" r="11"/><circle cx="404" cy="132" r="11"/><circle cx="404" cy="170" r="11"/><circle cx="404" cy="208" r="11"/><circle cx="464" cy="151" r="11"/><circle cx="464" cy="189" r="11"/></g>
+  <path d="M282 247Q282 265 300 265H458Q476 265 476 247" class="brace"/><text x="379" y="291" text-anchor="middle" class="math">ĝθ</text>
+  <!-- dual net -->
+  <g class="edgegreen"><path d="M294 329L334 309M294 329L334 347M294 329L334 385M294 367L334 309M294 367L334 347M294 367L334 385M294 405L334 347M294 405L334 385M294 405L334 423M354 309L394 329M354 309L394 367M354 347L394 329M354 347L394 367M354 347L394 405M354 385L394 367M354 385L394 405M354 423L394 405M414 329L454 348M414 367L454 348M414 367L454 386M414 405L454 386"/></g>
+  <g class="nodegreen"><circle cx="294" cy="329" r="11"/><circle cx="294" cy="367" r="11"/><circle cx="294" cy="405" r="11"/><circle cx="344" cy="309" r="11"/><circle cx="344" cy="347" r="11"/><circle cx="344" cy="385" r="11"/><circle cx="344" cy="423" r="11"/><circle cx="404" cy="329" r="11"/><circle cx="404" cy="367" r="11"/><circle cx="404" cy="405" r="11"/><circle cx="464" cy="348" r="11"/><circle cx="464" cy="386" r="11"/></g>
+  <path d="M282 444Q282 462 300 462H458Q476 462 476 444" class="brace"/><text x="379" y="488" text-anchor="middle" class="math">λφ</text>
+  <path d="M476 170H542" class="arrow" marker-end="url(#pd-arrow)"/><rect x="553" y="134" width="96" height="70" class="blue"/><text x="601" y="179" text-anchor="middle" class="math">ỹ</text>
+  <path d="M476 367H542" class="arrow" marker-end="url(#pd-arrow)"/><rect x="553" y="331" width="96" height="70" class="green"/><text x="601" y="376" text-anchor="middle" class="math">λ̃</text>
+  <path d="M649 169H697V238" class="arrow" marker-end="url(#pd-arrow)"/><path d="M649 366H697V331" class="arrow" marker-end="url(#pd-arrow)"/>
+  <rect x="708" y="214" width="317" height="165" rx="12" class="loss"/>
+  <text x="732" y="267" class="math" style="font-size:26px">ℒᴀʟ</text><text x="732" y="302" class="math" style="font-size:24px">f(ỹ;pᵢ) + λ̃ᵀc(ỹ;pᵢ)</text><text x="732" y="336" class="math" style="font-size:24px">+ ρ/2 ‖c(ỹ;pᵢ)‖²</text>
+  <path d="M755 379C728 442 520 443 438 247" class="update" marker-end="url(#pd-update)"/><path d="M952 379C930 476 520 472 438 444" class="update" marker-end="url(#pd-update)"/>
+  <!-- deployment -->
+  <ellipse cx="142" cy="571" rx="48" ry="16" class="context"/><path d="M94 571V616C94 642 190 642 190 616V571" class="context"/><ellipse cx="142" cy="616" rx="48" ry="16" class="context"/><text x="142" y="599" text-anchor="middle" class="math" style="font-size:22px">new p</text>
+  <path d="M190 594H249" class="arrow" marker-end="url(#pd-arrow)"/>
+  <rect x="261" y="558" width="199" height="72" rx="9" class="deploy"/><text x="360" y="602" text-anchor="middle" class="math" style="font-size:25px">ĝθ(p)</text>
+  <path d="M460 594H520" class="arrow" marker-end="url(#pd-arrow)"/>
+  <rect x="532" y="558" width="218" height="72" rx="9" fill="#f1efe9" stroke="#202a33" stroke-width="1.5"/><text x="641" y="602" text-anchor="middle" class="math" style="font-size:25px">Πᵧ</text>
+  <path d="M750 594H810" class="arrow" marker-end="url(#pd-arrow)"/>
+  <rect x="822" y="558" width="112" height="72" class="green"/><text x="878" y="604" text-anchor="middle" class="math">ŷ</text>
+</svg>

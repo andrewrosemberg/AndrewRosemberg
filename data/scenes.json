@@ -1,0 +1,130 @@
+{
+  "masked-sobolev": {
+    "pair": [
+      {
+        "file": "masked-sobolev-energy.jpg",
+        "alt": "A dark cloud covers the sun over a solar farm, and a painted violet arrow runs from the battery yard along the power line to the town.",
+        "position": "50% 50%",
+        "caption": "A learned solution map returns the new decision immediately when a cloud covers the sun: the batteries supply the town, in violet."
+      },
+      {
+        "file": "masked-sobolev-ai.jpg",
+        "alt": "A ball rolls into a suburban street; the car's planned path, in white, runs into it, and its response, in violet, steers around it while a child waits on the sidewalk.",
+        "position": "50% 50%",
+        "caption": "When a ball rolls into the street, the learned solution map gives the car a new path around it, in violet, in place of its previous path, in white."
+      }
+    ]
+  },
+  "decision-rules": {
+    "pair": [
+      {
+        "file": "decision-rules-energy.jpg",
+        "alt": "A decision tree of photographs: a battery yard in the morning with its evening charge target, branching to three versions of the next stage under sun, a passing cloud and a storm, each with its own charging or discharging, above a strip where the sun and cloud charge paths meet the target and the storm path falls short.",
+        "position": "50% 50%",
+        "caption": "A multistage policy chooses this morning’s battery decision so that it serves the sunny, cloudy and stormy afternoons that may follow."
+      },
+      {
+        "file": "decision-rules-ai.jpg",
+        "alt": "A decision tree of photographs: a car at the start of its planned route, branching to three versions of the next stretch on a clear road, around a ball in the street and in heavy rain, each reaching the same waypoint, above a strip where the three paths meet it.",
+        "position": "50% 50%",
+        "caption": "Each stretch of road ahead may be clear, blocked by a ball in the street or slowed by heavy rain, and the car’s policy chooses its route with all of these delays to its arrival time in mind."
+      }
+    ]
+  },
+  "strategic-bidding": {
+    "pair": [
+      {
+        "file": "strategic-bidding-energy.jpg",
+        "alt": "Three producers send painted offers along their lines to a central substation: the battery’s violet offer and the wind farm’s amber offer pass through and continue together to the town, while the gas plant’s amber offer stops against a bar before the substation.",
+        "position": "50% 50%",
+        "caption": "The market’s response decides each producer’s outcome: the battery’s offer, in violet, is accepted, and the gas plant’s offer, in amber, is rejected."
+      },
+      {
+        "file": "strategic-bidding-ai.jpg",
+        "alt": "A car changes lanes on a highway, painted in violet, and the surrounding cars' painted amber paths bend in response, with white dashed lines showing where they would have gone.",
+        "position": "50% 50%",
+        "caption": "The car’s lane change, in violet, makes the surrounding drivers leave the paths they would otherwise have taken, in dashed white, for new ones, in amber."
+      }
+    ]
+  },
+  "portfolio-optimization": {
+    "pair": [
+      {
+        "file": "portfolio-optimization-energy.jpg",
+        "alt": "Two painted families of possible cloud-shadow tracks cross a solar farm, a tight one ending in a small region and a wide one ending in a large region, and the battery yard's violet discharge is sized for the larger.",
+        "position": "50% 50%",
+        "caption": "Under ambiguity about where the cloud’s shadow will move, the batteries plan their discharge, in violet, for the wider of the two possible spreads of tracks, both in amber."
+      },
+      {
+        "file": "portfolio-optimization-ai.jpg",
+        "alt": "A cyclist ahead of a car has two painted sets of possible paths, one tight and one wide, and the car's violet path keeps clear of the wider set.",
+        "position": "50% 50%",
+        "caption": "Because the car cannot tell whether the cyclist will keep to a tight path or wander widely, both in amber, it plans a path, in violet, that clears the wider one."
+      }
+    ]
+  },
+  "differentiable-optimization": {
+    "pair": [
+      {
+        "file": "differentiable-optimization-race.jpg",
+        "alt": "An autonomous race car approaches a hairpin whose apex cone has been moved inward from a faint ghost position; a white line marks the old best line, a violet line the new one, and short amber arrows show how far each part of the line shifts.",
+        "position": "50% 50%",
+        "caption": "Differentiating the racing-line optimization shows how far each part of the best line moves, in amber, when the apex cone moves inward, from the old line in white to the new one in violet."
+      },
+      {
+        "file": "differentiable-optimization-ai.jpg",
+        "alt": "A part on a table moves to a new position, and a ghosted copy of the robot arm reaching it, with painted joint arrows, shows how each joint angle changes.",
+        "position": "50% 50%",
+        "caption": "When the part moves, the sensitivity of the reaching problem tells the arm how much to turn each joint, in amber, to reach the part’s new position, in violet."
+      }
+    ]
+  },
+  "dc2ac": {
+    "pair": [
+      {
+        "file": "dc2ac-drone.jpg",
+        "alt": "A delivery drone flies toward a landing pad in a strong crosswind; a white dashed path runs straight to the pad, an amber path drifts beside it, and a violet path leans into the wind and ends on the pad.",
+        "position": "50% 50%",
+        "caption": "In a crosswind, the simple flight model’s path, in dashed white, would carry the drone beside the pad, in amber, and a learned correction to that model lands it on the pad, in violet."
+      },
+      {
+        "file": "dc2ac-ai.jpg",
+        "alt": "On a wet curve, three thin painted paths leave the car's front: the dry-road prediction in white, the slide toward the road edge in amber, and the corrected path inside the lane in violet.",
+        "position": "50% 50%",
+        "caption": "On a wet road, the dry-road model’s path, in white, would make the car slide wide, in amber, whereas the corrected model keeps it in its lane, in violet."
+      }
+    ]
+  },
+  "value-functions": {
+    "pair": [
+      {
+        "file": "value-functions-energy.jpg",
+        "alt": "A charged battery yard at dusk branches into three evenings that may follow: a calm one with the batteries lighting the town, a storm that drains them, and a snowy winter night with the batteries empty and the town dark; an amber bar beside each shows its cost, small to large, and a violet outline under the battery yard holds a share of each cost.",
+        "position": "50% 50%",
+        "caption": "Weighing a calm evening, a storm and a winter night that leaves the town dark, each with its cost in amber, gives the continuation value of the charge stored now, in violet."
+      },
+      {
+        "file": "value-functions-ai.jpg",
+        "alt": "A car charging at dusk branches into three trips that may follow: an easy arrival in town, a night drive in heavy rain with almost no charge, and a stop at night with an empty battery; an amber bar beside each shows its cost, small to large, and a violet outline under the charging car holds a share of each cost.",
+        "position": "50% 50%",
+        "caption": "The continuation value of the car’s stored charge, in violet, weighs the costs of the trips that may follow, in amber, from an easy arrival to running out of charge on the road."
+      }
+    ]
+  },
+  "network-simplifications": {
+    "pair": [
+      {
+        "file": "network-simplifications-energy.jpg",
+        "alt": "On a reservoir above a dam, a painted white dashed line high on both banks marks the planned water level, and a large amber double arrow spans the exposed bank down to the actual waterline.",
+        "position": "50% 50%",
+        "caption": "Because the plan simplified the power network, it expected the reservoir to stay at the dashed white level, but operating the real grid drew the water lower, by the amber gap, leaving less stored for the dry months ahead."
+      },
+      {
+        "file": "network-simplifications-ai.jpg",
+        "alt": "A legged robot on a rocky slope: a white dashed straight line runs to a white goal marker, the path it actually walks winds in violet around the rocks and ends beside the goal, and a short amber double arrow marks the miss.",
+        "position": "50% 50%",
+        "caption": "The robot planned a straight route to the goal, in dashed white, but the path it actually walked, in violet, winds around the rocks and stops beside the goal, at the distance marked by the amber arrow."
+      }
+    ]
+  }
+}

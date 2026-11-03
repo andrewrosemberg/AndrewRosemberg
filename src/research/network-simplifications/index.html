@@ -1,0 +1,119 @@
+<!--
+title: Planning and Realization Mismatch
+description: A multistage policy computed on a simplified model is judged by the cost it realizes on the detailed system; relaxation tightness and value accuracy do not order such policies.
+nav: research
+math: true
+image: assets/img/thumbs/network-simplifications.jpg
+-->
+<header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="{{root}}research/">Research</a> / <a href="{{root}}research/#policies">Policies for Multistage Decisions</a></p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Model mismatch · Continuation values · Convex relaxations</p>
+  <h1>Planning and Realization Mismatch</h1>
+  <p class="lede">A policy planned on a simplified model of the world is judged by what it costs when it acts in the real one. When the simplified model assigns the values of future states, those values guide each decision only through their differences between alternatives, so a model with more accurate values need not induce the better policy. This work studies how such simplifications reprice scarce resources and change the decisions that follow.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, Alexandre&nbsp;Street, Joaquim&nbsp;Dias&nbsp;Garcia, Davi&nbsp;M.&nbsp;Valladão, Thuener&nbsp;Silva, Oscar&nbsp;Dowson</p>
+</header>
+{{scene:network-simplifications}}
+
+<nav class="topic-map wrap" aria-label="Planning and realization mismatch guide"><p>Argument</p><ol><li><a href="#object"><small>01 · Two models</small><span>Plan on one model, operate on another</span></a></li><li><a href="#values"><small>02 · Value transmission</small><span>Cuts carry the planning model into operation</span></a></li><li><a href="#relation"><small>03 · Model relation</small><span>Relaxations and approximations</span></a></li><li><a href="#accuracy"><small>04 · Value accuracy</small><span>Decisions follow differences of values</span></a></li><li><a href="#study"><small>05 · Induced policies</small><span>Hydrothermal planning under AC operation</span></a></li><li><a href="#program"><small>06 · Retained operating model</small><span>Approximation in policies, values, or coefficients</span></a></li><li><a href="#software"><small>07 · Software</small><span>HydroPowerModels.jl</span></a></li></ol></nav>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#object">Two models</a></li><li><a href="#values">Value transmission</a></li><li><a href="#relation">Model relation</a></li><li><a href="#accuracy">Value accuracy</a></li><li><a href="#study">Induced policies</a></li><li><a href="#program">Retained operating model</a></li><li><a href="#software">Software</a></li></ol></nav><article class="proj-body">
+
+<section id="object"><h2><span class="num">01 · Two models</span>A plan is judged where it is realized</h2>
+<p>Planning with a simplified model must be assessed through the decisions implemented on the system it represents. Consider a multistage problem with state \(\mathbf x_t\), recourse \(\mathbf y_t\), and uncertainty \(w_t\), and two descriptions of the same stage: a planning model with feasible recourse set \(\mathcal Y_t^{\mathrm{plan}}\), chosen because a planning method can handle it, and an operating model \(\mathcal Y_t^{\mathrm{op}}\), which determines what can be implemented. Given a continuation-value approximation \(\widehat{\mathcal V}_{t+1}\), either model selects a stage decision by solving</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+(\mathbf x_t^{m},\mathbf y_t^{m})\in\operatorname*{arg\,min}_{\mathbf x_t,\mathbf y_t}\quad &
+\underbrace{f(\mathbf x_t,\mathbf y_t)}_{\text{stage cost}}+\underbrace{\widehat{\mathcal V}_{t+1}(\mathbf x_t)}_{\text{continuation value}}\\[0.4em]
+\text{subject to}\quad & \mathbf y_t\in\mathcal Y_t^{m}(\mathbf x_{t-1},\mathbf x_t;w_t),\\[0.4em]
+& t\in\{1,\ldots,T\},\\[0.4em]
+& m\in\{\mathrm{plan},\mathrm{op}\}.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+& (\mathbf x_t^{m},\mathbf y_t^{m})\in\operatorname*{arg\,min}_{\mathbf x_t,\mathbf y_t}\\[0.4em]
+& \quad\Bigl[f(\mathbf x_t,\mathbf y_t)\\[0.4em]
+& \qquad+\widehat{\mathcal V}_{t+1}(\mathbf x_t)\Bigr]\\[0.4em]
+& \text{subject to}\\[0.4em]
+& \quad\mathbf y_t\in\mathcal Y_t^{m}(\mathbf x_{t-1},\mathbf x_t;w_t),\\[0.4em]
+& \quad t\in\{1,\ldots,T\},\\[0.4em]
+& \quad m\in\{\mathrm{plan},\mathrm{op}\}.
+\end{aligned}\]</div>
+</div>
+<p>Here \(f\) is the stage cost, \(T\) is the horizon, and \((\mathbf x_t^{m},\mathbf y_t^{m})\) is a selected minimizing pair under model \(m\). Rolling these decisions forward from a fixed initial state \(\mathbf x_0\) gives a trajectory with expected cost</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[J^{m}(\widehat{\mathcal V})=\mathbb E_{\mathbf w\sim\mathbb P}\!\Biggl[\underbrace{\sum_{t=1}^T f(\mathbf x_t^{m},\mathbf y_t^{m})}_{\text{trajectory cost}}\Biggr].\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+& J^{m}(\widehat{\mathcal V})=\\[0.4em]
+& \quad\mathbb E_{\mathbf w\sim\mathbb P}\!\Biggl[\sum_{t=1}^T f(\mathbf x_t^{m},\mathbf y_t^{m})\Biggr].
+\end{aligned}\]</div>
+</div>
+<p>Here \(\mathbf w=(w_1,\ldots,w_T)\) is the uncertainty path, \(\mathbb P\) is its law, and \(J^{\mathrm{plan}}\) and \(J^{\mathrm{op}}\) are respectively the planner's expected cost and the system's incurred expected cost under that same law. The difference between \(J^{\mathrm{op}}\) and \(J^{\mathrm{plan}}\), reported by <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a> in percent of the planned cost, is the inconsistency gap of <a href="#ref-brigatto2017">Brigatto et al., 2017</a>, the operator's regret with respect to its planning expectation. The gap measures how optimistic the planning model was. The implemented cost \(J^{\mathrm{op}}\) is what ranks competing planning models, and it is the criterion used here.</p>
+<p>The following case study considers long-horizon storage planning: Stochastic dual dynamic programming (SDDP) computes the value of stored water over years (<a href="#ref-pereira1991">Pereira and Pinto, 1991</a>) and requires convex stages, while the operated network obeys nonconvex AC power flow, so planning uses a convex or linear network model and dispatch a more detailed one, as in the planning chain of the Brazilian system (<a href="#ref-maceira2018">Maceira et al., 2018</a>).</p>
+</section>
+
+<section id="values"><h2><span class="num">02 · Value transmission</span>The planning model reaches every stage through its cuts</h2>
+<p>SDDP represents the continuation value by cuts, \(\widehat{\mathcal V}_{t+1}(\mathbf x_t)=\max_k\{\alpha_k+\boldsymbol\beta_k^\top\mathbf x_t\}\). Each cut is computed from the optimal values and state multipliers of next-stage problems solved on \(\mathcal Y_{t+1}^{\mathrm{plan}}\). Multipliers are signed as sensitivities of the optimal value to the incoming state fixed on the right-hand side, and \(\boldsymbol\beta_k\) is their probability-weighted average at the cut's reference state. For stored water, its negative is the marginal value of retaining it. When the cuts are used in operation, the planning model does not constrain any implemented dispatch. In the assessment of <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>, the only result of the planning stage used in operation is the cost-to-go approximation. The network model therefore acts on the operated system only through the value it assigns to stored water.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/network-simplifications--plan-realize-compact.svg"><img src="{{root}}assets/img/diagrams/network-simplifications--plan-realize.svg" alt="Planning row: in-sample inflows feed a forward pass on the operating model, which passes the visited states to a backward pass on the planning model; the backward pass produces the cuts, which return to the forward pass. Only the cuts cross into operation, where each stage is solved on the operating model with out-of-sample inflows and passes its state to the next stage." width="826" height="380"></picture></div><figcaption><b>Only the cuts cross from planning to operation.</b> Backward passes compute cuts on the planning model at the states that forward passes reach under the operating (AC) model; operation then solves every stage under AC power flow with those cuts, on scenarios not used in planning. Method of <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>, Fig. 1, extending <a href="#ref-brigatto2017">Brigatto et al., 2017</a>.</figcaption></figure>
+<p>Where the cuts are fitted matters as much as the model they are fitted on. In the rolling practice, cuts computed with planning-model forward and backward passes are embedded in the detailed stage problem and never revised at the states that detailed operation reaches, which makes the implemented policy time-inconsistent (<a href="#ref-brigatto2017">Brigatto et al., 2017</a>). The assessment above instead runs the forward pass under the operating model, so the cuts are refined at operated states while their values and slopes still come from the planning model. On the ramp-limited 793-bus battery instance of <a href="{{root}}research/decision-rules/#battery">Policies for Multistage Decisions</a>, DC cuts used in the rolling manner operated 25.69% above the best-known AC reference and left 213 MWh unserved, against 4.76% and 36 MWh when the forward pass ran under AC.</p>
+<p>The assessment is implemented in HydroPowerModels.jl (<a href="#ref-rosemberg2019">Rosemberg et al., 2019</a>), in which the planning and operating formulations are separate arguments of one model: Network formulations come from PowerModels.jl (<a href="#ref-coffrin2018">Coffrin et al., 2018</a>), and SDDP.jl (<a href="#ref-dowson2021">Dowson and Kapelevich, 2021</a>) trains the cuts with the operating formulation in the forward pass.</p>
+</section>
+
+<section id="relation"><h2><span class="num">03 · Model relation</span>Relaxations and approximations make different promises</h2>
+<p>The AC model can be written with a lifted matrix \(W=\mathbf v\mathbf v^{*}\) of voltage products, and its nonconvexity sits in this rank-one constraint. The SDP relaxation keeps \(W\succeq0\) and drops the rank (<a href="#ref-bai2008">Bai et al., 2008</a>); the SOC relaxation keeps only the \(2\times2\) conditions \(|w_{nm}|^2\le w_{nn}w_{mm}\) on the branches (<a href="#ref-jabr2006">Jabr, 2006</a>), so that the AC set lies inside the SDP set, which lies inside the SOC set (<a href="#ref-low2014">Low, 2014</a>). The QC relaxation is another member of this family (<a href="#ref-coffrin2016">Coffrin et al., 2016</a>). The transportation model (NFA) keeps line limits and drops Kirchhoff's voltage law. The DC model approximates that law linearly and without losses (<a href="#ref-stott2009">Stott et al., 2009</a>), and the DCLL model adds a quadratic approximation of line losses (<a href="#ref-coffrin2014">Coffrin and Van Hentenryck, 2014</a>). In the paper's classification, the inclusions are in the space of dispatch and storage decisions: NFA relaxes every other model, SOC relaxes SDP, and DC relaxes DCLL. They do not assert containment of the lossless and lossy branch-flow variables.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/network-simplifications--model-relations-compact.svg"><img src="{{root}}assets/img/diagrams/network-simplifications--model-relations.svg" alt="Inclusions in dispatch and storage decisions: NFA contains SOC, which contains SDP, which contains AC; NFA also contains DC, which contains DCLL. DCLL and AC are not nested." width="545" height="394"></picture></div><figcaption><b>Relaxations contain every AC operating point; the DC approximations are not nested with it.</b> Boxes are feasible sets; an arrow from one set to another means that the first contains the second. Inclusions are in the space of dispatch and storage decisions, as classified in <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>, Sections III and IV-A.</figcaption></figure>
+<p>A relaxation contains every detailed operating point. Solved to optimality, it bounds the detailed cost from below, and the cuts it generates are valid outer approximations of the detailed cost-to-go. By the same token they are optimistic: They value water as if the constraints that the relaxation removes could never bind. An approximation has neither property in general, since its feasible set need not contain, or be contained in, the detailed one (<a href="#ref-molzahn2019">Molzahn and Hiskens, 2019</a>). Both relations concern the values computed during planning. Neither concerns the policy those values induce under the operating model.</p>
+</section>
+
+<section id="accuracy"><h2><span class="num">04 · Value accuracy</span>Value accuracy does not order policies</h2>
+<p>A continuation value enters a decision only through differences of its values. For a stored quantity at two levels \(x^-\le x^+\), the future benefit of holding more is</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[B^{m}=\underbrace{\mathcal V^{m}(x^-)-\mathcal V^{m}(x^+)}_{\text{future benefit}},\qquad m\in\{\mathrm{plan},\mathrm{op}\}.\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+B^{m}&=\underbrace{\mathcal V^{m}(x^-)-\mathcal V^{m}(x^+)}_{\text{future benefit}},\\[0.4em]
+m&\in\{\mathrm{plan},\mathrm{op}\}.
+\end{aligned}\]</div>
+</div>
+<p>Here \(\mathcal V^{m}\) is the continuation cost under model \(m\), and \(B^{m}\) is its benefit from the higher inventory. If retaining the extra quantity costs \(A\) now, the reversal \(B^{\mathrm{plan}}\lt A\lt B^{\mathrm{op}}\) makes release attractive under the planning values when retention is preferable under the operating model. A constant offset cancels from both benefits, so an approximation can be wrong in level and right in every decision, or close in level and wrong in a decision.</p>
+<p>Validity does not repair this: Lower approximations that are valid at both levels can still overstate the benefit of holding more. In the same battery study, on the instance without ramp limits, the trained DC cuts lay below the exact DC continuation at all 20 test points, yet at the first stage their difference between two candidate decisions was 11,239 against 7,617 for the exact DC lookahead, for an extra cost of 9,126 now. The cut-based policy therefore stored 45–241 MWh more than the exact DC lookahead in each of the first ten stages, and it performed better under AC. The values farther from the exact DC continuation induced the better operated policy.</p>
+<p>A relaxation's error is also not uniform over states. On the 793-bus meshed network of the same study, with storage held at its incoming level, single-hour SOC costs were 3.4–6.6% below AC costs outside a renewable lull and 52–83% below during the regional demand stress that follows it, when the AC system needs emergency service that the larger relaxed set does not. The relaxation was least accurate when stored energy was most valuable, which is when its cuts set the decision.</p>
+</section>
+
+<section id="study"><h2><span class="num">05 · Induced policies</span>Operation reorders the planning models</h2>
+<p>The controlled comparison of <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a> holds every other modeling choice of long-term hydrothermal planning fixed and varies only the network model used to build the cuts: NFA, SOC, SDP, DC, and DCLL. Each policy is operated under AC power flow with the procedure of Section 02 and evaluated on the same 3,000 out-of-sample inflow scenarios. Two systems separate the effect of network topology. The first is a three-bus loop, fully meshed, with one hydro plant and 48 monthly stages. The second is the 28-bus Bolivian system with 11 hydro plants among 34 generators, 31 branches, and only three cycles, over 96 stages.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/research/network-simplifications-policies-tall.svg"><img src="{{root}}assets/img/research/network-simplifications-policies.svg" alt="Planned and implemented expected cost for each planning network model on the 3-bus loop and the 28-bus system, with the inconsistency gap and SDDP time. 3-bus: NFA 43.23 to 54.72, SOC 45.05 to 54.92, SDP 45.45 to 48.29, DC 43.39 to 48.89, DCLL 45.42 to 48.07 million dollars. 28-bus: NFA 0.587 to 0.687, SOC 0.608 to 0.609, SDP stopped after four weeks without converging, DC 0.587 to 0.645, DCLL 0.613 to 0.609 million dollars." width="1003" height="392"></picture></div><figcaption><b>Planned costs follow the inclusion order; implemented costs do not.</b> Open markers show expected cost under the planning model; filled markers show expected cost when the same cuts are operated under AC power flow on 3,000 out-of-sample scenarios. Columns give the inconsistency gap and the SDDP time in minutes. Data: <a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>, Tables I and II.</figcaption></figure>
+<p>On the meshed loop, NFA and SOC represent Kirchhoff's voltage law poorly around the cycle. Planning with either drove expected storage to very low levels, and AC operation then required load curtailment and expensive thermal dispatch. The implemented costs were 54.72 and 54.92 million dollars, a difference the paper finds not statistically significant even though SOC is the tighter relaxation. The DC, SDP, and DCLL policies value water accounting for the voltage law and stored significantly more of it, with implemented costs of 48.89, 48.29, and 48.07 million dollars. The tightest relaxation, SDP, did not give the lowest implemented cost. The DCLL approximation did, with the smallest gap (5.68%) and about a third of the SDP time (16.09 against 47.47 minutes).</p>
+<p>On the mostly radial system, the SOC policy has a gap of only 0.193%, consistent with the relaxation being nearly tight on radial networks (<a href="#ref-jabr2006">Jabr, 2006</a>). The DCLL policy had an implemented cost statistically indistinguishable from the SOC policy at the 0.05 level, at less than half its time (54.33 against 119.23 minutes); its gap is −0.602%, so the operated cost came out below the planned one. The SDP run was stopped after four weeks without converging. The DC and NFA policies, with gaps of 9.855% and 17.067%, produced high thermal dispatch and spot-price spikes under AC.</p>
+<p>The planned costs respect the inclusions: NFA is lowest and DC is below DCLL in both systems, with SOC below SDP on the meshed loop. The implemented costs do not. SOC, tighter than NFA, gave no improvement on the meshed system, and in each system an approximation matched or improved on the best relaxation policy.</p>
+</section>
+
+<section id="program"><h2><span class="num">06 · Retained operating model</span>The approximation can move into the policy, the value, or the coefficients</h2>
+<p>Every policy above is induced by cuts computed on a model that the operated system does not obey; choosing among planning models narrows the mismatch without removing it. The approximation can instead be placed where the operating model stays intact. A state policy can be trained against the operating model itself, with SDDP using conic and DC cuts, built as in Section 02, as its benchmark (<a href="{{root}}research/decision-rules/">Policies for Multistage Decisions</a>). A convex continuation value can be learned from samples of the detailed model (<a href="{{root}}research/value-functions/">Continuation-Value Representations</a>). A tractable model can be retained with coefficients learned from the decisions they induce under the detailed one (<a href="{{root}}research/dc2ac/">Learned Model Correction</a>).</p>
+</section>
+
+<section id="software"><h2><span class="num">07 · Software</span>Separate formulations expose the cost of model mismatch</h2>
+<p>HydroPowerModels.jl takes the planning and the operating network formulation as separate arguments, so any pair of PowerModels formulations can be compared as in Section 05.</p>
+{{software:project=network-simplifications}}
+</section>
+
+<section id="references"><h2>References</h2>
+<ol class="refs">
+<li id="ref-bai2008">X. Bai, H. Wei, K. Fujisawa, Y. Wang. Semidefinite programming for optimal power flow problems. <i>International Journal of Electrical Power &amp; Energy Systems</i> 30(6):383–392, 2008.</li>
+<li id="ref-brigatto2017">A. Brigatto, A. Street, D. M. Valladão. Assessing the cost of time-inconsistent operation policies in hydrothermal power systems. <i>IEEE Transactions on Power Systems</i> 32(6):4541–4550, 2017.</li>
+<li id="ref-coffrin2018">C. Coffrin, R. Bent, K. Sundar, Y. Ng, M. Lubin. PowerModels.jl: An open-source framework for exploring power flow formulations. <i>Power Systems Computation Conference</i>, 2018.</li>
+<li id="ref-coffrin2016">C. Coffrin, H. L. Hijazi, P. Van Hentenryck. The QC relaxation: A theoretical and computational study on optimal power flow. <i>IEEE Transactions on Power Systems</i> 31(4):3008–3018, 2016.</li>
+<li id="ref-coffrin2014">C. Coffrin, P. Van Hentenryck. A linear-programming approximation of AC power flows. <i>INFORMS Journal on Computing</i> 26(4):718–734, 2014.</li>
+<li id="ref-dowson2021">O. Dowson, L. Kapelevich. SDDP.jl: A Julia package for stochastic dual dynamic programming. <i>INFORMS Journal on Computing</i> 33(1):27–33, 2021.</li>
+<li id="ref-jabr2006">R. A. Jabr. Radial distribution load flow using conic programming. <i>IEEE Transactions on Power Systems</i> 21(3):1458–1459, 2006.</li>
+<li id="ref-low2014">S. H. Low. Convex relaxation of optimal power flow, Part I: Formulations and equivalence. <i>IEEE Transactions on Control of Network Systems</i> 1(1):15–27, 2014.</li>
+<li id="ref-maceira2018">M. E. P. Maceira, D. D. J. Penna, A. L. Diniz, R. J. Pinto, A. C. G. Melo, C. V. Vasconcellos, C. B. Cruz. Twenty years of application of stochastic dual dynamic programming in official and agent studies in Brazil: Main features and improvements on the NEWAVE model. <i>Power Systems Computation Conference</i>, 2018.</li>
+<li id="ref-molzahn2019">D. K. Molzahn, I. A. Hiskens. A survey of relaxations and approximations of the power flow equations. <i>Foundations and Trends in Electric Energy Systems</i> 4(1–2):1–221, 2019.</li>
+<li id="ref-pereira1991">M. V. F. Pereira, L. M. V. G. Pinto. Multi-stage stochastic optimization applied to energy planning. <i>Mathematical Programming</i> 52:359–375, 1991.</li>
+<li id="ref-stott2009">B. Stott, J. Jardim, O. Alsaç. DC power flow revisited. <i>IEEE Transactions on Power Systems</i> 24(3):1290–1300, 2009.</li>
+<li id="ref-rosemberg2022">A. W. Rosemberg, A. Street, J. Dias Garcia, D. M. Valladão, T. Silva, O. Dowson. Assessing the cost of network simplifications in long-term hydrothermal dispatch planning models. <i>IEEE Transactions on Sustainable Energy</i> 13(1):196–206, 2022.</li>
+<li id="ref-rosemberg2019">A. W. Rosemberg, A. Street, J. Dias Garcia, T. Silva, D. M. Valladão, O. Dowson. HydroPowerModels.jl: A Julia/JuMP package for hydrothermal economic dispatch optimization. <i>Proceedings of the JuliaCon Conferences</i> 1(1):35, 2019.</li>
+</ol>
+</section>
+{{projects:nav=network-simplifications}}
+<section id="papers"><h2>Publications</h2>
+{{pubs:project=network-simplifications}}
+</section>
+</article></div>

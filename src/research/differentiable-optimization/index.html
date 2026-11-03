@@ -1,0 +1,180 @@
+<!--
+title: Differentiating Optimization Models
+description: Value derivatives and primal–dual solution responses of parameterized, possibly nonconvex optimization models, computed on a regular selected KKT branch in the coordinates of the model's named parameters.
+nav: research
+math: true
+image: assets/img/thumbs/differentiable-optimization.jpg
+-->
+<header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="{{root}}research/">Research</a> / <a href="{{root}}research/#multi-level">Multi-level decision problems</a></p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Solution sensitivity · KKT systems · Named parameters · DiffOpt.jl</p>
+  <h1>Differentiating Optimization Models</h1>
+  <p class="lede">A prediction is only as good as the decision it leads to. When predicted quantities feed a planner or controller, a model trained for accuracy can still induce poor decisions, because errors in some inputs change the decision far more than equal errors in others. Training on decision quality instead requires the derivative of the planner’s decision with respect to its inputs. The same derivative trains a policy that sets the targets of its own controller and a learned map that corrects a simplified model. This work makes that derivative available for general planners and controllers, including nonconvex ones.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, Joaquim&nbsp;Dias&nbsp;Garcia, François&nbsp;Pacaud, Robert&nbsp;B.&nbsp;Parker, Benoît&nbsp;Legat, Kaarthik&nbsp;Sundar, Russell&nbsp;Bent, Pascal&nbsp;Van&nbsp;Hentenryck</p>
+  <div class="btn-row"><a class="btn primary" href="https://github.com/jump-dev/DiffOpt.jl">DiffOpt.jl on GitHub ↗</a><a class="btn" href="https://jump.dev/DiffOpt.jl/stable/">Documentation ↗</a></div>
+</header>
+{{scene:differentiable-optimization}}
+
+<nav class="topic-map wrap" aria-label="Differentiating Optimization Models argument"><p>Argument</p><ol><li><a href="#object"><small>01 · Selected response</small><span>An outer criterion scores a returned solution</span></a></li><li><a href="#derivatives"><small>02 · Two derivatives</small><span>Optimal value versus solution response</span></a></li><li><a href="#local"><small>03 · Implicit differentiation</small><span>KKT systems and their failure modes</span></a></li><li><a href="#framework"><small>04 · Named parameters</small><span>Implementation</span></a></li><li><a href="#consequences"><small>05 · Control-aware learning</small><span>What response information makes trainable</span></a></li><li><a href="#software"><small>06 · DiffOpt.jl</small><span>Package, uses and citation</span></a></li></ol></nav>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#object">Selected response</a></li><li><a href="#derivatives">Two derivatives</a></li><li><a href="#local">Implicit differentiation</a></li><li><a href="#framework">Named parameters</a></li><li><a href="#consequences">Control-aware learning</a></li><li><a href="#software">DiffOpt.jl</a></li></ol></nav><article class="proj-body">
+
+<section id="object"><h2><span class="num">01 · Selected response</span>An outer criterion scores the solution that a model returns</h2>
+<p>Let a learned map \(\phi_\theta\) send the observed context \(w\) to the parameters \(p\) of an optimization model, and let the model return a primal–dual solution \((\mathbf y^\star(p;w),\boldsymbol\lambda^\star(p;w))\), selected by its solver when several exist. Training minimizes the expected outer criterion of that solution over contexts:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\min_\theta\quad &\mathbb E_{w\sim\mathbb P}\!\Bigl[\underbrace{L\bigl(\mathbf y^\star(p;w),\boldsymbol\lambda^\star(p;w);w\bigr)}_{\text{outer criterion}}\Bigr]\\[0.4em]
+\text{subject to}\quad &p=\phi_\theta(w),\\[0.4em]
+&\mathbf y^\star(p;w)\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p;w)}f(\mathbf y;p,w).
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&\min_\theta\ \mathbb E_{w\sim\mathbb P}\!\left[\begin{aligned}L\bigl(&\mathbf y^\star(p;w),\\[0.4em] &\boldsymbol\lambda^\star(p;w);w\bigr)\end{aligned}\right]\\[0.4em]
+&\text{subject to}\\[0.4em]
+&\quad p=\phi_\theta(w),\\[0.4em]
+&\quad\begin{aligned}\mathbf y^\star(p;w)&\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p;w)}\\[0.4em] &\quad f(\mathbf y;p,w).
+\end{aligned}\end{aligned}\]</div>
+</div>
+<p>Here \(\mathbb P\) is the law of the context and \(\mathcal Y(p;w)\) the feasible set of the inner model. The inner model selects its solution by \(f\), while the outer problem scores that solution by \(L\). The two objectives differ whenever a decision maker plans with a tractable model or a short-horizon controller whose objective is not the cost the decision maker will be charged. They also differ when another agent runs the optimization, the setting of <a href="{{root}}research/strategic-bidding/">Endogenous Response</a>.</p>
+<figure class="fig dg-figure">{{diagram:through}}<figcaption><b>The outer gradient passes through the response of the selected solution.</b> Parameters enter an optimization with its own objective; its solution and multipliers enter a different criterion \(L\). The returned derivative is \(d L/d\theta=(\partial_{\mathbf y}L\,D_p\mathbf y^\star+\partial_{\boldsymbol\lambda}L\,D_p\boldsymbol\lambda^\star)\,dp/d\theta\).</figcaption></figure>
+<p>The problem is bilevel, and <a href="{{root}}research/strategic-bidding/#access">Endogenous Response</a> compares an exact single-level reformulation of such problems with iterative search through the inner solver. This work develops the derivative that gradient-based search and training need. It keeps the inner model and its solver, and trains \(\theta\) using only the local response of the selected solution. The arguments of \(L\) determine which response is needed.</p>
+</section>
+
+<section id="derivatives"><h2><span class="num">02 · Two derivatives</span>When sensitivities matter</h2>
+<p>Consider a smooth program whose data depend on a parameter \(p\):</p>
+<div class="eq">\[\begin{aligned}
+q(p)=\min_{\mathbf y\in\mathbb R^n}\quad &f(\mathbf y;p)\\[0.4em]
+\text{subject to}\quad &c(\mathbf y;p)=\mathbf 0\quad (:\boldsymbol\lambda),\\[0.4em]
+&\mathbf y\ge\mathbf 0\quad (:\boldsymbol\nu).
+\end{aligned}\]</div>
+<p>Here \(q\) is the optimal value, \(n\) the number of decisions, and \(\boldsymbol\lambda\) and \(\boldsymbol\nu\) the multipliers of the equalities and of the bounds. The context is held fixed and omitted. The functions \(f\) and \(c\) are twice continuously differentiable, and smooth inequalities are written as equalities with slack variables. The vector \(\mathbf z=(\mathbf y,\boldsymbol\lambda,\boldsymbol\nu)\) collects the primal–dual variables. The Lagrangian, and the stationarity condition it gives at a solution, are</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\mathcal L(\mathbf z;p)&=\underbrace{f(\mathbf y;p)}_{\text{objective}}+\underbrace{\boldsymbol\lambda^\top c(\mathbf y;p)}_{\text{equalities}}-\underbrace{\boldsymbol\nu^\top\mathbf y}_{\text{bounds}},\\[0.4em]
+\nabla_{\mathbf y}f(\mathbf y^\star;p)&=-A^\top\boldsymbol\lambda^\star+\boldsymbol\nu^\star,\qquad A=\frac{\partial c}{\partial\mathbf y}(\mathbf y^\star;p).
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\mathcal L(\mathbf z;p)&=f(\mathbf y;p)\\[0.4em]
+&\quad+\boldsymbol\lambda^\top c(\mathbf y;p)-\boldsymbol\nu^\top\mathbf y,\\[0.4em]
+\nabla_{\mathbf y}f(\mathbf y^\star;p)&=-A^\top\boldsymbol\lambda^\star+\boldsymbol\nu^\star,\\[0.4em]
+A&=\frac{\partial c}{\partial\mathbf y}(\mathbf y^\star;p).
+\end{aligned}\]</div>
+</div>
+<p>The matrix \(A\) is the Jacobian of the equality constraints. Let \(q_{\mathrm{loc}}(p)=f(\mathbf y^\star(p);p)\) be the objective along the local solution that the solver selects, assumed regular in the sense of Section 03. Differentiating feasibility gives \(A\,D\mathbf y^\star+\partial_pc=\mathbf 0\). Under strict complementarity, which gives every active bound a positive multiplier, each active bound stays active for nearby \(p\), so \((D\mathbf y^\star)^\top\boldsymbol\nu^\star=\mathbf 0\). Substituting the stationarity condition and these two relations into the derivative of \(q_{\mathrm{loc}}\) gives</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\nabla_pq_{\mathrm{loc}}(p)=\underbrace{\partial_pf(\mathbf y^\star;p)}_{\text{objective}}+\underbrace{\Bigl(\frac{\partial c}{\partial p}(\mathbf y^\star;p)\Bigr)^{\!\top}\boldsymbol\lambda^\star}_{\text{constraints}}=\partial_p\mathcal L(\mathbf z^\star;p).\]</div>
+<div class="eq eq-mid">\[\begin{aligned}
+\nabla_pq_{\mathrm{loc}}(p)&=\underbrace{\partial_pf(\mathbf y^\star;p)}_{\text{objective}}+\underbrace{\Bigl(\frac{\partial c}{\partial p}(\mathbf y^\star;p)\Bigr)^{\!\top}\boldsymbol\lambda^\star}_{\text{constraints}}\\[0.4em]
+&=\partial_p\mathcal L(\mathbf z^\star;p).
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\nabla_pq_{\mathrm{loc}}(p)&=\partial_pf(\mathbf y^\star;p)\\[0.4em]
+&\quad+\left(\frac{\partial c}{\partial p}(\mathbf y^\star;p)\right)^{\!\top}\boldsymbol\lambda^\star\\[0.4em]
+&=\partial_p\mathcal L(\mathbf z^\star;p).
+\end{aligned}\]</div>
+</div>
+<p>This envelope derivative needs the solution and its multipliers but no derivative of either. When \(p\) enters only the right-hand side of a constraint, the derivative is that constraint’s multiplier, with a sign set by how the constraint is written. If the selected solution stays globally optimal for nearby \(p\), then \(q_{\mathrm{loc}}=q\). For convex problems the multipliers are subgradients of \(q\) with respect to right-hand-side perturbations. For nonconvex problems solved locally, the derivative is that of \(q_{\mathrm{loc}}\), which can differ from \(q\).</p>
+<p>A criterion that depends on \(\mathbf y^\star\) or \(\boldsymbol\lambda^\star\) themselves generally requires the solution response \(D_p\mathbf z^\star\), whereas the inner optimal value needs only the envelope formula. A criterion equal to the inner optimal value arises in a <a href="{{root}}research/decision-rules/">policy</a> whose stage problem minimizes the same cost by which the policy is judged. When the targets enter as right-hand sides, the multipliers of the target constraints give the derivative of that cost with respect to the targets. When a target appears in coefficients or nonlinear terms instead, the envelope formula includes the partial derivatives of those terms.</p>
+</section>
+
+<section id="local"><h2><span class="num">03 · Implicit differentiation</span>Implicit differentiation follows a regular selected KKT branch</h2>
+<p>The Karush–Kuhn–Tucker (KKT) conditions of the program form a system of equations and sign conditions, with complementarity imposed componentwise:</p>
+<div class="eq">\[F(\mathbf z,p)=\begin{pmatrix}\nabla_{\mathbf y}\mathcal L(\mathbf z;p)\\ c(\mathbf y;p)\\ \mathbf y\odot\boldsymbol\nu\end{pmatrix}=\mathbf 0,\qquad \mathbf y\ge\mathbf 0,\quad \boldsymbol\nu\ge\mathbf 0.\]</div>
+<p>Here \(F\) is the KKT residual and \(\odot\) denotes componentwise multiplication. At a local minimizer that satisfies the linear independence constraint qualification (LICQ), a second-order sufficient condition (SOSC), and strict complementarity, the primal solution is locally unique, the multipliers are unique, and the active set is locally stable (<a href="#ref-fiacco1976">Fiacco, 1976</a>); such a minimizer is called regular. The Jacobian of \(F\) is then nonsingular, and the implicit function theorem (<a href="#ref-dontchev2009">Dontchev and Rockafellar, 2009</a>) yields a differentiable primal–dual branch \(\mathbf z^\star(p)\) with</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+M\,D_p\mathbf z^\star&=-N,\\[0.4em]
+M&=D_{\mathbf z}F(\mathbf z^\star,p),\qquad N=D_pF(\mathbf z^\star,p),\\[0.4em]
+M&=\begin{pmatrix}W&A^\top&-I\\ A&0&0\\ \operatorname{diag}(\boldsymbol\nu^\star)&0&\operatorname{diag}(\mathbf y^\star)\end{pmatrix},\qquad N=\begin{pmatrix}\nabla^2_{\mathbf yp}\mathcal L\\ \partial c/\partial p\\ 0\end{pmatrix}.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+M\,D_p\mathbf z^\star&=-N,\\[0.4em]
+M&=D_{\mathbf z}F(\mathbf z^\star,p),\\[0.4em]
+M&=\begin{pmatrix}W&A^\top&-I\\ A&0&0\\ \operatorname{diag}(\boldsymbol\nu^\star)&0&\operatorname{diag}(\mathbf y^\star)\end{pmatrix},\\[0.4em]
+N&=D_pF(\mathbf z^\star,p),\\[0.4em]
+N&=\begin{pmatrix}\nabla^2_{\mathbf yp}\mathcal L\\ \partial c/\partial p\\ 0\end{pmatrix}.
+\end{aligned}\]</div>
+</div>
+<p>In these blocks \(W=\nabla^2_{\mathbf y\mathbf y}\mathcal L\) is the Lagrangian Hessian, \(I\) is the identity matrix, and all blocks are evaluated at \((\mathbf z^\star(p),p)\). Learning rarely needs the full Jacobian \(-M^{-1}N\). Forward mode returns the solution tangent along one parameter direction \(\dot p\), and reverse mode returns the gradient of a scalar loss with one adjoint solve (<a href="#ref-griewank2008">Griewank and Walther, 2008</a>):</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\text{Forward:}\quad &M\dot{\mathbf z}=-N\dot p,\qquad \dot{\mathbf z}=D_p\mathbf z^\star\dot p,\\[0.4em]
+\text{Reverse:}\quad &M^\top v=\nabla_{\mathbf z}L,\qquad \nabla_pL=\underbrace{\partial_pL}_{\text{direct}}-\underbrace{N^\top v}_{\text{KKT}}.
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+&\text{Forward:}\\[0.4em]
+&\quad\begin{aligned}
+M\dot{\mathbf z}&=-N\dot p,\\[0.4em]
+\dot{\mathbf z}&=D_p\mathbf z^\star\dot p,
+\end{aligned}\\[0.4em]
+&\text{Reverse:}\\[0.4em]
+&\quad\begin{aligned}
+M^\top v&=\nabla_{\mathbf z}L,\\[0.4em]
+\nabla_pL&=\partial_pL-N^\top v.
+\end{aligned}\end{aligned}\]</div>
+</div>
+<p>Here \(v\) is the adjoint vector, and \(\partial_pL\) holds \(\mathbf z\) fixed while \(\nabla_pL\) includes its response. Both modes use only the converged solution, so the solver’s iterations are neither stored nor differentiated. One factorization of \(M\) is reused for every forward direction and adjoint solve.</p>
+<p>Without strict complementarity, a bound can be active with a zero multiplier, and an arbitrarily small change of the parameters can then change which constraints are active. In that case the solution map generally has only directional derivatives (<a href="#ref-jittorntrum1984">Jittorntrum, 1984</a>; <a href="#ref-ralph1995">Ralph and Dempe, 1995</a>). Under weaker regularity conditions, which require neither LICQ nor strict complementarity, the solution can remain stable without being differentiable, and its multipliers need not be unique (<a href="#ref-kojima1980">Kojima, 1980</a>). In a nonconvex program, the derivative describes the solution that the solver returned, and from another starting point the solver can return a different solution with a different response.</p>
+</section>
+
+<section id="framework"><h2><span class="num">04 · Named parameters</span>Implementation</h2>
+<p>In JuMP a model is written once in mathematical notation, and its backend MathOptInterface reformulates it, through transformations called bridges, into the form a chosen solver accepts (<a href="#ref-lubin2023">Lubin et al., 2023</a>). DiffOpt.jl differentiates at the MathOptInterface level, so derivatives account for every reformulation applied to the model, and any supported solver can compute the solution (<a href="#ref-besancon2024">Besançon et al., 2024</a>). It differentiates a small set of standard forms, quadratic programs through their optimality conditions and conic programs through their primal–dual residual map, so one rule per form covers every model that reformulates into it; the package itself contains no solver. Its earlier releases covered these convex forms and returned derivatives with respect to the coefficients of each objective and constraint function.</p>
+<p><a href="#ref-rosemberg2025diffopt">Rosemberg et al. (2025a)</a> extend DiffOpt.jl to smooth, possibly nonconvex programs and to named parameters. A nonlinear module solves the linear systems of Section 03 at the local solutions returned by standard nonlinear solvers, with parameters allowed anywhere in the objective and the constraints. It reuses the solver’s linear algebra when available and assembles \(M\) and \(N\) through MathOptInterface otherwise. When the KKT matrix is nearly singular, it adds a small diagonal correction, in the manner of the inertia correction of Ipopt. Constraints may also be supplied as oracles that return values and derivatives (MathOptInterface’s <code>VectorNonlinearOracle</code>).</p>
+<p>Parameters become JuMP objects of their own, declared as <code>@variable(model, d in Parameter(100.0))</code>. A parametric layer tracks every objective and constraint term that each parameter affects, including terms created by reformulations. A parameter that appears in several constraints and in the objective therefore receives a single derivative, with respect to the parameter as the user declared it, such as a demand, a target position or a cost coefficient. After <code>set_parameter_value</code>, the model is re-solved and differentiated again without being rebuilt.</p>
+<p>Forward queries seed a direction on the parameters and return \(\dot{\mathbf z}\) (<code>set_forward_parameter</code>, <code>forward_differentiate!</code>, <code>get_forward_variable</code>). Reverse queries seed either the solution or the optimal value, not both, and return one cotangent per parameter (<code>set_reverse_variable</code> or <code>set_reverse_objective</code>, <code>reverse_differentiate!</code>, <code>get_reverse_parameter</code>); the optimal-value seed gives the envelope derivative of Section 02. </p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="{{root}}assets/img/diagrams/differentiable-optimization--kkt-response-compact.svg"><img src="{{root}}assets/img/diagrams/differentiable-optimization--kkt-response.svg" alt="Method diagram. Solve lane: context w enters a learned map that sets the named parameters p of a JuMP model; a solver returns the selected KKT point z-star, which a loss L scores. Differentiate lane: DiffOpt solves the adjoint system, M-transpose v equals the loss gradient, once at z-star, and forms the parameter cotangent p-bar, which returns as a red dashed gradient to the learned map. No arrow returns to the solver." width="890" height="355"></picture></div><figcaption><b>The gradient costs one adjoint solve at the converged KKT point.</b> The solver returns a selected KKT point. DiffOpt.jl forms the KKT matrices \(M\) and \(N\) at that point, solves the adjoint system once, and maps the result back through the reformulation to the named parameters. Red dashed arrows show the gradient of \(L\). No solver iteration is differentiated. Construction of <a href="#ref-rosemberg2025diffopt">Rosemberg et al. (2025a)</a>, Sections 3–4.</figcaption></figure>
+</section>
+
+<section id="consequences"><h2><span class="num">05 · Control-aware learning</span>Response information determines which representations can be trained</h2>
+<p>A gradient through an optimization model is the response of one selected solution within one active set. Whether that response suffices depends on what the learned component outputs and on how the loss uses the decision.</p>
+<p>In <a href="{{root}}research/dc2ac/">Learned Model Correction</a>, a learned map predicts the coefficients of a tractable model whose solution is the decision, and the loss compares that decision with a detailed reference. Because the loss depends on \(\mathbf y^\star\), training needs the response of the solution to the coefficients. The tractable model is linear, yet its decisions move with the predicted coefficients within each active set. Training then averages these responses over many sampled instances. In <a href="{{root}}research/strategic-bidding/">Endogenous Response</a>, the response of a market clearing’s allocation and prices to an offer guides an iterative search over offers. In <a href="{{root}}research/masked-sobolev/">Learning Solution Maps</a>, the same sensitivities serve as derivative labels, so a proxy that replaces a solve is trained to reproduce the local response that gradients through the proxy will use. Decision-focused learning likewise trains predictions on the quality of downstream decisions (<a href="#ref-donti2017">Donti et al., 2017</a>; <a href="#ref-elmachtoub2022">Elmachtoub and Grigas, 2022</a>).</p>
+<p>Sequential decisions raise the same need when a controller executes the targets of a policy. A model-predictive controller \(g\) plans over a short horizon with its own internal model and objective, and its applied controls \(\mathbf y_t=E\,g(p_t)\) drive an environment whose transition is modeled by the implicit relation \(\mathcal T(\mathbf x_t,\mathbf x_{t-1},\mathbf y_t)=\mathbf 0\). The policy is judged by the closed-loop cost of the modeled rollout. When the rollout is differentiable and the controller’s selected solution is regular, the chain rule through the controller and the transition gives</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}
+\frac{d\mathbf y_t}{d\theta}&=E\,Dg(p_t)\,\frac{dp_t}{d\theta},\\[0.4em]
+\frac{d\mathbf x_t}{d\theta}&=-\mathcal T_{\mathbf x_t}^{-1}\!\Biggl(\underbrace{\mathcal T_{\mathbf x_{t-1}}\frac{d\mathbf x_{t-1}}{d\theta}}_{\text{state response}}+\underbrace{\mathcal T_{\mathbf y_t}\frac{d\mathbf y_t}{d\theta}}_{\text{control}}\Biggr).
+\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}
+\frac{d\mathbf y_t}{d\theta}&=E\,Dg(p_t)\,\frac{dp_t}{d\theta},\\[0.4em]
+\frac{d\mathbf x_t}{d\theta}&=-\mathcal T_{\mathbf x_t}^{-1}\!\left[\begin{aligned}&\mathcal T_{\mathbf x_{t-1}}\frac{d\mathbf x_{t-1}}{d\theta}\\[0.4em] &\quad+\mathcal T_{\mathbf y_t}\frac{d\mathbf y_t}{d\theta}\end{aligned}\right].
+\end{aligned}\]</div>
+</div>
+<p>Here \(\mathcal T_{\mathbf x_t}=\partial\mathcal T/\partial\mathbf x_t\) is assumed nonsingular along the rollout, and \(\mathcal T_{\mathbf x_{t-1}}\) and \(\mathcal T_{\mathbf y_t}\) are the corresponding partial Jacobians. The total derivative \(dp_t/d\theta\) includes \(d\mathbf x_{t-1}/d\theta\) through the incoming state. The derivative \(Dg\) is the solution response of Section 03, \(E\) extracts the applied controls from the controller's primal–dual solution, and \(p_t\) collects the incoming state, the forecasts, and the learned targets or coefficients. Differentiable model-predictive control learns the cost and dynamics terms of a box-constrained iterative LQR controller, mainly from imitation losses on its output (<a href="#ref-amos2018">Amos et al., 2018</a>). Convex optimization control policies tune convex controllers on closed-loop cost (<a href="#ref-agrawal2020">Agrawal et al., 2020</a>). Solution responses are available here for smooth, possibly nonconvex controllers with state and path constraints. Consequently, this work allows differentiable model-predictive control to be extended beyond box-constrained and convex controllers to smooth nonconvex ones, a direction this research is currently exploring.</p>
+</section>
+
+<section id="software"><h2><span class="num">06 · DiffOpt.jl</span>The package that computes these derivatives</h2>
+<p>DiffOpt.jl computes these solution responses for convex and smooth nonconvex JuMP models and returns derivatives with respect to named parameters across the model’s reformulations. The package belongs to the JuMP ecosystem.</p>
+<h3>Where the package is used</h3>
+<ul>
+<li><a href="{{root}}research/dc2ac/"><b>Learned Model Correction</b></a>. The DC power-flow model is solved by HiGHS and differentiated through its JuMP model with respect to the predicted coefficients, inside the training loop.</li>
+<li><a href="{{root}}research/masked-sobolev/"><b>Learning Solution Maps</b></a>. The sensitivities that masked Sobolev training matches are computed at each sampled solution in the dataset, with respect to named problem parameters.</li>
+<li><a href="{{root}}research/strategic-bidding/"><b>Endogenous Response</b></a>. Gradients of profit through AC market clearing, which guide the search over offers, are computed by the nonlinear module.</li>
+</ul>
+<h3>How to cite</h3>
+{{bib:rosemberg2025general}}
+</section>
+
+<section id="references"><h2>References</h2>
+<ol class="refs">
+<li id="ref-agrawal2020">A. Agrawal, S. Barratt, S. Boyd, B. Stellato. Learning convex optimization control policies. <i>Proceedings of the 2nd Conference on Learning for Dynamics and Control</i>, PMLR 120:361–373, 2020.</li>
+<li id="ref-amos2018">B. Amos, I. Jimenez, J. Sacks, B. Boots, J. Z. Kolter. Differentiable MPC for end-to-end planning and control. <i>Advances in Neural Information Processing Systems</i> 31, 2018.</li>
+<li id="ref-besancon2024">M. Besançon, J. Dias Garcia, B. Legat, A. Sharma. Flexible differentiable optimization via model transformations. <i>INFORMS Journal on Computing</i> 36(2):456–478, 2024.</li>
+<li id="ref-dontchev2009">A. L. Dontchev, R. T. Rockafellar. Implicit Functions and Solution Mappings: A View from Variational Analysis. <i>Springer</i>, 2009.</li>
+<li id="ref-donti2017">P. L. Donti, B. Amos, J. Z. Kolter. Task-based end-to-end model learning in stochastic optimization. <i>Advances in Neural Information Processing Systems</i> 30, 2017.</li>
+<li id="ref-elmachtoub2022">A. N. Elmachtoub, P. Grigas. Smart “predict, then optimize”. <i>Management Science</i> 68(1):9–26, 2022.</li>
+<li id="ref-fiacco1976">A. V. Fiacco. Sensitivity analysis for nonlinear programming using penalty methods. <i>Mathematical Programming</i> 10(1):287–311, 1976.</li>
+<li id="ref-griewank2008">A. Griewank, A. Walther. Evaluating Derivatives: Principles and Techniques of Algorithmic Differentiation. <i>SIAM</i>, 2008.</li>
+<li id="ref-jittorntrum1984">K. Jittorntrum. Solution point differentiability without strict complementarity in nonlinear programming. <i>Sensitivity, Stability and Parametric Analysis</i>, 127–138, 1984.</li>
+<li id="ref-kojima1980">M. Kojima. Strongly stable stationary solutions in nonlinear programs. <i>Analysis and Computation of Fixed Points</i>, 93–138, 1980.</li>
+<li id="ref-lubin2023">M. Lubin, O. Dowson, J. Dias Garcia, J. Huchette, B. Legat, J. P. Vielma. JuMP 1.0: Recent improvements to a modeling language for mathematical optimization. <i>Mathematical Programming Computation</i> 15(3):581–589, 2023.</li>
+<li id="ref-ralph1995">D. Ralph, S. Dempe. Directional derivatives of the solution of a parametric nonlinear program. <i>Mathematical Programming</i> 70(1–3):159–172, 1995.</li>
+<li id="ref-rosemberg2025diffopt">A. W. Rosemberg, J. Dias Garcia, F. Pacaud, R. B. Parker, B. Legat, K. Sundar, R. Bent, P. Van Hentenryck. A general and streamlined differentiable optimization framework. <i>Preprint</i> <a href="https://arxiv.org/abs/2510.25986">arXiv:2510.25986</a>, 2025a.</li>
+<li id="ref-rosemberg2025bidding">A. W. Rosemberg, F. Pacaud, J. Dias Garcia, R. B. Parker, K. Sundar, R. Bent, P. Van Hentenryck. Strategic bidding in energy markets with gradient-based iterative methods. <a href="https://doi.org/10.1016/j.segan.2025.101878"><i>Sustainable Energy, Grids and Networks</i></a> 43:101878, 2025d.</li>
+<li id="ref-rosemberg2025dc2ac">A. W. Rosemberg, M. Klamkin, P. Van Hentenryck. Differentiable optimization for deep learning-enhanced DC approximation of AC optimal power flow. <i>NeurIPS 2025 Workshop MLxOR</i>, <a href="https://arxiv.org/abs/2504.01970">arXiv:2504.01970</a>, 2025b.</li>
+<li id="ref-rosemberg2026sobolev">A. W. Rosemberg, J. Dias Garcia, R. Bent, P. Van Hentenryck. Masked Sobolev training for feasibility-reliable optimization proxies. <i>Advances in Neural Information Processing Systems</i>, 2026a. Preprint <a href="https://arxiv.org/abs/2505.11342">arXiv:2505.11342</a>.</li>
+</ol>
+</section>
+{{projects:nav=differentiable-optimization}}
+<section id="papers"><h2>Publications</h2>
+{{pubs:project=differentiable-optimization}}
+</section>
+</article></div>
