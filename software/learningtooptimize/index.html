@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LearningToOptimize · Andrew Rosemberg</title>
+  <meta name="description" content="An open-source organization and Julia package for learning solution maps: datasets of decisions, multipliers and sensitivities from parametric JuMP models, Sobolev and primal–dual training of optimization proxies, and their evaluation in the model&#x27;s own terms.">
+  <meta name="author" content="Andrew Rosemberg">
+  <meta name="theme-color" content="#f8f7f3">
+  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
+  <link rel="canonical" href="https://andrewrosemberg.github.io/AndrewRosemberg/software/learningtooptimize/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Andrew Rosemberg">
+  <meta property="og:title" content="LearningToOptimize · Andrew Rosemberg">
+  <meta property="og:description" content="An open-source organization and Julia package for learning solution maps: datasets of decisions, multipliers and sensitivities from parametric JuMP models, Sobolev and primal–dual training of optimization proxies, and their evaluation in the model&#x27;s own terms.">
+  <meta property="og:url" content="https://andrewrosemberg.github.io/AndrewRosemberg/software/learningtooptimize/">
+  <meta property="og:image" content="https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="../../assets/fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/InstrumentSerif-Regular-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=8513f2753c">
+  <script src="../../assets/js/site.js?v=d8fec169e3" defer></script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Person","name":"Andrew Rosemberg","alternateName":"Andrew David Werner Rosemberg","url":"https://andrewrosemberg.github.io/AndrewRosemberg/","image":"https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/andrew-rosemberg.jpg","jobTitle":"PhD Candidate in Machine Learning","affiliation":[{"@type":"CollegeOrUniversity","name":"Georgia Institute of Technology"},{"@type":"Organization","name":"AI4OPT"}],"alumniOf":[{"@type":"CollegeOrUniversity","name":"Pontifical Catholic University of Rio de Janeiro"},{"@type":"CollegeOrUniversity","name":"École Centrale de Marseille"}],"knowsAbout":["Machine learning","Mathematical optimization","Stochastic programming","Differentiable optimization","Reinforcement learning","Power systems"],"sameAs":["https://github.com/andrewrosemberg","https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/","https://scholar.google.com/citations?user=jOuzK3EAAAAJ"]}
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});window.fitEquations&&(fitEquations(),document.fonts.ready.then(fitEquations),addEventListener('load',fitEquations))"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../../" aria-label="Andrew Rosemberg — home">
+      <span class="monogram" aria-hidden="true">AR</span>
+      <span>Andrew Rosemberg</span>
+    </a>
+    <nav class="site-nav" aria-label="Main"><a href="../../research/">Research</a><a href="../../publications/">Publications</a><a href="../../software/" aria-current="page">Software</a><a href="../../teaching/">Teaching</a><a href="../../experience/">Experience</a></nav>
+    <div class="header-tools">
+      <button class="icon-btn search-btn" type="button" data-search-open aria-label="Search the site" title="Search (⌘K or /)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><kbd>⌘K</kbd></button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      <a class="header-cv" href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV <span aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+</header>
+<dialog class="palette" aria-label="Search the site" data-root="../../">
+  <form method="dialog" class="palette-box">
+    <div class="palette-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="Search pages, projects, papers…" aria-label="Search" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div>
+    <ul class="palette-results" role="listbox"></ul>
+    <p class="palette-hint"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span></p>
+  </form>
+</dialog>
+<main id="main"><header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="../../software/">Software</a> / LearningToOptimize</p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Parametric datasets · Sensitivity labels · Optimization proxies</p>
+  <h1>LearningToOptimize</h1>
+  <p class="lede">Learning a solution map needs many solved instances of one parametric model, recorded with the quantities a training loss will use: decisions, multipliers and sensitivities. LearningToOptimize.jl turns a JuMP model with declared parameters into such datasets, and the LearningToOptimize organization collects the packages that train proxies on them, from supervised and Sobolev fitting to primal–dual learning and batched solves on GPUs.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong> · Organization lead; author of LearningToOptimize.jl</p>
+  <div class="btn-row"><a class="btn primary" href="https://github.com/LearningToOptimize">GitHub ↗</a><a class="btn" href="https://learningtooptimize.github.io/LearningToOptimize.jl/dev/">Documentation ↗</a><a class="btn" href="https://huggingface.co/LearningToOptimize">Datasets ↗</a><img class="stars" src="https://img.shields.io/github/stars/LearningToOptimize/LearningToOptimize.jl?style=social" alt="GitHub stars for LearningToOptimize.jl" style="height:20px;width:auto;align-self:center"></div>
+</header>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#design">Design</a></li><li><a href="#example">Example</a></li><li><a href="#research">Research</a></li><li><a href="#citation">Citation</a></li></ol></nav><article class="proj-body">
+
+<section id="design"><h2><span class="num">01 · Design</span>The parametric model is the dataset specification</h2>
+
+<h3>Instances, records and files</h3>
+<p>A dataset is specified by a JuMP model whose data are declared as parameters, a <code>ProblemIterator</code> that assigns sampled values to them, and a <code>Recorder</code> that lists the decisions to store and the constraints whose multipliers to store. Samplers draw the values in boxes around the nominal point, along one coordinate at a time, or from scaled distributions, and <code>general_sampler</code> combines them for a model read from a MathOptFormat file. The function <code>solve_batch</code> solves every instance and writes CSV or Arrow tables keyed by a unique identifier per instance, with termination status, objective and solve time; a filter keeps by default only solves with an accepted termination status and feasible primal and dual points.</p>
+<p>A dataset is thereby reproducible from a model file and a parameter table, labels can come from any solver that JuMP supports, and the tables match the datasets the organization publishes on Hugging Face.</p>
+<figure class="fig"><div class="frame"><a href="../../assets/img/diagrams/learningtooptimize--pipeline.webp"><img src="../../assets/img/diagrams/learningtooptimize--pipeline.webp" style="--diagram-max:none" width="3145" height="1505" alt="LearningToOptimize.jl pipeline in three panels. In the package panel, a ProblemIterator holds a table of instances, one parameter vector per identifier; solve_batch loops over them, update_model sets each parameter of the JuMP model with MOI.set, and JuMP.optimize! solves it; a Recorder then stores the primal and dual variables that pass its filter. The parameters and the recorded solutions are saved as input and output tables, published on Hugging Face, which Flux.jl reads as features and labels in Flux.train with a model, an optimizer and a loss."></a></div><figcaption><b>The pipeline of LearningToOptimize.jl.</b> A problem iterator sets the parameters of a JuMP model and solves each instance; a recorder writes the selected decisions and multipliers to input and output tables, which a learning library such as Flux.jl reads as features and labels. From the package documentation.</figcaption></figure>
+
+<h3>Sensitivities as labels</h3>
+<p>When the iterator carries a cotangent \(v_i\) on the decisions of instance \(i\), random by default through <code>random_pullback_primal_pairs</code>, each solve is followed by a DiffOpt.jl reverse pass, and the recorder also stores the vector–Jacobian product \(v_i^\top D_p\mathbf y^\star(p_i)\). The function <code>sobolev_pb_loss_generator</code> builds the corresponding loss for a proxy \(\hat g_\theta\),</p>
+<div class="eq">\[\ell_i(\theta)=\big\lVert\hat g_\theta(p_i)-\mathbf y^\star(p_i)\big\rVert^2+\lambda\,\big\lVert v_i^\top D_p\hat g_\theta(p_i)-v_i^\top D_p\mathbf y^\star(p_i)\big\rVert^2,\]</div>
+<p>with the proxy's product computed by one reverse pass of automatic differentiation.</p>
+<p>Derivative supervision then costs one reverse solve per instance and never forms a Jacobian, on either side. This is the unmasked form of the supervision developed on <a href="../../research/masked-sobolev/">Learning Solution Maps</a>, where a mask selects which sensitivities are matched.</p>
+
+<h3>Evaluation in the model's own terms</h3>
+<p>The evaluators <code>feasibility_evaluator</code>, <code>objective_evaluator</code> and <code>general_evaluator</code> score predicted points against the JuMP model itself: the distance of each constraint function to its set, the objective value, and inference time. The function <code>inconvexhull</code> solves a linear program per query to decide whether a test parameter lies in the convex hull of the training parameters.</p>
+<p>A proxy's quality is its constraint violation and objective gap in the original model, and the hull test separates interpolation from extrapolation, which matters for every guarantee that holds only between samples.</p>
+
+<h3>Convex and embeddable networks</h3>
+<p>Networks of type <code>FullyConnected</code> carry the input to every layer through skip connections, and the training rule <code>ConvexRule</code> keeps the weights of every layer after the first nonnegative after each epoch, which makes a scalar output convex in the input. A trained rectified-linear network can be written back into a JuMP model with one binary variable per unit.</p>
+<p>A convex network can serve as a convex term of a decision problem, as continuation values do on <a href="../../research/value-functions/">Continuation-Value Representations</a>; an unrestricted one can be embedded exactly, at the price of integer variables.</p>
+
+<h3>The organization</h3>
+<p>The <a href="https://github.com/LearningToOptimize">LearningToOptimize</a> organization hosts, with collaborators, the packages that build on these datasets and models:</p>
+<ul>
+<li><a href="https://github.com/LearningToOptimize/LearningToOptimize.jl">LearningToOptimize.jl</a>: datasets from parametric JuMP models, proxy training and evaluation;</li>
+<li><a href="https://github.com/LearningToOptimize/L2OALM.jl">L2OALM.jl</a>, <a href="https://github.com/LearningToOptimize/L2ODLL.jl">L2ODLL.jl</a> and <a href="https://github.com/LearningToOptimize/L2ODC3.jl">L2ODC3.jl</a>: primal–dual learning by the augmented Lagrangian, dual learning, and DC3;</li>
+<li><a href="https://github.com/LearningToOptimize/BatchNLPKernels.jl">BatchNLPKernels.jl</a> and <a href="https://github.com/LearningToOptimize/BatchConeKernels.jl">BatchConeKernels.jl</a>: GPU kernels that evaluate objectives and constraint violations for batches of nonlinear and conic problems;</li>
+<li><a href="../../software/decisionrules/">DecisionRules.jl</a> and <a href="https://github.com/LearningToOptimize/DecisionRulesExa.jl">DecisionRulesExa.jl</a>: policies for multistage problems trained through their stage problems;</li>
+<li><a href="https://huggingface.co/LearningToOptimize">Hugging Face datasets</a>: parametric problems and sensitivity systems.</li>
+</ul>
+</section>
+
+<section id="example"><h2><span class="num">02 · Example</span>A dataset with sensitivity labels</h2>
+<p>The example follows the package README and its test suite: a one-parameter linear program, ten instances, decisions and multipliers recorded together with one vector–Jacobian product per instance, and the Sobolev loss for a proxy with one input and one output.</p>
+<div class="code"><pre><code><span class="k">using</span> JuMP, Ipopt, LearningToOptimize
+<span class="k">import</span> DiffOpt
+
+<span class="c"># A parametric model whose solutions can be differentiated</span>
+model = Model(() -&gt; DiffOpt.diff_optimizer(Ipopt.Optimizer))
+@variable(model, x)
+@variable(model, p <span class="k">in</span> MOI.Parameter(1.0))
+@constraint(model, cons, x + p &gt;= 3)
+@objective(model, Min, 2x)
+
+<span class="c"># Instances, with one random cotangent on the decisions per instance</span>
+problem_iterator = ProblemIterator(Dict(p =&gt; collect(1.0:10.0)))
+problem_iterator.pullback_primal_pairs = random_pullback_primal_pairs(problem_iterator, 10)
+save(problem_iterator, <span class="s">"input"</span>, ArrowFile)
+
+<span class="c"># Solve every instance; record decisions, multipliers and vector–Jacobian products</span>
+recorder = Recorder{ArrowFile}(<span class="s">"output"</span>; primal_variables = [x], dual_variables = [cons])
+solve_batch(problem_iterator, recorder)
+
+<span class="c"># Loss on values and pullbacks for a proxy with one input and one output</span>
+loss = sobolev_pb_loss_generator(500, 1, 1)</code></pre></div>
+<p style="margin-top:18px">Replacing the model by a PowerModels optimal power flow with nodal demands as parameters, and the iterator by <code>general_sampler</code> on its MathOptFormat file, gives the datasets of the repository's PGLib examples.</p>
+</section>
+
+<section id="research"><h2><span class="num">03 · Research</span>Where the package carries the theory</h2>
+<ul>
+<li><a href="../../research/masked-sobolev/"><b>Learning Solution Maps</b></a>. The supervision developed there, decisions together with selected sensitivities of the solution map, is the kind of dataset this package records, and its Sobolev loss is the unmasked case; the organization also hosts an implementation of the primal–dual construction described there.</li>
+<li><a href="../../research/value-functions/"><b>Continuation-Value Representations</b></a>. The repository's PGLib examples generate operating-value datasets over sampled demand, train input-convex networks with the nonnegativity rule, and test whether a query lies in the hull of the training inputs, the three steps of the study on that page.</li>
+</ul>
+</section>
+
+<section id="citation"><h2><span class="num">04 · Citation</span>How to cite</h2>
+<p>For sensitivity-supervised proxies:</p>
+<div class="bib-box standalone"><button class="copy-bib" type="button">Copy</button><pre><code>@inproceedings{rosemberg2026masked,
+  title     = {Masked Sobolev Training for Feasibility-Reliable Optimization Proxies},
+  author    = {Rosemberg, Andrew W. and Dias Garcia, Joaquim and Bent, Russell and Van Hentenryck, Pascal},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2026}
+}</code></pre></div>
+<p style="margin-top:18px">For input-convex value functions:</p>
+<div class="bib-box standalone"><button class="copy-bib" type="button">Copy</button><pre><code>@article{rosemberg2024learning,
+  title   = {Learning Optimal Power Flow Value Functions with Input-Convex Neural Networks},
+  author  = {Rosemberg, Andrew and Tanneau, Mathieu and Fanzeres, Bruno and Garcia, Joaquim and Van Hentenryck, Pascal},
+  journal = {Electric Power Systems Research},
+  volume  = {235},
+  pages   = {110643},
+  year    = {2024},
+  doi     = {10.1016/j.epsr.2024.110643}
+}</code></pre></div>
+<p style="margin-top:18px">For the package itself:</p>
+<div class="bib-box standalone"><button class="copy-bib" type="button">Copy</button><pre><code>@misc{rosemberg_learningtooptimize,
+  author       = {Rosemberg, Andrew W.},
+  title        = {{LearningToOptimize.jl}: Datasets and proxies for parametric optimization},
+  howpublished = {\url{https://github.com/LearningToOptimize/LearningToOptimize.jl}},
+  note         = {Julia package}
+}</code></pre></div>
+</section>
+
+</article></div>
+</main><footer class="site-footer">
+  <div class="footer-inner wrap">
+    <div class="footer-id">
+      <p class="footer-name">Andrew Rosemberg</p>
+      <p>PhD Candidate in Machine Learning<br>Georgia Tech · AI4OPT · Atlanta, GA</p>
+      <p><a href="mailto:arosemberg3@gatech.edu">arosemberg3@gatech.edu</a></p>
+    </div>
+    <nav class="footer-col" aria-label="Site">
+      <p class="footer-label">Site</p>
+      <a href="../../research/">Research</a>
+      <a href="../../publications/">Publications</a>
+      <a href="../../software/">Software</a>
+      <a href="../../teaching/">Teaching</a>
+      <a href="../../experience/">Experience</a>
+    </nav>
+    <nav class="footer-col" aria-label="Elsewhere">
+      <p class="footer-label">Elsewhere</p>
+      <a href="https://scholar.google.com/citations?user=jOuzK3EAAAAJ">Google Scholar</a>
+      <a href="https://github.com/andrewrosemberg">GitHub</a>
+      <a href="https://github.com/LearningToOptimize">LearningToOptimize</a>
+      <a href="https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/">LinkedIn</a>
+      <a href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV (PDF)</a>
+    </nav>
+  </div>
+  <div class="footer-bottom wrap"><div class="footer-bottom-inner"><p>© 2026 Andrew Rosemberg</p><p>Updated November 2026</p></div></div>
+</footer>
+</body>
+</html>

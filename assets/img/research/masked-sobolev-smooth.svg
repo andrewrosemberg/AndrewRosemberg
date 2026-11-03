@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="352.420625pt" height="334.365pt" viewBox="0 0 352.420625 334.365" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 334.365
+L 352.420625 334.365
+L 352.420625 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 109.420625 121.093866
+L 343.780625 121.093866
+L 343.780625 51.587
+L 109.420625 51.587
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 109.420625 121.093866
+L 109.420625 51.587
+" clip-path="url(#pf1cb8a2f60)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2">
+      <defs>
+       <path id="m1aa7a5e9bd" d="M 0 0
+L 0 3.5
+" style="stroke: #687078; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m1aa7a5e9bd" x="109.420625" y="121.093866" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="109.420625" y="140.469866" transform="rotate(-0 109.420625 140.469866)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 218.425276 121.093866
+L 218.425276 51.587
+" clip-path="url(#pf1cb8a2f60)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m1aa7a5e9bd" x="218.425276" y="121.093866" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="218.425276" y="140.469866" transform="rotate(-0 218.425276 140.469866)">2000</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 327.429927 121.093866
+L 327.429927 51.587
+" clip-path="url(#pf1cb8a2f60)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m1aa7a5e9bd" x="327.429927" y="121.093866" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="327.429927" y="140.469866" transform="rotate(-0 327.429927 140.469866)">4000</text>
+     </g>
+    </g>
+    <g id="text_4">
+     <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="226.600625" y="159.614866" transform="rotate(-0 226.600625 159.614866)">Training iteration</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_7"/>
+     <g id="text_5">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #202a33" x="105.920625" y="72.782164" transform="rotate(-0 105.920625 72.782164)">Masked Sobolev</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_8"/>
+     <g id="text_6">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #202a33" x="105.920625" y="112.274701" transform="rotate(-0 105.920625 112.274701)">Value-only</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 109.420625 78.441925
+L 182.944262 78.441925
+L 182.944262 54.746403
+L 109.420625 54.746403
+z
+" clip-path="url(#pf1cb8a2f60)" style="fill: #c0501f"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 109.420625 117.934463
+L 297.235639 117.934463
+L 297.235639 94.23894
+L 109.420625 94.23894
+z
+" clip-path="url(#pf1cb8a2f60)" style="fill: #2a6fb5"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 109.420625 121.093866
+L 343.780625 121.093866
+" style="fill: none; stroke: #dddcd5; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #202a33" x="186.459662" y="71.397664" transform="rotate(-0 186.459662 71.397664)">1,349</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #202a33" x="300.751039" y="110.890201" transform="rotate(-0 300.751039 110.890201)">3,446</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(109.420625 22.493)">First run to reach</text>
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(109.420625 39.587)">95% of teacher performance</text>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_6">
+    <path d="M 109.420625 284.435
+L 343.780625 284.435
+L 343.780625 214.928134
+L 109.420625 214.928134
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_4">
+     <g id="line2d_9">
+      <path d="M 109.420625 284.435
+L 109.420625 214.928134
+" clip-path="url(#p758345d08d)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m1aa7a5e9bd" x="109.420625" y="284.435" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="109.420625" y="303.811" transform="rotate(-0 109.420625 303.811)">0</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_11">
+      <path d="M 208.72571 284.435
+L 208.72571 214.928134
+" clip-path="url(#p758345d08d)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m1aa7a5e9bd" x="208.72571" y="284.435" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="208.72571" y="303.811" transform="rotate(-0 208.72571 303.811)">50</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_13">
+      <path d="M 308.030794 284.435
+L 308.030794 214.928134
+" clip-path="url(#p758345d08d)" style="fill: none; stroke: #eceae4; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#m1aa7a5e9bd" x="308.030794" y="284.435" style="fill: #687078; stroke: #687078; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="308.030794" y="303.811" transform="rotate(-0 308.030794 303.811)">100</text>
+     </g>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #687078" x="226.600625" y="322.956" transform="rotate(-0 226.600625 322.956)">Share of sweep traces (%)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_3">
+     <g id="line2d_15"/>
+     <g id="text_14">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #202a33" x="105.920625" y="236.123299" transform="rotate(-0 105.920625 236.123299)">Masked Sobolev</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_16"/>
+     <g id="text_15">
+      <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #202a33" x="105.920625" y="275.615836" transform="rotate(-0 105.920625 275.615836)">Value-only</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_7">
+    <path d="M 109.420625 241.78306
+L 298.894727 241.78306
+L 298.894727 218.087537
+L 109.420625 218.087537
+z
+" clip-path="url(#p758345d08d)" style="fill: #c0501f"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 109.420625 281.275597
+L 117.762252 281.275597
+L 117.762252 257.580075
+L 109.420625 257.580075
+z
+" clip-path="url(#p758345d08d)" style="fill: #2a6fb5"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 109.420625 284.435
+L 343.780625 284.435
+" style="fill: none; stroke: #dddcd5; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #202a33" x="302.410127" y="234.738799" transform="rotate(-0 302.410127 234.738799)">95.4%</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 13px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #202a33" x="121.277652" y="274.231336" transform="rotate(-0 121.277652 274.231336)">4.2%</text>
+   </g>
+   <g id="text_18">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(109.420625 185.834134)">Sweep runs reaching</text>
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'DejaVu Sans', sans-serif; fill: #202a33" transform="translate(109.420625 202.928134)">95% of teacher performance</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pf1cb8a2f60">
+   <rect x="109.420625" y="51.587" width="234.36" height="69.506866"/>
+  </clipPath>
+  <clipPath id="p758345d08d">
+   <rect x="109.420625" y="214.928134" width="234.36" height="69.506866"/>
+  </clipPath>
+ </defs>
+</svg>

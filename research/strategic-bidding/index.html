@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Endogenous Response · Andrew Rosemberg</title>
+  <meta name="description" content="Decisions evaluated through another agent’s optimization: exact MPEC reformulation, derivative-free search, and solution sensitivities, compared through AC market clearing.">
+  <meta name="author" content="Andrew Rosemberg">
+  <meta name="theme-color" content="#f8f7f3">
+  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
+  <link rel="canonical" href="https://andrewrosemberg.github.io/AndrewRosemberg/research/strategic-bidding/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Andrew Rosemberg">
+  <meta property="og:title" content="Endogenous Response · Andrew Rosemberg">
+  <meta property="og:description" content="Decisions evaluated through another agent’s optimization: exact MPEC reformulation, derivative-free search, and solution sensitivities, compared through AC market clearing.">
+  <meta property="og:url" content="https://andrewrosemberg.github.io/AndrewRosemberg/research/strategic-bidding/">
+  <meta property="og:image" content="https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/thumbs/strategic-bidding.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="../../assets/fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/InstrumentSerif-Regular-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=8513f2753c">
+  <script src="../../assets/js/site.js?v=d8fec169e3" defer></script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Person","name":"Andrew Rosemberg","alternateName":"Andrew David Werner Rosemberg","url":"https://andrewrosemberg.github.io/AndrewRosemberg/","image":"https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/andrew-rosemberg.jpg","jobTitle":"PhD Candidate in Machine Learning","affiliation":[{"@type":"CollegeOrUniversity","name":"Georgia Institute of Technology"},{"@type":"Organization","name":"AI4OPT"}],"alumniOf":[{"@type":"CollegeOrUniversity","name":"Pontifical Catholic University of Rio de Janeiro"},{"@type":"CollegeOrUniversity","name":"École Centrale de Marseille"}],"knowsAbout":["Machine learning","Mathematical optimization","Stochastic programming","Differentiable optimization","Reinforcement learning","Power systems"],"sameAs":["https://github.com/andrewrosemberg","https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/","https://scholar.google.com/citations?user=jOuzK3EAAAAJ"]}
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});window.fitEquations&&(fitEquations(),document.fonts.ready.then(fitEquations),addEventListener('load',fitEquations))"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../../" aria-label="Andrew Rosemberg — home">
+      <span class="monogram" aria-hidden="true">AR</span>
+      <span>Andrew Rosemberg</span>
+    </a>
+    <nav class="site-nav" aria-label="Main"><a href="../../research/" aria-current="page">Research</a><a href="../../publications/">Publications</a><a href="../../software/">Software</a><a href="../../teaching/">Teaching</a><a href="../../experience/">Experience</a></nav>
+    <div class="header-tools">
+      <button class="icon-btn search-btn" type="button" data-search-open aria-label="Search the site" title="Search (⌘K or /)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><kbd>⌘K</kbd></button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      <a class="header-cv" href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV <span aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+</header>
+<dialog class="palette" aria-label="Search the site" data-root="../../">
+  <form method="dialog" class="palette-box">
+    <div class="palette-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="Search pages, projects, papers…" aria-label="Search" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div>
+    <ul class="palette-results" role="listbox"></ul>
+    <p class="palette-hint"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span></p>
+  </form>
+</dialog>
+<main id="main"><header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="../../research/">Research</a> / <a href="../../research/#multi-level">Multi-level decision problems</a></p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Bilevel optimization · Solution sensitivities · Derivative-free and global search</p>
+  <h1>Endogenous Response</h1>
+  <p class="lede">Evaluating an action often requires a counterfactual analysis of how another agent, cooperative or adversarial, would respond to it by optimizing its own objective, as in a Stackelberg game between a leader and a follower. The follower’s response is a map from actions to solutions, and learning it from historical data as a generic function ignores the objective and constraints that determine it, which can make generalization to new actions very hard. When that structure is used, the gradient of the leader’s criterion follows from differentiating the follower’s solution with respect to the action, and that solution changes smoothly only while the same constraints remain binding. This work computes these derivatives from the follower’s optimization model and studies when they lead to better actions than unconditional model-free search.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, François&nbsp;Pacaud, Joaquim&nbsp;Dias&nbsp;Garcia, Robert&nbsp;B.&nbsp;Parker, Kaarthik&nbsp;Sundar, Russell&nbsp;Bent, Pascal&nbsp;Van&nbsp;Hentenryck</p>
+</header>
+<figure class="scene scene-pair wrap"><div class="scene-item"><img src="../../assets/img/scenes/strategic-bidding-energy.jpg" alt="Three producers send painted offers along their lines to a central substation: the battery’s violet offer and the wind farm’s amber offer pass through and continue together to the town, while the gas plant’s amber offer stops against a bar before the substation." width="1200" height="900" style="object-position:50% 50%"><p class="scene-cap">The market’s response decides each producer’s outcome: the battery’s offer, in violet, is accepted, and the gas plant’s offer, in amber, is rejected.</p></div><div class="scene-item"><img src="../../assets/img/scenes/strategic-bidding-ai.jpg" alt="A car changes lanes on a highway, painted in violet, and the surrounding cars&#x27; painted amber paths bend in response, with white dashed lines showing where they would have gone." width="1200" height="900" style="object-position:50% 50%"><p class="scene-cap">The car’s lane change, in violet, makes the surrounding drivers leave the paths they would otherwise have taken, in dashed white, for new ones, in amber.</p></div></figure>
+
+<nav class="topic-map wrap" aria-label="Endogenous Response guide"><p>Argument</p><ol><li><a href="#response"><small>01 · Endogenous response</small><span>An action evaluated through another agent’s optimization</span></a></li><li><a href="#access"><small>02 · Computation</small><span>Exact, evaluation-only, and local access</span></a></li><li><a href="#market"><small>03 · Market instance</small><span>Offers completed by sequential clearing</span></a></li><li><a href="#study"><small>04 · Comparison</small><span>Better offers with fewer clearings</span></a></li><li><a href="#beyond"><small>05 · Beyond local search</small><span>Global surrogates and offer policies</span></a></li><li><a href="#software"><small>06 · Software</small><span>OptimalBids.jl and DiffOpt.jl</span></a></li></ol></nav>
+
+<div class="wrap proj-layout">
+  <nav class="toc" aria-label="On this page">
+    <p>On this page</p>
+    <ol>
+      <li><a href="#response">Endogenous response</a></li>
+      <li><a href="#access">Computation</a></li>
+      <li><a href="#market">Market instance</a></li>
+      <li><a href="#study">Comparison</a></li>
+      <li><a href="#beyond">Beyond local search</a></li>
+      <li><a href="#software">Software</a></li>
+    </ol>
+  </nav>
+  <article class="proj-body">
+    <section id="response">
+      <h2><span class="num">01 · Endogenous response</span>An action evaluated through another agent’s optimization</h2>
+      <p>When an action induces another decision maker's response, its value depends on that response. Let \(u\in\mathcal B\) be an action from the agent’s admissible set, \(\xi\) the exogenous context the agent does not control, and, without loss of generality, suppose that a second decision maker or mechanism completes the action by solving its own problem,</p>
+      <div class="eq">\[ \mathbf y^\star(u,\xi)\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(u,\xi)}\ f(\mathbf y;u,\xi), \]</div>
+      <p>with multipliers \(\boldsymbol\lambda^\star(u,\xi)\), signed as sensitivities of the optimal value to the right-hand side. The action is chosen against the completed response,</p>
+      <div class="eq">\[ \begin{aligned}
+&\max_{u\in\mathcal B}\quad J(u),\\[0.4em]
+J(u)&=\rho_\xi\!\bigl[\ell^\star(u,\xi)\bigr],\\[0.4em]
+\ell^\star(u,\xi)&=\ell\bigl(u,\mathbf y^\star(u,\xi),\boldsymbol\lambda^\star(u,\xi);\xi\bigr).
+\end{aligned} \]</div>
+      <p>Here \(\ell\) is the acting agent’s criterion, \(\ell^\star\) its value after the selected response, and \(\rho_\xi\) a risk-adjusted value of that criterion over the context, such as its expectation or its lower-tail mean (equivalently, the negative of a risk functional of \(-\ell\)). The inner objective \(f\) belongs to the other decision maker. The pair is a bilevel program, a Stackelberg game whose follower is an optimization. Multipliers enter because outer criteria often read the prices or marginal values of the inner problem. When the inner problem has several optimal solutions, \(\mathbf y^\star\) denotes the solution the mechanism selects.</p>
+      <p>The object is the counterfactual response: the solution the inner problem would select after each candidate action. Replacing \(\mathbf y^\star(u,\xi)\) by an outcome observed before acting gives a price-taking, or open-loop, approximation. It is adequate when one agent’s action barely moves the inner solution. When the action does move it, a model of the response must generalize to actions absent from the data, and fitting that model as a generic function of \(u\) ignores the objective and constraints that determine \(\mathbf y^\star\), which can make such generalization very hard. <a href="../../research/portfolio-optimization/">Uncertainty and Ambiguity</a> treats the estimated law; the response map is the object here.</p>
+      <p>The structure recurs wherever independently chosen actions meet a shared constrained process. An offer changes the allocation and the marginal values at which a market settles it; an order changes the book through which it executes; a planned trajectory changes the feasible continuation left to other agents. The mechanisms differ, and so do the representations a decision maker can hold of them: the optimization itself, a simulator, a learned surrogate, or a statistical model of outcomes. Each commits differently to feasibility, to local response, and to behavior across changes of the active constraints.</p>
+    </section>
+
+    <section id="access">
+      <h2><span class="num">02 · Computation</span>Exact, evaluation-only, and local access to the response</h2>
+      <p>Writing the response map makes the decision model faithful, but it does not make repeated search over \(u\) tractable. Three families of methods reach the inner problem in different ways, and they answer different computational questions.</p>
+      <p>An exact reformulation replaces the inner problem by its optimality conditions. When the inner problem is convex and satisfies a constraint qualification, its KKT conditions characterize \(\mathbf y^\star\), and imposing primal feasibility, dual feasibility, stationarity, and complementarity as constraints gives a single-level mathematical program with equilibrium constraints (MPEC) (<a href="#ref-hobbs2000">Hobbs et al., 2000</a>; <a href="#ref-ruiz2009">Ruiz and Conejo, 2009</a>). Complementarity carries the difficulty. Written with binary variables (<a href="#ref-fortuny1981">Fortuny-Amat and McCarl, 1981</a>) or special ordered sets (<a href="#ref-siddiqui2013">Siddiqui and Gabriel, 2013</a>), it certifies global optima at a cost that grows combinatorially; written as a nonlinear program (<a href="#ref-fletcher2004">Fletcher and Leyffer, 2004</a>), it solves quickly to degenerate local solutions. For a nonconvex inner problem the KKT conditions are necessary but no longer sufficient, so the single-level problem can admit points that are not the follower’s optimum.</p>
+      <p>Evaluation-only search keeps the inner problem as a solver and treats \(J\) as a black box. Derivative-free methods, from model-based trust regions such as BOBYQA (<a href="#ref-powell2009">Powell, 2009</a>) to simplex and evolutionary search, need nothing beyond repeated solves and remain meaningful across nonsmooth changes of the active set. Their cost is the number of solves, which becomes the binding limit as the dimension of \(u\) grows.</p>
+      <p>First-order search keeps the solver’s mathematical model and differentiates its solution. At a selected solution that satisfies the linear independence constraint qualification, second-order sufficiency, and strict complementarity, the implicit function theorem applied to the KKT residual \(F(\mathbf z;u,\xi)=\mathbf 0\), with \(\mathbf z=(\mathbf y,\boldsymbol\lambda,\boldsymbol\nu)\) and \(\boldsymbol\nu\) the multipliers of the inequality constraints, gives a differentiable primal–dual branch (<a href="#ref-fiacco1976">Fiacco, 1976</a>), and the derivative of the outer criterion is</p>
+      <div class="eq-r"><div class="eq eq-wide">\[ \begin{aligned}
+\nabla_u\ell^\star(u,\xi)
+&=\partial_u\ell
++\underbrace{\left(D_u\mathbf y^\star\right)^{\!\top}\nabla_{\mathbf y}\ell}_{\text{primal response}}
++\underbrace{\left(D_u\boldsymbol\lambda^\star\right)^{\!\top}\nabla_{\boldsymbol\lambda}\ell}_{\text{dual response}},\\[0.4em]
+F_{\mathbf z}^{\top}\mathbf v&=\nabla_{\mathbf z}\ell,\\[0.4em]
+\nabla_u\ell^\star(u,\xi)&=\partial_u\ell-F_u^{\top}\mathbf v.
+\end{aligned} \]</div><div class="eq eq-narrow">\[ \begin{aligned}
+\nabla_u\ell^\star(u,\xi)&=\partial_u\ell\\[0.4em]
+&\quad+\left(D_u\mathbf y^\star\right)^{\!\top}\nabla_{\mathbf y}\ell\\[0.4em]
+&\quad+\left(D_u\boldsymbol\lambda^\star\right)^{\!\top}\nabla_{\boldsymbol\lambda}\ell,\\[0.4em]
+F_{\mathbf z}^{\top}\mathbf v&=\nabla_{\mathbf z}\ell,\\[0.4em]
+\nabla_u\ell^\star(u,\xi)&=\partial_u\ell-F_u^{\top}\mathbf v.
+\end{aligned} \]</div></div>
+      <p>Here \(F_{\mathbf z}=\partial F/\partial\mathbf z\) and \(F_u=\partial F/\partial u\) are evaluated at the selected solution, \(\mathbf v\) is the adjoint vector, and one solve with the transposed KKT matrix returns this gradient using the factorization the solver already holds (<a href="#ref-pirnay2012">Pirnay et al., 2012</a>). The envelope theorem would give this derivative from the multipliers alone only if the outer criterion coincided with the inner objective. Here the two belong to different agents, so the response of the solution itself is required. Gradient-based bidding methods compute such responses from the clearing problem, for instance as transmission-constrained residual-demand derivatives (<a href="#ref-xu2011">Xu et al., 2011</a>). <a href="../../research/differentiable-optimization/">Differentiating Optimization Models</a> develops the calculus for existing models; at nonregular points, directional derivatives take the place of the derivative (<a href="#ref-ralph1995">Ralph and Dempe, 1995</a>).</p>
+      <h3>What a local response can carry</h3>
+      <p>A gradient is computable wherever the selected branch is regular. It is informative only if the inner model transmits the part of the response that the outer criterion reads. Linear inner problems make the failure exact. For \(\min\{\mathbf c^\top\mathbf y:\ A\mathbf y=\mathbf b,\ \mathbf y\ge\mathbf 0\}\) with a nondegenerate optimal basis \(B\) and multipliers signed as prices, \(\boldsymbol\lambda^\star=\nabla_{\mathbf b}\) of the optimal value,</p>
+      <div class="eq">\[ \begin{aligned}
+\mathbf y_B^\star&=B^{-1}\mathbf b,\qquad \mathbf y_N^\star=\mathbf 0,\\[0.4em]
+\boldsymbol\lambda^\star&=B^{-\top}\mathbf c_B.
+\end{aligned} \]</div>
+      <p>Here \(N\) indexes the nonbasic variables: The primal solution responds to the right-hand side and not to the costs, while the multipliers respond to the basic costs and not to the right-hand side. Over the right-hand side the solution is piecewise affine and the multipliers are piecewise constant (<a href="#ref-borrelli2003">Borrelli et al., 2003</a>). An action that enters through \(\mathbf b\) therefore has \(D_u\boldsymbol\lambda^\star=\mathbf 0\) wherever the derivative exists, and every change of \(\boldsymbol\lambda^\star\) arrives as a jump at a change of basis that the derivative at the current basis cannot anticipate. The term is exactly zero, so no step size or solver tolerance repairs it.</p>
+      <p>Curvature removes this decoupling. With a nonzero Hessian of the Lagrangian, the primal and dual blocks of the KKT matrix are coupled, and within an active set the multipliers move continuously with the right-hand side; for a quadratic inner problem, \(\boldsymbol\lambda^\star\) is affine in \(\mathbf b\). Changes of the active set, however, still produce kinks and jumps, and local search can still stop at a poor stationary point. Whether the transmitted response repays its computation is therefore a question about the inner model, and the market study below answers it for one representative class.</p>
+    </section>
+
+    <section id="market">
+      <h2><span class="num">03 · Market instance</span>Offers completed by sequential market clearing</h2>
+      <p>Electricity markets make every element of the composition explicit. A producer or trader submits, for each node and hour of the next day, a price and a quantity, \(u=(\mathbf c,\mathbf Q)\). The operator clears day-ahead offers by an optimization that sets an allocation \(\mathbf q\) and nodal prices \(\boldsymbol\pi\), the multipliers of power balance, which give the marginal value of energy delivered at each node. On the operating day a second clearing sets dispatch \(\mathbf g\) and real-time prices \(\boldsymbol\lambda\), starting from a state \(\mathbf x\) set by the day-ahead clearing. Competing offers, demand, and the operator’s forecasts are not observed at bidding time and enter through \(\xi\). A strategic participant solves a problem with one equilibrium constraint for each clearing,</p>
+      <div class="eq-r"><div class="eq eq-wide">\[ \begin{aligned}
+\max_{u\in\mathcal B}\quad &\rho_\xi\!\left[R(\mathbf q,\boldsymbol\pi,\mathbf g,\boldsymbol\lambda)\right]\\[0.4em]
+\text{s.t.}\quad &\underbrace{(\mathbf q,\boldsymbol\pi,\mathbf x)\in\mathcal M^{\mathrm{DA}}(u,\xi)}_{\text{day-ahead clearing}},\\[0.4em]
+&\underbrace{(\mathbf g,\boldsymbol\lambda)\in\mathcal M^{\mathrm{RT}}(u,\mathbf x,\xi)}_{\text{real-time clearing}},\\[0.4em]
+R_{\mathrm{phys}}&=\sum_{n\in\mathcal N}\sum_{h\in\mathcal H}
+\Bigl[\underbrace{\pi_{n,h}q_{n,h}}_{\text{DA}}
++\underbrace{\lambda_{n,h}(g_{n,h}-q_{n,h})}_{\text{RT adjustment}}\Bigr],\\[0.4em]
+R_{\mathrm{virt}}&=\sum_{n\in\mathcal N}\sum_{h\in\mathcal H}(\pi_{n,h}-\lambda_{n,h})q_{n,h}.
+\end{aligned} \]</div><div class="eq eq-narrow">\[ \begin{aligned}
+\max_{u\in\mathcal B}\quad &\rho_\xi\!\left[R(\mathbf q,\boldsymbol\pi,\mathbf g,\boldsymbol\lambda)\right]\\[0.4em]
+\text{s.t.}\quad &(\mathbf q,\boldsymbol\pi,\mathbf x)\in\mathcal M^{\mathrm{DA}}(u,\xi),\\[0.4em]
+&(\mathbf g,\boldsymbol\lambda)\in\mathcal M^{\mathrm{RT}}(u,\mathbf x,\xi),\\[0.4em]
+R_{\mathrm{phys}}&=\sum_{\substack{n\in\mathcal N\\h\in\mathcal H}}\bigl[\pi_{n,h}q_{n,h}\\[0.4em]
+&\qquad+\lambda_{n,h}(g_{n,h}-q_{n,h})\bigr],\\[0.4em]
+R_{\mathrm{virt}}&=\sum_{\substack{n\in\mathcal N\\h\in\mathcal H}}(\pi_{n,h}-\lambda_{n,h})q_{n,h}.
+\end{aligned} \]</div></div>
+      <p>Here \(\mathcal B\) collects the participant’s offer limits, \(\mathcal M^{\mathrm{DA}}\) and \(\mathcal M^{\mathrm{RT}}\) return the selected clearing responses, \(\mathcal N\) and \(\mathcal H\) index the participant’s nodes and settlement hours, and \(R\) is \(R_{\mathrm{phys}}\) for a physical position or \(R_{\mathrm{virt}}\) for a virtual position, which settles the price difference without delivery, as in virtual bidding (<a href="#ref-macedo2022">Macedo et al., 2022</a>). A physical participant may also offer into the real-time clearing, so \(\mathcal M^{\mathrm{RT}}\) depends on \(u\) as well as on the state \(\mathbf x\) set by the day-ahead clearing. A virtual bid enters only the day-ahead clearing and reaches real-time prices through that state alone. Uncertain inputs enter both.</p>
+      <figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="../../assets/img/diagrams/strategic-bidding--sequential-market-compact.svg?v=d1fb77e7" width="309" height="344"><img src="../../assets/img/diagrams/strategic-bidding--sequential-market.svg?v=57722d36" alt="The participant’s problem, maximizing risk-adjusted revenue over offers u, sends u to day-ahead clearing and to real-time clearing. Day-ahead clearing returns the allocation and prices (q, π) to the participant and passes the state x to real-time clearing, which returns dispatch and prices (g, λ). Uncertain context ξ enters both clearings." width="535" height="279" style="max-width:856px"></picture></div><figcaption><b>The participant acts and the operator’s two clearings react.</b> Each offer \(u\) is answered by the day-ahead allocation and prices \((\mathbf q,\boldsymbol\pi)\) and, from the state \(\mathbf x\) set by the day-ahead clearing, by real-time dispatch and prices \((\mathbf g,\boldsymbol\lambda)\), which together fix the revenue. A search over offers repeats this exchange, one pair of clearings per evaluated offer. A virtual bid enters only the day-ahead clearing. Structure after B.&nbsp;Fanzeres’s two-settlement diagram.</figcaption></figure>
+      <p>How the clearing is represented decides how much of its own influence a bidding model can capture. A statistical, or data-analytics, approach models day-ahead and real-time prices as a stochastic process and chooses offers against it, so the offer decides only whether it clears against prices that do not respond. It is a price-taking approximation, and its difficulties are those of an estimated law: finite samples, heavy tails, nonstationarity. <a href="../../research/portfolio-optimization/#calibration">Uncertainty and Ambiguity</a> addresses these difficulties at the statistical level, for instance by calibrating ambiguity sets on the day-ahead minus real-time price spreads of PJM virtual bids.</p>
+      <figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="../../assets/img/diagrams/strategic-bidding--price-process-compact.svg?v=0e872db6" width="309" height="344"><img src="../../assets/img/diagrams/strategic-bidding--price-process.svg?v=9c3e4fd2" alt="The same layout as the two-settlement diagram, with each clearing replaced by a price law: day-ahead prices drawn given the context ξ, real-time prices drawn given ξ and the day-ahead prices. Both prices return to the participant’s problem; no offer arrow enters either box." loading="eager" width="535" height="279" style="max-width:856px"></picture></div><figcaption><b>A statistical approach replaces each clearing by a price law.</b> Day-ahead prices are drawn given the context \(\xi\), and real-time prices given the context and the day-ahead prices. No arrow carries the offer \(u\) into either box, so the offer decides only how much clears at those prices.</figcaption></figure>
+      <p>A price–quota, or surrogate, approach fits prices as functions of the offer, \(\boldsymbol\pi(\mathbf c,\mathbf Q)\) and \(\boldsymbol\lambda(\mathbf c,\mathbf Q)\), for instance as a neural network embedded in the bidding problem (<a href="#ref-dolanyi2024">Dolányi et al., 2024</a>). It retains influence but must remain credible for offers unlike those it was fitted on. Finally, an endogenous approach keeps the clearing problems and evaluates each candidate offer through the operator’s selected solution; only it computes price responses from the clearing model itself, but its exact reformulation grows combinatorially with the complementarity conditions, as we have pointed out before.</p>
+      <p>The completed study follows the endogenous approach and solves it iteratively: Each candidate offer is cleared, and a search method proposes the next offer from the outcome. To compare search methods on a controlled response, it isolates one clearing and one strategic producer (<a href="#ref-rosemberg2025d">Rosemberg et al., 2025d</a>). Other participants’ offers and the load are fixed to one scenario, and commitment decisions are taken as given, as in a real-time market. For each of its generators the producer offers a price \(\mathbf c_a\ge\mathbf c_o\), at least its operating cost, and a quantity \(\mathbf 0\le\mathbf Q_a\le\mathbf Q^{\max}\), so \(u=(\mathbf c_a,\mathbf Q_a)\). Clearing returns dispatch \(\mathbf g_a^\star\) and nodal prices \(\boldsymbol\lambda_a^\star\), and the profit and its gradient are</p>
+      <div class="eq-r"><div class="eq eq-wide">\[ \begin{aligned}
+\Pi(u)&=\bigl(\boldsymbol\lambda_a^\star-\mathbf c_o\bigr)^{\!\top}\mathbf g_a^\star,\\[0.4em]
+\nabla_u\Pi(u)&=\underbrace{\bigl(D_u\mathbf g_a^\star\bigr)^{\!\top}\bigl(\boldsymbol\lambda_a^\star-\mathbf c_o\bigr)}_{\text{dispatch path}}
++\underbrace{\bigl(D_u\boldsymbol\lambda_a^\star\bigr)^{\!\top}\mathbf g_a^\star}_{\text{price path}}.
+\end{aligned} \]</div><div class="eq eq-narrow">\[ \begin{aligned}
+\Pi(u)&=\bigl(\boldsymbol\lambda_a^\star-\mathbf c_o\bigr)^{\!\top}\mathbf g_a^\star,\\[0.4em]
+\nabla_u\Pi(u)&=\bigl(D_u\mathbf g_a^\star\bigr)^{\!\top}\bigl(\boldsymbol\lambda_a^\star-\mathbf c_o\bigr)\\[0.4em]
+&\quad+\bigl(D_u\boldsymbol\lambda_a^\star\bigr)^{\!\top}\mathbf g_a^\star.
+\end{aligned} \]</div></div>
+      <p>The first term is the dispatch path, the second the price path. The clearing is modeled in its AC form, with the nonlinear power-flow equations, voltage limits, and losses. Market operators often clear on a linear approximation for tractability and then correct the dispatch toward AC physics; this study uses the AC model directly, which also isolates the search from the differentiability issues that linear problems pose for the Lagrange multipliers, as stated before.</p>
+    </section>
+
+    <section id="study">
+      <h2><span class="num">04 · Comparison</span>Gradients find better offers with fewer clearings</h2>
+      <p>Gradient-based search found better offers with fewer clearings. On the two PEGASE systems, with 1,354 and 2,869 buses, the best gradient-based method reached about twice the profit of the best derivative-free method, with gains of 102% and 110%; gradient-based methods converged in about 50 clearings, while derivative-free methods reached the 100-clearing limit in nearly all runs.</p>
+      <p>Five PGLib benchmark systems, from 300 to 2,869 buses, were cleared by AC optimal power flow. In each of several randomized variations per system, 10% of the nodes were made bidding nodes with sampled initial offers. Four gradient-based and four derivative-free methods from the NLopt library each received at most 100 clearings, with gradients through the AC clearing computed by the nonlinear extension of DiffOpt.jl (<a href="#ref-rosemberg2025a">Rosemberg et al., 2025a</a>). Counting clearings is a uniform measure of cost, because the sensitivity solve reuses the factorized KKT system and is cheap beside the clearing itself.</p>
+      <figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="../../assets/img/research/strategic-bidding-nonlinear-compact.svg"><img src="../../assets/img/research/strategic-bidding-nonlinear.svg" alt="Horizontal bar charts for five systems. Profit gain of gradient-based over derivative-free search, best versus best: PEGASE 2869 110.0%, PEGASE 1354 102.1%, RTE 2868 28.3%, GOC 2000 2.2%, IEEE 300 minus 1.1%; averages over all methods: 95.7, 80.2, 27.7, 7.5 and 12.2%. Reduction in clearing evaluations, best versus best: 23.7, 41.0, 44.4, 36.5 and 19.0%; averages over all methods: 42.5, 49.6, 48.3, 44.1 and 41.3%." width="934" height="375"></picture></div><figcaption><b>Gradient-based search earns more and clears less.</b> The <i>Profit</i> panel shows profit gain of gradient-based over derivative-free search; <i>Clearing evaluations</i> shows the reduction in clearings. Dark grey compares the best method of each class, amber the averages over all methods of each class; bars are means over case variations and whiskers one standard deviation. Data from Rosemberg et al. (2025d), Tables I and II. The profit gain concentrates on the PEGASE systems; the reduction in clearings holds on every system.</figcaption></figure>
+      <p>On the smallest system the simpler landscape leaves derivative-free search competitive; on the larger ones the paper attributes its shortfall to the dimension of the offer, which grows with the number of bidding nodes.</p>
+    </section>
+
+    <section id="beyond">
+      <h2><span class="num">05 · Beyond local search</span>Where the local branch is uninformative, a prior or an average over contexts replaces it</h2>
+      <h3>Global surrogate search</h3>
+      <p>Where the local branch does not describe the change in response that matters, a global method replaces the derivative by a prior. Bayesian optimization models the objective as a Gaussian process and chooses each new clearing by an acquisition function \(\alpha_n\) computed from the posterior after \(n\) clearings,</p>
+      <div class="eq-r"><div class="eq eq-wide">\[ \begin{aligned}
+J&\sim\operatorname{GP}(m,k),\qquad \mathcal D_n=\bigl\{(u_i,\hat J_i)\bigr\}_{i=1}^{n},\\[0.4em]
+\mu_n(u)&=m(u)+\mathbf k_n(u)^{\!\top}\bigl(K_n+\sigma_\varepsilon^2 I\bigr)^{-1}\bigl(\hat{\mathbf J}_n-\mathbf m_n\bigr),\\[0.4em]
+\sigma_n^2(u)&=k(u,u)-\mathbf k_n(u)^{\!\top}\bigl(K_n+\sigma_\varepsilon^2 I\bigr)^{-1}\mathbf k_n(u),\\[0.4em]
+\alpha_n(u)&=\underbrace{\mu_n(u)}_{\mathclap{\text{exploitation}}}+\underbrace{\beta_n^{1/2}\,\sigma_n(u)}_{\mathclap{\text{exploration}}},\\[0.4em]
+u_{n+1}&\in\operatorname*{arg\,max}_{u\in\mathcal B}\ \alpha_n(u).
+\end{aligned} \]</div><div class="eq eq-narrow">\[ \begin{aligned}
+J&\sim\operatorname{GP}(m,k),\\[0.4em]
+\mathcal D_n&=\bigl\{(u_i,\hat J_i)\bigr\}_{i=1}^{n},\\[0.4em]
+\mu_n(u)&=m(u)\\[0.4em]
+&\quad+\mathbf k_n(u)^{\!\top}\bigl(K_n+\sigma_\varepsilon^2 I\bigr)^{-1}\bigl(\hat{\mathbf J}_n-\mathbf m_n\bigr),\\[0.4em]
+\sigma_n^2(u)&=k(u,u)\\[0.4em]
+&\quad-\mathbf k_n(u)^{\!\top}\bigl(K_n+\sigma_\varepsilon^2 I\bigr)^{-1}\mathbf k_n(u),\\[0.4em]
+\alpha_n(u)&=\underbrace{\mu_n(u)}_{\mathclap{\text{exploitation}}}+\underbrace{\beta_n^{1/2}\,\sigma_n(u)}_{\mathclap{\text{exploration}}},\\[0.4em]
+u_{n+1}&\in\operatorname*{arg\,max}_{u\in\mathcal B}\ \alpha_n(u).
+\end{aligned} \]</div></div>
+      <p>Here \(m\) is the prior mean and \(k\) the covariance kernel, \(\mathcal D_n\) the \(n\) offers cleared so far with their evaluated profits \(\hat J_i\), \(\mathbf k_n(u)\) and \(K_n\) the kernel evaluated between \(u\) and those offers and among them, \(\mathbf m_n\) the prior mean at those offers, \(\sigma_\varepsilon^2\) the evaluation noise, and \(\beta_n\) the weight on exploration. Every term of the acquisition is computed from \(k\): The posterior mean interpolates the cleared offers through it, and the exploration term measures how far an offer lies from them in the geometry it defines. The kernel therefore decides both where the surrogate expects profit and where it expects to learn, and the surrogate can leave the current basin and find another response regime only if \(k\) describes the objective it explores.</p>
+      <p>Strategic-offer profit is piecewise and upper semicontinuous, with jumps where the active set of the clearing changes. A stationary kernel assigns one correlation length to the whole offer space, so it either smooths over the jumps or, fitted to them, treats every gap between clearings as uncertain. Some kernels, among them the squared-exponential and Matérn families, are universal: Their reproducing kernel Hilbert spaces are dense in the continuous functions on a compact set, so with enough clearings the posterior can approximate the profit arbitrarily well away from its jumps. Universality concerns what the surrogate can eventually represent, however, not how many clearings the search needs to find a good offer: Regret bounds for this acquisition grow with the kernel’s maximal information gain, which is larger for rougher kernels and grows with the dimension of the offer (<a href="#ref-srinivas2010">Srinivas et al., 2010</a>).</p>
+      <p>Fitted by maximum likelihood to the same ten clearings along one offer direction, three out-of-the-box kernels place their uncertainty differently, and none of them includes the profit peak, which lies between the first two cleared offers, inside its posterior band.</p>
+      <figure class="fig"><div class="frame"><img src="../../assets/img/research/strategic-bidding-kernels.webp" alt="Kernel comparison: producer profit over bid volume from 0 to 15% market share, a jagged black curve with a sharp peak near 0.5%; ten orange data points; posterior means and bands for Matérn, rational quadratic and fractional Brownian motion kernels, all passing below the peak." width="1616" height="1134" loading="eager"></div><figcaption><b>Kernels fitted to the same clearings disagree about where profit can be.</b> Producer profit on IEEE 118 with linear clearing, all offered quantities scaled by one factor. Black is the profit evaluated over the whole range, dots are the ten clearings to which each kernel’s hyperparameters were fitted by maximum likelihood, and lines and bands are the posterior means and uncertainty. From the OptimalBids.jl examples.</figcaption></figure>
+      <p>The burden moves from local fidelity of the clearing model to global fidelity of the surrogate, and the clearings needed to make the surrogate informative become the limiting cost as the dimension of the offer grows. Extensive exploration of out-of-the-box kernels found the rational quadratic the best of them for the studied case, and the search below uses it, although it still describes the jumps of the profit only approximately.</p>
+      <figure class="fig inset"><div class="frame"><img src="../../assets/img/software/optimalbids-bayesopt.gif" alt="Bayesian optimization building a Gaussian-process surrogate of a jagged producer-profit curve, one clearing at a time." width="900" height="600"></div><figcaption><b>A Gaussian-process prior takes the place of the local derivative along one offer direction.</b> Bayesian optimization of producer profit on IEEE 118 with linear clearing, all offered quantities scaled by one factor; points are clearings and the band is the posterior of a Gaussian process with the rational quadratic kernel. An illustration from the OptimalBids.jl examples; Bayesian optimization was not among the methods compared above.</figcaption></figure>
+      <h3>Offer policies trained through the clearing</h3>
+      <p>The comparison searches one offer for one context. The same derivative can train a map from observed context \(w\) to offers, \(u=\phi_\theta(w)\), by stochastic gradient on</p>
+      <div class="eq-r"><div class="eq eq-wide">\[ \begin{aligned}
+&\max_\theta\ \underbrace{\mathbb E_{w\sim\mathbb P_w}\!\Bigl[
+\mathbb E_{\xi\sim\mathbb P(\cdot\mid w)}\!\bigl[\Pi\bigl(\phi_\theta(w);\xi\bigr)\bigr]\Bigr]}_{\text{expected profit}},\\[0.4em]
+&\begin{aligned}
+\nabla_\theta\Pi\bigl(\phi_\theta(w);\xi\bigr)
+&=\bigl(D_\theta\phi_\theta(w)\bigr)^{\!\top}
+\left.\nabla_u\Pi(u;\xi)\right|_{u=\phi_\theta(w)}.
+\end{aligned}
+\end{aligned} \]</div><div class="eq eq-narrow">\[ \begin{aligned}
+&\max_\theta\ \mathbb E_{w\sim\mathbb P_w}\!\Bigl[\\[0.4em]
+&\quad\mathbb E_{\xi\sim\mathbb P(\cdot\mid w)}\!\bigl[\Pi\bigl(\phi_\theta(w);\xi\bigr)\bigr]\Bigr],\\[0.4em]
+&\nabla_\theta\Pi\bigl(\phi_\theta(w);\xi\bigr)\\[0.4em]
+&\quad=\bigl(D_\theta\phi_\theta(w)\bigr)^{\!\top}\\[0.4em]
+&\qquad\cdot\left.\nabla_u\Pi(u;\xi)\right|_{u=\phi_\theta(w)}.
+\end{aligned} \]</div></div>
+      <p>Here \(\mathbb P_w\) is the law of observed contexts, \(\mathbb P(\cdot\mid w)\) the conditional law of the unobserved context \(\xi\), and \(\Pi(u;\xi)\) the profit of offer \(u\) under \(\xi\), which is realized after the offer is fixed. Each sample costs one clearing and one adjoint solve. The expectation should also smooth the objective: averaged over load scenarios, the mean profit along an offer is relatively smooth (<a href="#ref-rosemberg2025d">Rosemberg et al., 2025d</a>, Figs.&nbsp;4–5), which would favor every iterative method. This is the decision-focused learning developed on <a href="../../research/differentiable-optimization/">Differentiating Optimization Models</a>, with the downstream optimization belonging to another agent: The clearing minimizes the cost of supply, while the map is trained on the producer’s profit. The offered quantities can themselves be set by a state policy, for instance storage discharge prescribed by a policy of <a href="../../research/decision-rules/">Policies for Multistage Decisions</a>; the clearing response then returns through the offer to the policy’s parameters. In the two-settlement problem the derivative passes through both clearings and the state between them, and the expectation over \(\xi\) is taken under an estimated law that an ambiguity set can protect, as developed on <a href="../../research/portfolio-optimization/">Uncertainty and Ambiguity</a>. When the optimization is the decision maker’s own controller rather than another agent’s mechanism, the same derivative path can train the controller’s targets and coefficients, the other setting of decision-focused learning.</p>
+    </section>
+
+    <section id="software"><h2>Software</h2>
+    <p>OptimalBids.jl turns a market-clearing model into one object on which derivative-free search, gradient search, and exact bilevel reformulations act, and DiffOpt.jl differentiates the clearing.</p>
+    <div class="soft-features"><article class="soft-feature"><a class="soft-feature-media" href="../../software/optimalbids/" tabindex="-1" aria-hidden="true"><img src="../../assets/img/software/optimalbids-bayesopt.gif" alt="" loading="lazy"></a><div><h3><a href="../../software/optimalbids/">OptimalBids.jl</a></h3><p>Reduces a market to four operations, so derivative-free search, gradient search and exact bilevel reformulations act on one market definition.</p><p class="soft-feature-links"><a href="../../software/optimalbids/">Package page <span aria-hidden="true">→</span></a><a href="https://github.com/andrewrosemberg/OptimalBids.jl">GitHub <span aria-hidden="true">↗</span></a></p></div></article><article class="soft-feature"><a class="soft-feature-media" href="../../research/differentiable-optimization/" tabindex="-1" aria-hidden="true"><img src="../../assets/img/scenes/thumbs/differentiable-optimization-ai.webp" alt="" loading="lazy"></a><div><h3><a href="../../research/differentiable-optimization/">DiffOpt.jl</a></h3><p>Solution and optimal-value derivatives of JuMP models with respect to named parameters, through the model&#x27;s reformulations, for convex and smooth nonconvex programs.</p><p class="soft-feature-links"><a href="../../research/differentiable-optimization/">Package page <span aria-hidden="true">→</span></a><a href="https://github.com/jump-dev/DiffOpt.jl">GitHub <span aria-hidden="true">↗</span></a></p></div></article></div>
+    </section>
+
+    <section id="references">
+      <h2>References</h2>
+      <ol class="refs">
+        <li id="ref-borrelli2003">F. Borrelli, A. Bemporad, M. Morari. Geometric algorithm for multiparametric linear programming. <i>Journal of Optimization Theory and Applications</i> 118:515–540, 2003.</li>
+        <li id="ref-dolanyi2024">M. Dolányi, K. Bruninx, J.-F. Toubeau, E. Delarue. Capturing electricity market dynamics in strategic market participation using neural network constrained optimization. <i>IEEE Transactions on Power Systems</i> 39(1):533–545, 2024.</li>
+        <li id="ref-fiacco1976">A. V. Fiacco. Sensitivity analysis for nonlinear programming using penalty methods. <i>Mathematical Programming</i> 10(1):287–311, 1976.</li>
+        <li id="ref-fletcher2004">R. Fletcher, S. Leyffer. Solving mathematical programs with complementarity constraints as nonlinear programs. <i>Optimization Methods and Software</i> 19(1):15–40, 2004.</li>
+        <li id="ref-fortuny1981">J. Fortuny-Amat, B. McCarl. A representation and economic interpretation of a two-level programming problem. <i>Journal of the Operational Research Society</i> 32(9):783–792, 1981.</li>
+        <li id="ref-hobbs2000">B. F. Hobbs, C. B. Metzler, J.-S. Pang. Strategic gaming analysis for electric power systems: An MPEC approach. <i>IEEE Transactions on Power Systems</i> 15(2):638–645, 2000.</li>
+        <li id="ref-pirnay2012">H. Pirnay, R. López-Negrete, L. T. Biegler. Optimal sensitivity based on IPOPT. <i>Mathematical Programming Computation</i> 4:307–331, 2012.</li>
+        <li id="ref-powell2009">M. J. D. Powell. The BOBYQA algorithm for bound constrained optimization without derivatives. Cambridge NA Report NA2009/06, University of Cambridge, 2009.</li>
+        <li id="ref-ralph1995">D. Ralph, S. Dempe. Directional derivatives of the solution of a parametric nonlinear program. <i>Mathematical Programming</i> 70(1–3):159–172, 1995.</li>
+        <li id="ref-ruiz2009">C. Ruiz, A. J. Conejo. Pool strategy of a producer with endogenous formation of locational marginal prices. <i>IEEE Transactions on Power Systems</i> 24(4):1855–1866, 2009.</li>
+        <li id="ref-siddiqui2013">S. Siddiqui, S. A. Gabriel. An SOS1-based approach for solving MPECs with a natural gas market application. <i>Networks and Spatial Economics</i> 13:205–227, 2013.</li>
+        <li id="ref-srinivas2010">N. Srinivas, A. Krause, S. M. Kakade, M. Seeger. Gaussian process optimization in the bandit setting: No regret and experimental design. International Conference on Machine Learning (ICML), 2010.</li>
+        <li id="ref-xu2011">L. Xu, R. Baldick, Y. Sutjandra. Bidding into electricity markets: A transmission-constrained residual demand derivative approach. <i>IEEE Transactions on Power Systems</i> 26(3):1380–1388, 2011.</li>
+        <li id="ref-macedo2022">D. Macedo, R. Ribeiro, B. Fanzeres, A. W. Rosemberg. Virtual transactions in electricity markets: An instrument for a reliable energy transition towards a low-carbon operation. 54th Brazilian Symposium of Operations Research (SBPO), 2022. <a href="https://www.researchgate.net/publication/365319078_Virtual_Transactions_in_Electricity_Markets_An_Instrument_for_a_Reliable_Energy_Transition_Towards_a_Low-Carbon_Operation">Paper</a></li>
+        <li id="ref-rosemberg2025a">A. W. Rosemberg, J. Dias Garcia, F. Pacaud, R. B. Parker, B. Legat, K. Sundar, R. Bent, P. Van Hentenryck. A general and streamlined differentiable optimization framework. Preprint arXiv:2510.25986, 2025. <a href="https://arxiv.org/abs/2510.25986">Preprint</a></li>
+        <li id="ref-rosemberg2025d">A. W. Rosemberg, F. Pacaud, J. Dias Garcia, R. B. Parker, K. Sundar, R. Bent, P. Van Hentenryck. Strategic bidding in energy markets with gradient-based iterative methods. <i>Sustainable Energy, Grids and Networks</i>, 101878, 2025. <a href="https://doi.org/10.1016/j.segan.2025.101878">Paper</a></li>
+      </ol>
+    </section>
+
+    <nav class="research-compass" aria-label="Continue through the research"><p>Navigate This Work</p><div class="research-compass-grid"><a href="../../research/#multi-level"><small>Theory</small><span>Research Overview<b aria-hidden="true"> →</b></span></a><a href="../../software/optimalbids/"><small>Software</small><span>OptimalBids.jl<b aria-hidden="true"> →</b></span></a><a href="#papers"><small>Paper</small><span>Publication and Technical Record<b aria-hidden="true"> →</b></span></a><a href="../../research/portfolio-optimization/"><small>Related Setting</small><span>Uncertainty and Ambiguity<b aria-hidden="true"> →</b></span></a></div><div class="research-compass-all"><a href="../../research/">Research Overview</a><a href="../../software/">Software Index</a><a href="../../publications/">Publication Index</a></div></nav>
+
+    <section id="papers">
+      <h2>Publication</h2>
+      <ol class="pub-list compact"><li class="pub" data-type="journal"><div class="pub-body"><p class="pub-meta"><span class="venue-badge journal">Journal</span><span>Sustainable Energy, Grids and Networks, vol. 43, 101878 · presented at IREP 2025</span></p><h3 class="pub-title">Strategic Bidding in Energy Markets with Gradient-Based Iterative Methods</h3><p class="pub-authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, François&nbsp;Pacaud, Joaquim&nbsp;Dias&nbsp;Garcia, Robert&nbsp;B.&nbsp;Parker, Kaarthik&nbsp;Sundar, Russell&nbsp;Bent, Pascal&nbsp;Van&nbsp;Hentenryck</p><div class="pub-links"><a class="pub-link" href="https://doi.org/10.1016/j.segan.2025.101878">Paper <span aria-hidden="true">↗</span></a><a class="pub-link" href="https://doi.org/10.2139/ssrn.5043309">Preprint (SSRN) <span aria-hidden="true">↗</span></a><details class="bib"><summary class="pub-link">BibTeX</summary><div class="bib-box"><button class="copy-bib" type="button">Copy</button><pre><code>@article{rosemberg2025strategic,
+  title   = {Strategic bidding in energy markets with gradient-based iterative methods},
+  author  = {Rosemberg, Andrew and Pacaud, Fran{\c{c}}ois and Dias Garcia, Joaquim and Parker, Robert B. and Sundar, Kaarthik and Bent, Russell and Van Hentenryck, Pascal},
+  journal = {Sustainable Energy, Grids and Networks},
+  volume  = {43},
+  pages   = {101878},
+  year    = {2025},
+  doi     = {10.1016/j.segan.2025.101878}
+}</code></pre></div></details></div></div></li></ol>
+    </section>
+  </article>
+</div>
+</main><footer class="site-footer">
+  <div class="footer-inner wrap">
+    <div class="footer-id">
+      <p class="footer-name">Andrew Rosemberg</p>
+      <p>PhD Candidate in Machine Learning<br>Georgia Tech · AI4OPT · Atlanta, GA</p>
+      <p><a href="mailto:arosemberg3@gatech.edu">arosemberg3@gatech.edu</a></p>
+    </div>
+    <nav class="footer-col" aria-label="Site">
+      <p class="footer-label">Site</p>
+      <a href="../../research/">Research</a>
+      <a href="../../publications/">Publications</a>
+      <a href="../../software/">Software</a>
+      <a href="../../teaching/">Teaching</a>
+      <a href="../../experience/">Experience</a>
+    </nav>
+    <nav class="footer-col" aria-label="Elsewhere">
+      <p class="footer-label">Elsewhere</p>
+      <a href="https://scholar.google.com/citations?user=jOuzK3EAAAAJ">Google Scholar</a>
+      <a href="https://github.com/andrewrosemberg">GitHub</a>
+      <a href="https://github.com/LearningToOptimize">LearningToOptimize</a>
+      <a href="https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/">LinkedIn</a>
+      <a href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV (PDF)</a>
+    </nav>
+  </div>
+  <div class="footer-bottom wrap"><div class="footer-bottom-inner"><p>© 2026 Andrew Rosemberg</p><p>Updated November 2026</p></div></div>
+</footer>
+</body>
+</html>

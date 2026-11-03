@@ -1,28 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-<url>
-    <loc>https://andrewrosemberg.github.io/AndrewRosemberg/index.html</loc>
-    <lastmod>2023-10-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://andrewrosemberg.github.io/AndrewRosemberg/publications/index.html</loc>
-    <lastmod>2023-10-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://andrewrosemberg.github.io/AndrewRosemberg/experience/index.html</loc>
-    <lastmod>2023-10-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
-<url>
-    <loc>https://andrewrosemberg.github.io/AndrewRosemberg/software/index.html</loc>
-    <lastmod>2023-10-11</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-</url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/experience/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/publications/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/dc2ac/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/decision-rules/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/differentiable-optimization/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/masked-sobolev/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/network-simplifications/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/portfolio-optimization/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/strategic-bidding/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/research/value-functions/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/software/decisionrules/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/software/hydropowermodels/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/software/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/software/learningtooptimize/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/software/optimalbids/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/software/portfolioopt/</loc><lastmod>2026-11-03</lastmod></url>
+  <url><loc>https://andrewrosemberg.github.io/AndrewRosemberg/teaching/</loc><lastmod>2026-11-03</lastmod></url>
 </urlset>

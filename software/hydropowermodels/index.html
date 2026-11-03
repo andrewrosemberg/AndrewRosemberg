@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HydroPowerModels.jl · Andrew Rosemberg</title>
+  <meta name="description" content="A Julia package for multistage hydrothermal planning by stochastic dual dynamic programming over any PowerModels.jl network formulation, with separate formulations for computing cuts and for operating the system.">
+  <meta name="author" content="Andrew Rosemberg">
+  <meta name="theme-color" content="#f8f7f3">
+  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
+  <link rel="canonical" href="https://andrewrosemberg.github.io/AndrewRosemberg/software/hydropowermodels/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Andrew Rosemberg">
+  <meta property="og:title" content="HydroPowerModels.jl · Andrew Rosemberg">
+  <meta property="og:description" content="A Julia package for multistage hydrothermal planning by stochastic dual dynamic programming over any PowerModels.jl network formulation, with separate formulations for computing cuts and for operating the system.">
+  <meta property="og:url" content="https://andrewrosemberg.github.io/AndrewRosemberg/software/hydropowermodels/">
+  <meta property="og:image" content="https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="../../assets/fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/InstrumentSerif-Regular-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=8513f2753c">
+  <script src="../../assets/js/site.js?v=d8fec169e3" defer></script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Person","name":"Andrew Rosemberg","alternateName":"Andrew David Werner Rosemberg","url":"https://andrewrosemberg.github.io/AndrewRosemberg/","image":"https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/andrew-rosemberg.jpg","jobTitle":"PhD Candidate in Machine Learning","affiliation":[{"@type":"CollegeOrUniversity","name":"Georgia Institute of Technology"},{"@type":"Organization","name":"AI4OPT"}],"alumniOf":[{"@type":"CollegeOrUniversity","name":"Pontifical Catholic University of Rio de Janeiro"},{"@type":"CollegeOrUniversity","name":"École Centrale de Marseille"}],"knowsAbout":["Machine learning","Mathematical optimization","Stochastic programming","Differentiable optimization","Reinforcement learning","Power systems"],"sameAs":["https://github.com/andrewrosemberg","https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/","https://scholar.google.com/citations?user=jOuzK3EAAAAJ"]}
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});window.fitEquations&&(fitEquations(),document.fonts.ready.then(fitEquations),addEventListener('load',fitEquations))"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../../" aria-label="Andrew Rosemberg — home">
+      <span class="monogram" aria-hidden="true">AR</span>
+      <span>Andrew Rosemberg</span>
+    </a>
+    <nav class="site-nav" aria-label="Main"><a href="../../research/">Research</a><a href="../../publications/">Publications</a><a href="../../software/" aria-current="page">Software</a><a href="../../teaching/">Teaching</a><a href="../../experience/">Experience</a></nav>
+    <div class="header-tools">
+      <button class="icon-btn search-btn" type="button" data-search-open aria-label="Search the site" title="Search (⌘K or /)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><kbd>⌘K</kbd></button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      <a class="header-cv" href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV <span aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+</header>
+<dialog class="palette" aria-label="Search the site" data-root="../../">
+  <form method="dialog" class="palette-box">
+    <div class="palette-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="Search pages, projects, papers…" aria-label="Search" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div>
+    <ul class="palette-results" role="listbox"></ul>
+    <p class="palette-hint"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span></p>
+  </form>
+</dialog>
+<main id="main"><header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="../../software/">Software</a> / HydroPowerModels.jl</p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Multistage planning · SDDP · Network formulations</p>
+  <h1>HydroPowerModels.jl</h1>
+  <p class="lede">Long-horizon hydrothermal planning is solved with stochastic dual dynamic programming, which needs convex stage problems, while the network that is operated is not convex. HydroPowerModels.jl builds the multistage model from network and reservoir data with any PowerModels.jl formulation, and lets the formulation that computes the cuts differ from the formulation that is operated, so the cost of a simplification is measured on the system it simplifies.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong> · Author, with Alexandre&nbsp;Street, Joaquim&nbsp;Dias&nbsp;Garcia, Thuener&nbsp;Silva, Davi&nbsp;M.&nbsp;Valladão, Oscar&nbsp;Dowson</p>
+  <div class="btn-row"><a class="btn primary" href="https://github.com/andrewrosemberg/HydroPowerModels.jl">GitHub ↗</a><a class="btn" href="https://andrewrosemberg.github.io/HydroPowerModels.jl/latest/">Documentation ↗</a><img class="stars" src="https://img.shields.io/github/stars/andrewrosemberg/HydroPowerModels.jl?style=social" alt="GitHub stars for HydroPowerModels.jl" style="height:20px;width:auto;align-self:center"></div>
+</header>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#design">Design</a></li><li><a href="#example">Example</a></li><li><a href="#research">Research</a></li><li><a href="#citation">Citation</a></li></ol></nav><article class="proj-body">
+
+<section id="design"><h2><span class="num">01 · Design</span>The network formulation is an argument, twice</h2>
+
+<h3>Any network formulation in one multistage model</h3>
+<p>The package builds an SDDP.jl policy graph whose stage problems are instantiated by PowerModels.jl inside each subproblem, with the network formulation and the problem builder passed as arguments (<code>model_constructor_grid</code>, <code>post_method</code>). The hydro layer is written once on top of whatever network PowerModels returns: reservoir volumes with bounds and violation penalties, turbined outflow and spillage along cascades, sampled inflows, hydro generation tied to the network's generator variables, and load shedding at a deficit cost. The formulations are those of PowerModels.jl, from polar AC power flow and its semidefinite, second-order-cone and quadratic-convex relaxations to the DC approximation, with or without losses, and the network-flow model.</p>
+<p>A study of network models then becomes a sweep over one argument: The data, the inflow scenarios, the hydro constraints and the SDDP configuration stay fixed while only the network changes. The policy graph and the network builder are themselves arguments (<code>build_graph</code>, <code>build_opf_model</code>), so discounting, cyclic graphs or a custom grid model enter the same way.</p>
+<figure class="fig inset"><div class="frame"><img src="../../assets/img/software/relaxation-hierarchy.svg" alt="Nested regions: a copper plate region contains a network-flow region, which contains an SOC relaxation, which contains an SDP relaxation, which contains the nonconvex AC feasible set." width="560" height="300"></div><figcaption><b>Network models ordered by their feasible sets.</b> The AC power-flow set lies inside its semidefinite and second-order-cone relaxations, which lie inside the network-flow and copper-plate models. Approximations such as DC power flow sit outside this order. Any of the PowerModels formulations can be the planning model and any can be the operating model. Schematic.</figcaption></figure>
+
+<h3>Cuts on one formulation, operation on another</h3>
+<p>The planning and operating formulations, and their solvers, are separate parameters: <code>model_constructor_grid_backward</code> and <code>model_constructor_grid_forward</code>, <code>optimizer_backward</code> and <code>optimizer_forward</code>. When they differ, the package builds two policy graphs over the same data. Training runs SDDP with the backward pass on the planning graph, where the cuts are computed, and the forward pass on the operating graph, where the visited states are generated; after each iteration the cuts are copied to the operating graph. Simulation operates the operating graph with those cuts. In the notation of <a href="../../research/network-simplifications/">Planning and Realization Mismatch</a>, each operated stage solves</p>
+<div class="eq">\[\begin{gathered}\min_{\mathbf x_t,\mathbf y_t}\ f(\mathbf x_t,\mathbf y_t)+\widehat{\mathcal V}_{t+1}(\mathbf x_t)\\ \text{s.t.}\quad\mathbf y_t\in\mathcal Y_t^{\mathrm{op}}(\mathbf x_{t-1},\mathbf x_t;w_t),\end{gathered}\]</div>
+<p>with the cuts of \(\widehat{\mathcal V}_{t+1}\) computed on \(\mathcal Y^{\mathrm{plan}}\) at the states that operation visits.</p>
+<p>The quality of a simplified planning model is the cost it induces on the system that is operated. Measuring that cost requires exactly this pairing, and making it a parameter turns the assessment of any planning model against any operating model into one run.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="../../assets/img/research/network-simplifications-policies-tall.svg"><img src="../../assets/img/research/network-simplifications-policies.svg" alt="For each planning network model on a 3-bus loop and a 28-bus system, an open marker for the expected cost under the planning model and a filled marker for the expected cost when the same cuts are operated under AC power flow. The planned costs follow the inclusion order of the relaxations; the operated costs do not." width="1003" height="392"></picture></div><figcaption><b>Planned and operated cost of the policies induced by each planning model, computed with the package.</b> Open marker: expected cost under the planning model; filled marker: expected cost when the same cuts operate the system under AC power flow. Data: Rosemberg et al. (2022), Tables I and II, as on <a href="../../research/network-simplifications/#study">Planning and Realization Mismatch</a>. The order of the planned costs does not survive operation under AC.</figcaption></figure>
+
+<h3>A baseline for learned policies</h3>
+<p>The same pairing is the stochastic dual dynamic programming baseline against which <a href="../../research/decision-rules/">Policies for Multistage Decisions</a> compares trained policies: cuts computed on the second-order-cone relaxation or on the DC approximation, with forward passes and evaluation under AC power flow. The hydro case of <a href="../../software/decisionrules/">DecisionRules.jl</a> reads the package's input format, a PowerModels network file, a reservoir file and an inflow table, so the learned policy and SDDP see identical data.</p>
+
+<h3>Solutions in PowerModels' terms</h3>
+<p>Inputs are a PowerModels network file and a reservoir file, validated against JSON schemas. Each simulated stage returns the PowerModels solution, with generation, flows, voltages and nodal multipliers, together with the reservoir trajectories, so prices and flows are compared across formulations directly. A statistical stopping rule, <code>SimulationStalling</code>, ends training when a t-test cannot distinguish the simulated costs of successive policies.</p>
+</section>
+
+<section id="example"><h2><span class="num">02 · Example</span>Plan on DC power flow, operate under AC</h2>
+<p>The example below follows the package's three-bus inconsistency example: cuts are computed on the DC approximation with a linear solver, while forward passes and the final simulation run the polar AC model with a nonlinear solver.</p>
+<div class="code"><pre><code><span class="k">using</span> HydroPowerModels, HiGHS, Ipopt
+
+data = HydroPowerModels.parse_folder(<span class="s">"testcases/case3"</span>)   <span class="c"># PowerModels.json, hydro.json, inflows.csv</span>
+
+params = create_param(;
+    stages = 12,
+    model_constructor_grid = DCPPowerModel,           <span class="c"># planning: computes the cuts</span>
+    model_constructor_grid_forward = ACPPowerModel,   <span class="c"># operation: visits states, realizes costs</span>
+    post_method = PowerModels.build_opf,
+    optimizer = HiGHS.Optimizer,
+    optimizer_forward = optimizer_with_attributes(Ipopt.Optimizer, <span class="s">"tol"</span> =&gt; 1e-6),
+    stage_hours = 24 * 30,
+)
+
+m = hydro_thermal_operation(data, params)
+HydroPowerModels.train(m; iteration_limit = 100)
+results = HydroPowerModels.simulate(m, 100)              <span class="c"># 100 scenarios operated under AC</span>
+
+results[:simulations][1][1][:objective]                  <span class="c"># stage-1 cost of the first scenario</span></code></pre></div>
+<p style="margin-top:18px">Dropping the forward arguments plans and operates on the same model. Changing <code>model_constructor_grid</code> to another formulation, such as <code>SOCWRPowerModel</code> with a conic solver, while keeping the AC forward model, gives the next point of the comparison.</p>
+</section>
+
+<section id="research"><h2><span class="num">03 · Research</span>Where the package carries the theory</h2>
+<ul>
+<li><a href="../../research/network-simplifications/"><b>Planning and Realization Mismatch</b></a>. The comparison of planning network models under AC operation is a sweep over the planning formulation with the operating formulation held at AC power flow.</li>
+<li><a href="../../research/decision-rules/"><b>Policies for Multistage Decisions</b></a>. The SDDP baselines of the hydrothermal comparison compute cuts on the conic relaxation or the DC approximation and operate under AC power flow, the paired configuration of this package.</li>
+</ul>
+</section>
+
+<section id="citation"><h2><span class="num">04 · Citation</span>How to cite</h2>
+<p>The package was developed as part of the author's master's thesis. Its repository asks users to cite the package paper:</p>
+<div class="bib-box standalone"><button class="copy-bib" type="button">Copy</button><pre><code>@article{rosemberg2019hydropowermodels,
+  title   = {HydroPowerModels.jl: A Julia/JuMP Package for Hydrothermal Economic Dispatch Optimization},
+  author  = {Rosemberg, Andrew and Street, Alexandre and Garcia, Joaquim Dias and Silva, Thuener and Vallad{\~a}o, Davi and Dowson, Oscar},
+  journal = {JuliaCon Proceedings},
+  volume  = {1},
+  number  = {1},
+  pages   = {35},
+  year    = {2019},
+  doi     = {10.21105/jcon.00035}
+}</code></pre></div>
+<p style="margin-top:18px">For the assessment of planning network models under AC operation:</p>
+<div class="bib-box standalone"><button class="copy-bib" type="button">Copy</button><pre><code>@article{rosemberg2021assessing,
+  title   = {Assessing the Cost of Network Simplifications in Long-Term Hydrothermal Dispatch Planning Models},
+  author  = {Rosemberg, Andrew W. and Street, Alexandre and Dias Garcia, Joaquim and Vallad{\~a}o, Davi M. and Silva, Thuener and Dowson, Oscar},
+  journal = {IEEE Transactions on Sustainable Energy},
+  volume  = {13},
+  number  = {1},
+  pages   = {196--206},
+  year    = {2022},
+  doi     = {10.1109/TSTE.2021.3106810}
+}</code></pre></div>
+</section>
+
+</article></div>
+</main><footer class="site-footer">
+  <div class="footer-inner wrap">
+    <div class="footer-id">
+      <p class="footer-name">Andrew Rosemberg</p>
+      <p>PhD Candidate in Machine Learning<br>Georgia Tech · AI4OPT · Atlanta, GA</p>
+      <p><a href="mailto:arosemberg3@gatech.edu">arosemberg3@gatech.edu</a></p>
+    </div>
+    <nav class="footer-col" aria-label="Site">
+      <p class="footer-label">Site</p>
+      <a href="../../research/">Research</a>
+      <a href="../../publications/">Publications</a>
+      <a href="../../software/">Software</a>
+      <a href="../../teaching/">Teaching</a>
+      <a href="../../experience/">Experience</a>
+    </nav>
+    <nav class="footer-col" aria-label="Elsewhere">
+      <p class="footer-label">Elsewhere</p>
+      <a href="https://scholar.google.com/citations?user=jOuzK3EAAAAJ">Google Scholar</a>
+      <a href="https://github.com/andrewrosemberg">GitHub</a>
+      <a href="https://github.com/LearningToOptimize">LearningToOptimize</a>
+      <a href="https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/">LinkedIn</a>
+      <a href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV (PDF)</a>
+    </nav>
+  </div>
+  <div class="footer-bottom wrap"><div class="footer-bottom-inner"><p>© 2026 Andrew Rosemberg</p><p>Updated November 2026</p></div></div>
+</footer>
+</body>
+</html>

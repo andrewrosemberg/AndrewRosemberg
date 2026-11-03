@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, Arial, sans-serif" viewBox="0 0 560 300" role="img" aria-label="Nested sets of operating points: the nonconvex AC feasible region sits inside the semidefinite relaxation, which sits inside the second-order cone relaxation, inside the network-flow model, inside the copper plate.">
+          <g font-size="13" fill="#3a4550">
+            <rect x="8" y="8" width="544" height="284" rx="16" fill="#f1efe9" stroke="#dddcd5"/>
+            <text x="24" y="32" font-weight="650">Copper plate (no network)</text>
+            <ellipse cx="290" cy="165" rx="240" ry="118" fill="#fdfcfa" stroke="#dddcd5" stroke-width="1.5"/>
+            <text x="290" y="68" text-anchor="middle" font-weight="650">Network flow (transportation)</text>
+            <ellipse cx="300" cy="178" rx="180" ry="90" fill="#e3f0ee" stroke="#2b7a73" stroke-width="1.5"/>
+            <text x="300" y="108" text-anchor="middle" font-weight="650" fill="#2b7a73">SOC relaxation</text>
+            <ellipse cx="305" cy="190" rx="118" ry="64" fill="#eee8f5" stroke="#7551a7" stroke-width="1.5"/>
+            <text x="305" y="146" text-anchor="middle" font-weight="650" fill="#5e3b8f">SDP relaxation</text>
+            <path d="M262 190 C250 160 296 150 308 170 C320 150 362 168 344 194 C368 214 330 236 306 214 C284 238 238 222 262 190 Z" fill="#202a33" opacity=".85"/>
+            <text x="305" y="198" text-anchor="middle" font-weight="700" fill="#f8f7f3">AC</text>
+          </g>
+        </svg>

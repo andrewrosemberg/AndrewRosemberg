@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learned Model Correction · Andrew Rosemberg</title>
+  <meta name="description" content="A learned map selects the coefficients of a retained optimization model, trained through the sensitivities of its solution against the decisions of a detailed model.">
+  <meta name="author" content="Andrew Rosemberg">
+  <meta name="theme-color" content="#f8f7f3">
+  <script>try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}</script>
+  <link rel="canonical" href="https://andrewrosemberg.github.io/AndrewRosemberg/research/dc2ac/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Andrew Rosemberg">
+  <meta property="og:title" content="Learned Model Correction · Andrew Rosemberg">
+  <meta property="og:description" content="A learned map selects the coefficients of a retained optimization model, trained through the sensitivities of its solution against the decisions of a detailed model.">
+  <meta property="og:url" content="https://andrewrosemberg.github.io/AndrewRosemberg/research/dc2ac/">
+  <meta property="og:image" content="https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/thumbs/dc2ac.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="../../assets/fonts/Inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/InstrumentSerif-Regular-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=8513f2753c">
+  <script src="../../assets/js/site.js?v=d8fec169e3" defer></script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Person","name":"Andrew Rosemberg","alternateName":"Andrew David Werner Rosemberg","url":"https://andrewrosemberg.github.io/AndrewRosemberg/","image":"https://andrewrosemberg.github.io/AndrewRosemberg/assets/img/andrew-rosemberg.jpg","jobTitle":"PhD Candidate in Machine Learning","affiliation":[{"@type":"CollegeOrUniversity","name":"Georgia Institute of Technology"},{"@type":"Organization","name":"AI4OPT"}],"alumniOf":[{"@type":"CollegeOrUniversity","name":"Pontifical Catholic University of Rio de Janeiro"},{"@type":"CollegeOrUniversity","name":"École Centrale de Marseille"}],"knowsAbout":["Machine learning","Mathematical optimization","Stochastic programming","Differentiable optimization","Reinforcement learning","Power systems"],"sameAs":["https://github.com/andrewrosemberg","https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/","https://scholar.google.com/citations?user=jOuzK3EAAAAJ"]}
+  </script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.querySelector('main'),{delimiters:[{left:'\\[',right:'\\]',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});window.fitEquations&&(fitEquations(),document.fonts.ready.then(fitEquations),addEventListener('load',fitEquations))"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="../../" aria-label="Andrew Rosemberg — home">
+      <span class="monogram" aria-hidden="true">AR</span>
+      <span>Andrew Rosemberg</span>
+    </a>
+    <nav class="site-nav" aria-label="Main"><a href="../../research/" aria-current="page">Research</a><a href="../../publications/">Publications</a><a href="../../software/">Software</a><a href="../../teaching/">Teaching</a><a href="../../experience/">Experience</a></nav>
+    <div class="header-tools">
+      <button class="icon-btn search-btn" type="button" data-search-open aria-label="Search the site" title="Search (⌘K or /)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><kbd>⌘K</kbd></button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme"><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      <a class="header-cv" href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV <span aria-hidden="true">↓</span></a>
+    </div>
+  </div>
+</header>
+<dialog class="palette" aria-label="Search the site" data-root="../../">
+  <form method="dialog" class="palette-box">
+    <div class="palette-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="Search pages, projects, papers…" aria-label="Search" autocomplete="off" spellcheck="false"><kbd>esc</kbd></div>
+    <ul class="palette-results" role="listbox"></ul>
+    <p class="palette-hint"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span></p>
+  </form>
+</dialog>
+<main id="main"><header class="proj-hero wrap">
+  <p class="breadcrumb"><a href="../../research/">Research</a> / <a href="../../research/#solution-maps">Learning Solution Maps</a></p>
+  <p class="eyebrow" style="margin-top:18px"><span class="dot" aria-hidden="true"></span>Retained optimization · Model coefficients · Solution sensitivities</p>
+  <h1>Learned Model Correction</h1>
+  <p class="lede">A simplified model of the world makes fast decisions possible but biases every decision it makes. A learned map can predict the parameters of that model from the current situation and leave the decision to the model, so that every decision keeps the structure and limits the model guarantees. The map is trained through the model’s decisions, against those of a high-fidelity model.</p>
+  <p class="authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, Michael&nbsp;Klamkin, Pascal&nbsp;Van&nbsp;Hentenryck</p>
+</header>
+<figure class="scene scene-pair wrap"><div class="scene-item"><img src="../../assets/img/scenes/dc2ac-drone.jpg" alt="A delivery drone flies toward a landing pad in a strong crosswind; a white dashed path runs straight to the pad, an amber path drifts beside it, and a violet path leans into the wind and ends on the pad." width="1200" height="900" style="object-position:50% 50%"><p class="scene-cap">In a crosswind, the simple flight model’s path, in dashed white, would carry the drone beside the pad, in amber, and a learned correction to that model lands it on the pad, in violet.</p></div><div class="scene-item"><img src="../../assets/img/scenes/dc2ac-ai.jpg" alt="On a wet curve, three thin painted paths leave the car&#x27;s front: the dry-road prediction in white, the slide toward the road edge in amber, and the corrected path inside the lane in violet." width="1200" height="900" style="object-position:50% 50%"><p class="scene-cap">On a wet road, the dry-road model’s path, in white, would make the car slide wide, in amber, whereas the corrected model keeps it in its lane, in violet.</p></div></figure>
+
+<nav class="topic-map wrap" aria-label="Learned model correction guide"><p>Argument</p><ol><li><a href="#object"><small>01 · Retained model</small><span>Correct the model that computes the decision</span></a></li><li><a href="#training"><small>02 · Training</small><span>Gradients through the retained solution</span></a></li><li><a href="#instance"><small>03 · Network instance</small><span>DC-OPF corrected against AC-OPF</span></a></li><li><a href="#accuracy"><small>04 · Induced accuracy</small><span>Generation and flows closer to AC</span></a></li><li><a href="#boundaries"><small>05 · Scope</small><span>Angles, congestion, and scope</span></a></li><li><a href="#connections"><small>06 · Policy composition</small><span>Policies, controllers, and solution maps</span></a></li><li><a href="#software"><small>07 · Software</small><span>DiffOpt.jl</span></a></li></ol></nav>
+
+<div class="wrap proj-layout"><nav class="toc" aria-label="On this page"><p>On this page</p><ol><li><a href="#object">Retained model</a></li><li><a href="#training">Training</a></li><li><a href="#instance">Network instance</a></li><li><a href="#accuracy">Induced accuracy</a></li><li><a href="#boundaries">Scope</a></li><li><a href="#connections">Policy composition</a></li><li><a href="#software">Software</a></li></ol></nav><article class="proj-body">
+
+<section id="object"><h2><span class="num">01 · Retained model</span>Correct the model that computes the decision</h2>
+<p>Detailed models are often too costly to solve at every decision, so a simplified model computes the decision instead. Its decisions may not be implementable on the actual system, and the costs it plans differ from those the system incurs (<a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>). Learning can enter this arrangement in two places. A direct map \(\hat{\mathbf y}=\hat g_{\omega'}(w)\) replaces the solve and is fit to reference decisions \(\mathbf y^{\mathrm{ref}}(w)\) of the detailed model, as optimization proxies do (<a href="#ref-kotary2021">Kotary et al., 2021</a>; <a href="#ref-chen2022">Chen et al., 2022</a>). A correction instead keeps the simplified model and learns its parameters as a function of the context \(w\):</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}p&=\underbrace{\phi_\omega(w)}_{\text{map}},\\[0.4em] \mathbf y^\star(p;w)&\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p;w)}\underbrace{f(\mathbf y;p,w)}_{\text{objective}}.\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}p&=\phi_\omega(w),\\[0.4em] \mathbf y^\star(p;w)&\in\\[0.4em] &\quad\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p;w)}f(\mathbf y;p,w).\end{aligned}\]</div>
+</div>
+<p>Here \(p\) contains the retained model's coefficients, \(\mathcal Y(p;w)\) is its feasible set, \(f\) is its objective, and the coefficient map has weights \(\omega\), distinct from the direct map's weights \(\omega'\), since \(\boldsymbol\theta\) denotes voltage angles here. The decision is the selected solution \(\mathbf y^\star\) of the retained model, and it may be judged against the same reference \(\mathbf y^{\mathrm{ref}}(w)\), as a supervised proxy is.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="../../assets/img/diagrams/dc2ac--proxy-vs-correction-compact.svg?v=1462efee" width="266" height="454"><img src="../../assets/img/diagrams/dc2ac--proxy-vs-correction.svg?v=16336502" alt="A Dataset panel turns the context w into reference decisions of the detailed model, which feed the losses of two training pipelines that each take w. In the direct map, a network outputs the decision, which enters the loss. In the correction, a network outputs model parameters, a retained optimization model returns its solution, and that solution enters the loss. Dashed red gradient paths return the loss to each network; the second passes through the solution sensitivity of the retained model." width="535" height="374" style="max-width:856px"></picture></div><figcaption><b>Both constructions fit the same reference decisions; they differ in what produces the decision.</b> The direct map outputs the decision, and its error reaches the network directly. The correction outputs model parameters \(p\), the retained model returns \(\mathbf y^\star\), and the error reaches the network only through the solution sensitivity \(D_p\mathbf y^\star\). Deployment retains the context-to-decision paths and omits reference construction and losses.</figcaption></figure>
+<p>Retaining the solve has three consequences. Every decision is a solution of the retained model, so the constraints of that model hold exactly, whereas a direct map typically carries no guarantee of feasibility or optimality, particularly outside its training distribution. The network learns only how the retained model must change to reproduce the detailed decisions, while a direct map must also learn to solve the problem. The learned quantities keep the meaning they have in the model, so each corrected coefficient can be read, and bounded, as the physical quantity it represents.</p>
+<p>Correcting simplified models has a long history in network equivalents (<a href="#ref-ward1949">Ward, 1949</a>), recently with data-driven nonlinear load functions (<a href="#ref-ribeiro2023">Ribeiro et al., 2023</a>). Parameter optimization can fit one set of coefficients of a linear model over a range of operating conditions (<a href="#ref-taheri2026">Taheri and Molzahn, 2026</a>). A coefficient map instead adapts the coefficients to the inputs of each decision, such as the uncertain demand or the system state. The best coefficients for each instance can also be computed exactly, by solving a bilevel problem per instance and then fitting a network to the results; the per-instance bilevel solves limit that approach in scale (<a href="#ref-constante2024">Constante-Flores et al., 2024</a>).</p>
+</section>
+
+<section id="training"><h2><span class="num">02 · Training</span>The gradient passes through the retained solution</h2>
+<p>With reference decisions computed in advance, the coefficient map is trained by minimizing the expected reference-decision loss through the retained solve:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}\min_\omega\quad&\mathbb E_{w\sim\mathbb P_w}\Big[\underbrace{L\big(\mathbf y^\star(p;w),\,\mathbf y^{\mathrm{ref}}(w)\big)}_{\text{loss}}\Big]\\[0.4em] \text{s.t.}\quad&p=\phi_\omega(w),\\[0.4em] &\mathbf y^\star(p;w)\in\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p;w)}f(\mathbf y;p,w),\\[0.4em] &\text{for each sampled }w.\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}&\min_\omega\quad\mathbb E_{w\sim\mathbb P_w}\Big[\\[0.4em] &\quad L\big(\mathbf y^\star(p;w),\,\mathbf y^{\mathrm{ref}}(w)\big)\Big]\\[0.4em] &\text{s.t.}\quad p=\phi_\omega(w),\\[0.4em] &\phantom{\text{s.t.}}\quad\mathbf y^\star(p;w)\in\\[0.4em] &\phantom{\text{s.t.}}\qquad\operatorname*{arg\,min}_{\mathbf y\in\mathcal Y(p;w)}f(\mathbf y;p,w),\\[0.4em] &\phantom{\text{s.t.}}\quad\text{for each sampled }w.\end{aligned}\]</div>
+</div>
+<p>Here \(\mathbb P_w\) is the context distribution used for training; the problem is bilevel, and the outer loss \(L\) differs from the inner objective \(f\). The envelope theorem therefore does not supply the gradient, and the multipliers of the retained model alone do not give the training gradient. The gradient follows the response of the solution itself:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\nabla_\omega L=\underbrace{D_\omega\phi_\omega(w)^{\top}}_{\text{map}}\quad\underbrace{D_p\mathbf y^\star(p;w)^{\top}}_{\text{solution}}\quad\underbrace{\nabla_{\mathbf y}L}_{\text{loss}}.\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}\nabla_\omega L&=D_\omega\phi_\omega(w)^{\top}\\[0.4em] &\quad\cdot D_p\mathbf y^\star(p;w)^{\top}\\[0.4em] &\quad\cdot\nabla_{\mathbf y}L.\end{aligned}\]</div>
+</div>
+<p>Here \(D\) denotes a Jacobian, and \(\nabla_{\mathbf y}L\) is evaluated at \(\mathbf y^\star(p;w)\) with the reference fixed; at a regular solution (for the linear DC-OPF used here, a nondegenerate optimum with unique primal and dual solutions and strict complementarity), the solution response follows from the implicit function theorem applied to the retained model's KKT conditions, with one adjoint solve per sample at the converged solution (<a href="#ref-fiacco1976">Fiacco, 1976</a>). Differentiable optimization layers supply it for convex programs (<a href="#ref-amos2017">Amos and Kolter, 2017</a>; <a href="#ref-agrawal2019">Agrawal et al., 2019</a>), and DiffOpt.jl for models written in JuMP (<a href="#ref-besancon2024">Besançon et al., 2024</a>; <a href="#ref-rosemberg2025diffopt">Rosemberg et al., 2025a</a>). <a href="../../research/differentiable-optimization/#local">Differentiating Optimization Models</a> develops the calculation and its failure modes.</p>
+<p>A linear retained model still supplies a usable signal. The loss depends only on the decisions, which move with the coefficients within each active set, and training averages their sensitivities over many sampled contexts. A loss on prices behaves differently: The prices of a linear market clearing are multipliers, piecewise constant in the offers, so their sensitivities vanish almost everywhere (<a href="../../research/strategic-bidding/">Endogenous Response</a>).</p>
+<p>The related decision-focused learning construction is discussed in <a href="../../research/differentiable-optimization/#consequences">Differentiating Optimization Models</a>. In model correction the predicted quantities are the coefficients of the model that stands in for a detailed one, and the target is the detailed model's decision. The detailed model is solved once per sample before training, and the retained model is solved inside every forward pass.</p>
+</section>
+
+<section id="instance"><h2><span class="num">03 · Network instance</span>A linear network model corrected against AC power flow</h2>
+<p>Optimal power flow selects the least-cost generation that serves demand under network physics and operating limits (<a href="#ref-carpentier1962">Carpentier, 1962</a>). Its AC form is nonconvex, and system operators often use the DC approximation instead (<a href="#ref-oneill2011">O'Neill et al., 2011</a>). DC-OPF assumes unit voltage magnitudes, small angle differences, and negligible losses, and omits reactive power (<a href="#ref-molzahn2019">Molzahn and Hiskens, 2019</a>). It is a linear program, and its dispatch differs from that of AC-OPF.</p>
+<p>DC2AC retains DC-OPF and lets the active demand \(w=\mathbf p^{\mathrm d}\) select two of its coefficient vectors through \((\tilde{\mathbf g}^{\mathrm s},\tilde{\mathbf b})=\phi_\omega(\mathbf p^{\mathrm d})\): the nodal shunt conductances and the branch susceptances. DC-OPF minimizes generation cost plus a penalty \(c_\varsigma\) on load shedding \(\varsigma_i\), over generation \(\tilde{\mathbf p}^{\mathrm g}\), branch flows \(\tilde{\mathbf p}^{\mathrm f}\), and voltage angles \(\tilde{\boldsymbol\theta}\). Let \(\mathcal N\) and \(\mathcal E\) be the buses and branches, \(\mathcal G_i\) and \(\mathcal L_i\) the generators and loads at bus \(i\), and \(\mathcal E_i\) and \(\mathcal E^R_i\) its outgoing and incoming branches. With \(\tilde b_e<0\) denoting series susceptance as in PGLib, the corrected balance and flow equations accompany the operating limits and reference angle:</p>
+<div class="eq-r">
+<div class="eq eq-wide">\[\begin{aligned}\sum_{j\in\mathcal G_i}\tilde p^{\mathrm g}_j-\sum_{e\in\mathcal E_i}\tilde p^{\mathrm f}_e+\sum_{e\in\mathcal E^R_i}\tilde p^{\mathrm f}_e+\varsigma_i&=\sum_{j\in\mathcal L_i}p^{\mathrm d}_j+\tilde g^{\mathrm s}_i,&&i\in\mathcal N,\\[0.4em] \tilde p^{\mathrm f}_e&=-\tilde b_e(\tilde\theta_i-\tilde\theta_j),&&e=(i,j)\in\mathcal E,\\[0.4em] \underline{\Delta\theta}_e&\le\tilde\theta_i-\tilde\theta_j\le\overline{\Delta\theta}_e,&&e=(i,j)\in\mathcal E,\\[0.4em] \underline p^{\mathrm g}_j&\le\tilde p^{\mathrm g}_j\le\overline p^{\mathrm g}_j,&&j\in\mathcal G,\\[0.4em] -\overline S_e&\le\tilde p^{\mathrm f}_e\le\overline S_e,&&e\in\mathcal E,\\[0.4em] \tilde\theta_{\mathrm{ref}}&=0.\end{aligned}\]</div>
+<div class="eq eq-narrow">\[\begin{aligned}&\sum_{j\in\mathcal G_i}\tilde p^{\mathrm g}_j+\varsigma_i\\[0.4em] &\quad=\sum_{j\in\mathcal L_i}p^{\mathrm d}_j+\tilde g^{\mathrm s}_i\\[0.4em] &\qquad+\sum_{e\in\mathcal E_i}\tilde p^{\mathrm f}_e-\sum_{e\in\mathcal E^R_i}\tilde p^{\mathrm f}_e,\\[0.4em] &\quad i\in\mathcal N;\\[0.4em] &\tilde p^{\mathrm f}_e=-\tilde b_e(\tilde\theta_i-\tilde\theta_j),\\[0.4em] &\quad e=(i,j)\in\mathcal E;\\[0.4em] &\underline{\Delta\theta}_e\le\tilde\theta_i-\tilde\theta_j\le\overline{\Delta\theta}_e,\\[0.4em] &\quad e=(i,j)\in\mathcal E;\\[0.4em] &\underline p^{\mathrm g}_j\le\tilde p^{\mathrm g}_j\le\overline p^{\mathrm g}_j,\quad j\in\mathcal G;\\[0.4em] &-\overline S_e\le\tilde p^{\mathrm f}_e\le\overline S_e,\quad e\in\mathcal E;\\[0.4em] &\tilde\theta_{\mathrm{ref}}=0.\end{aligned}\]</div>
+</div>
+<p>Here \(\mathcal G\) is the set of all generators, underlines and overlines on generation and angle differences denote their lower and upper limits, \(\overline S_e\) is the branch thermal limit, and \(\mathrm{ref}\) identifies the reference bus. The shunt term lets the linear balance account for losses, and the susceptances account for variations in effective line impedance; the standard model neglects both. In the notation of the object, \(p=(\tilde{\mathbf g}^{\mathrm s},\tilde{\mathbf b})\), the induced decision is \(\mathbf y^\star=(\tilde{\mathbf p}^{\mathrm g},\tilde{\mathbf p}^{\mathrm f},\tilde{\boldsymbol\theta})\), and the reference \(\mathbf y^{\mathrm{ref}}=(\mathbf p^{\mathrm g},\mathbf p^{\mathrm f},\boldsymbol\theta)\) is the AC-OPF solution computed by Ipopt. The training loss is the squared error between the two.</p>
+<figure class="fig method-figure"><div class="frame"><picture><source media="(max-width: 640px)" srcset="../../assets/img/diagrams/dc2ac-compact.svg?v=b3907019" width="265" height="508"><img src="../../assets/img/diagrams/dc2ac.svg?v=cc76afbb" alt="Training lane: a demand store feeds a neural network that outputs adjusted shunt conductances and branch susceptances; these enter DC-OPF, whose generation, flow, and angle outputs enter a regression loss. Dataset lane: the same demands are solved by AC-OPF and stored; the stored AC generation, flows, and angles enter the same loss. A red path returns the loss to the network." width="413" height="293" style="max-width:661px"></picture></div><figcaption><b>The network selects coefficients; DC-OPF selects the decision.</b> Demand conditions the predicted shunt conductances and susceptances, the retained DC-OPF returns generation, flows, and angles, and the regression loss compares them with AC-OPF solutions computed in the Dataset lane. The red path returns the loss to the network through the sensitivities of the DC-OPF solution. After Figure 1 of <a href="#ref-rosemberg2025dc2ac">Rosemberg et al. (2025b)</a>.</figcaption></figure>
+<p>A two-sided softplus keeps each predicted coefficient within physical bounds. DC-OPF is solved by HiGHS and differentiated by DiffOpt.jl through its JuMP model.</p>
+</section>
+
+<section id="accuracy"><h2><span class="num">04 · Induced accuracy</span>Generation and flows closer to AC than both baselines</h2>
+<p>The study uses the 89-bus PEGASE system (<a href="#ref-fliscounakis2013">Fliscounakis et al., 2013</a>), with 35 loads, 12 generators, and 210 branches. Ten thousand demand profiles are generated with PGLearn (<a href="#ref-klamkin2025">Klamkin et al., 2025</a>) by scaling all loads with a common factor drawn uniformly between 70% and 110% of nominal and perturbing each load by up to ±15%; 80% of the profiles train and 20% validate. The correction is compared with the unadjusted DC-OPF and a direct proxy with the same architecture and the same initialization, trained on the AC solutions. Accuracy is the L1 distance between each method's generation, flows, and angles and the AC-OPF solution.</p>
+<p>On the validation set, the corrected model has the lowest generation error of the three methods on 95% of samples and the lowest branch-flow error on 97%. Its mean generation error is 0.22 per unit, against 0.90 for the unadjusted DC-OPF and 0.74 for the proxy; for branch flows the means are 7.57, 9.72, and 12.83. In the middle of the demand range it reproduces the AC generation almost exactly, with errors as low as \(10^{-5}\). From the same initialization as the proxy, its training loss converged mostly within the first two epochs.</p>
+<figure class="fig"><div class="frame"><picture><source media="(max-width: 640px)" srcset="../../assets/img/research/dc2ac-accuracy-compact.svg" width="510" height="787"><img src="../../assets/img/research/dc2ac-accuracy.svg" alt="Generation and branch-flow scatter plots with linear total-demand axes and logarithmic L1-error axes. Generation error: the corrected DC-OPF lies mostly between 0.001 and 0.6 per unit, below the direct proxy (mostly 0.1 to 1) and the unadjusted DC-OPF (about 0.6 to 1), except at the highest loads. Branch-flow error: the corrected model forms the lowest band near 7, below the unadjusted model near 10 and the scattered proxy." width="990" height="417"></picture></div><figcaption><b>The corrected model lies below both baselines across most of the demand range.</b> Each point is one of the 2,000 validation samples: the L1 distance between a method's generation or branch flows and the AC-OPF solution, against total active demand. The error axes are logarithmic. All three methods degrade at the highest loads. Data: <a href="#ref-rosemberg2025dc2ac">Rosemberg et al. (2025b)</a>, Figure 2(a, b).</figcaption></figure>
+</section>
+
+<section id="boundaries"><h2><span class="num">05 · Scope</span>What the correction does not recover</h2>
+<p>Voltage angles are the exception. The correction has the lowest angle error on only 13% of samples, and its mean (1.08) barely improves on the unadjusted model (1.12), while the direct proxy is the most accurate (0.95). The DC-OPF used here omits reactive power (<a href="#ref-klamkin2025">Klamkin et al., 2025</a>). With any coefficients, its output remains a DC-OPF solution, and the paper attributes the angle gap, as a hypothesis, to the active–reactive coupling that such a solution cannot represent.</p>
+<figure class="fig inset"><div class="frame"><img src="../../assets/img/research/dc2ac-angles.svg" alt="Scatter plot of L1 voltage-angle error against total active demand, with a logarithmic error axis. The corrected and unadjusted DC-OPF overlap in a band near 1; the direct proxy spreads below them, between about 0.6 and 1." width="586" height="437"></div><figcaption><b>On voltage angles the correction tracks the unadjusted model, and the direct proxy is closer to AC.</b> L1 distance from the AC-OPF voltage angles against total active demand, with a logarithmic error axis. The gap marks the part of the AC solution that the retained linear model, with these two coefficient vectors, did not recover. Data: <a href="#ref-rosemberg2025dc2ac">Rosemberg et al. (2025b)</a>, Figure 2(c).</figcaption></figure>
+<p>All three methods struggle at high load, where the system is congested. There the unadjusted DC-OPF often outperforms the proxy, and the correction typically improves only slightly on DC-OPF, so its advantage narrows.</p>
+<p>The study covers one network under demand perturbations at fixed topology. Accuracy is measured as distance to the AC reference decisions; the AC feasibility and the operating cost of the corrected dispatch were not evaluated. The construction itself does not require a linear retained model. Any differentiable simplified formulation can take the place of DC-OPF, such as an AC-OPF model on a reduced network, and the paper proposes other approximations of AC-OPF to address the angle gap.</p>
+</section>
+
+<section id="connections"><h2><span class="num">06 · Policy composition</span>Where a corrected model sits in a decision process</h2>
+<p>A calibrated simplified model is a decision engine with its own objective. It can replace the detailed recourse problem during policy training, and possibly at execution, so that policies are evaluated and their decisions computed faster. The stage problems of the state-target policies in <a href="../../research/decision-rules/">Policies for Multistage Decisions</a> are such recourse problems.</p>
+<p>When the retained model is the internal model of a controller that acts repeatedly, the construction is to learn its coefficients through the controller's response at regular local solutions, with the loss replaced by the realized closed-loop cost and constraint violations; <a href="../../research/differentiable-optimization/#consequences">Differentiating Optimization Models</a> develops that construction.</p>
+<p>The alternative to retaining the model is to approximate its solution map directly. <a href="../../research/masked-sobolev/">Learning Solution Maps</a> develops that choice, including the case in which the learned map must also reproduce the local response of the solver because it is differentiated through. Planning on a simplified network and operating on the detailed one changes resource valuations and implemented costs (<a href="#ref-rosemberg2022">Rosemberg et al., 2022</a>); <a href="../../research/network-simplifications/">Planning and Realization Mismatch</a> treats that gap at the level of policies.</p>
+</section>
+
+<section id="software"><h2>Software</h2>
+<p>DiffOpt.jl supplies the derivatives of the DC-OPF solution with respect to the predicted coefficients, through the JuMP model, inside the training loop.</p>
+<div class="soft-features"><article class="soft-feature"><a class="soft-feature-media" href="../../research/differentiable-optimization/" tabindex="-1" aria-hidden="true"><img src="../../assets/img/scenes/thumbs/differentiable-optimization-ai.webp" alt="" loading="lazy"></a><div><h3><a href="../../research/differentiable-optimization/">DiffOpt.jl</a></h3><p>Solution and optimal-value derivatives of JuMP models with respect to named parameters, through the model&#x27;s reformulations, for convex and smooth nonconvex programs.</p><p class="soft-feature-links"><a href="../../research/differentiable-optimization/">Package page <span aria-hidden="true">→</span></a><a href="https://github.com/jump-dev/DiffOpt.jl">GitHub <span aria-hidden="true">↗</span></a></p></div></article></div>
+</section>
+
+<section id="references"><h2>References</h2>
+<ol class="refs">
+<li id="ref-agrawal2019">A. Agrawal, B. Amos, S. Barratt, S. Boyd, S. Diamond, J. Z. Kolter. Differentiable convex optimization layers. <i>Advances in Neural Information Processing Systems</i> 32, 2019.</li>
+<li id="ref-amos2017">B. Amos, J. Z. Kolter. OptNet: Differentiable optimization as a layer in neural networks. <i>International Conference on Machine Learning</i>, 136–145, 2017.</li>
+<li id="ref-besancon2024">M. Besançon, J. Dias Garcia, B. Legat, A. Sharma. Flexible differentiable optimization via model transformations. <i>INFORMS Journal on Computing</i> 36(2):456–478, 2024.</li>
+<li id="ref-carpentier1962">J. Carpentier. Contribution to the economic dispatch problem. <i>Bulletin de la Société Française des Électriciens</i> 3(8):431–447, 1962.</li>
+<li id="ref-chen2022">W. Chen, S. Park, M. Tanneau, P. Van Hentenryck. Learning optimization proxies for large-scale security-constrained economic dispatch. <i>Electric Power Systems Research</i> 213:108566, 2022.</li>
+<li id="ref-constante2024">G. E. Constante-Flores, A. H. Quisaguano, A. J. Conejo, C. Li. AC-network-informed DC optimal power flow for electricity markets. Preprint arXiv:2410.18413, 2024.</li>
+<li id="ref-fiacco1976">A. V. Fiacco. Sensitivity analysis for nonlinear programming using penalty methods. <i>Mathematical Programming</i> 10(1):287–311, 1976.</li>
+<li id="ref-fliscounakis2013">S. Fliscounakis, P. Panciatici, F. Capitanescu, L. Wehenkel. Contingency ranking with respect to overloads in very large power systems taking into account uncertainty, preventive, and corrective actions. <i>IEEE Transactions on Power Systems</i> 28(4):4909–4917, 2013.</li>
+<li id="ref-klamkin2025">M. Klamkin, M. Tanneau, P. Van Hentenryck. PGLearn: An open-source learning toolkit for optimal power flow. Preprint arXiv:2505.22825, 2025.</li>
+<li id="ref-kotary2021">J. Kotary, F. Fioretto, P. Van Hentenryck, B. Wilder. End-to-end constrained optimization learning: A survey. <i>Proceedings of the Thirtieth International Joint Conference on Artificial Intelligence</i>, 4475–4482, 2021.</li>
+<li id="ref-molzahn2019">D. K. Molzahn, I. A. Hiskens. A survey of relaxations and approximations of the power flow equations. <i>Foundations and Trends in Electric Energy Systems</i> 4(1–2):1–221, 2019.</li>
+<li id="ref-oneill2011">R. P. O'Neill, T. Dautel, E. Krall. Recent ISO software enhancements and future software and modeling plans. Federal Energy Regulatory Commission, technical report, 2011.</li>
+<li id="ref-ribeiro2023">R. Ribeiro, A. Street, F. Mancilla-David, A. Angulo. Equivalent reduced DC network models with nonlinear load functions: A data-driven approach. <i>IEEE Transactions on Power Systems</i> 39(2):3021–3032, 2023.</li>
+<li id="ref-taheri2026">B. Taheri, D. K. Molzahn. Improving the accuracy of DC optimal power flow formulations via parameter optimization. <i>IEEE Transactions on Power Systems</i> 41(3):2373–2385, 2026.</li>
+<li id="ref-ward1949">J. B. Ward. <i>Equivalent Circuits in Power System Studies</i>. Purdue University, 1949.</li>
+<li id="ref-rosemberg2022">A. W. Rosemberg, A. Street, J. Dias Garcia, D. M. Valladão, T. Silva, O. Dowson. Assessing the cost of network simplifications in long-term hydrothermal dispatch planning models. <i>IEEE Transactions on Sustainable Energy</i> 13(1):196–206, 2022. <a href="https://doi.org/10.1109/TSTE.2021.3106810">DOI 10.1109/TSTE.2021.3106810</a>.</li>
+<li id="ref-rosemberg2025dc2ac">A. Rosemberg, M. Klamkin, P. Van Hentenryck. Differentiable optimization for deep learning-enhanced DC approximation of AC optimal power flow. NeurIPS 2025 Workshop MLxOR; <a href="https://arxiv.org/abs/2504.01970">arXiv:2504.01970</a>, 2025b.</li>
+<li id="ref-rosemberg2025diffopt">A. W. Rosemberg, J. Dias Garcia, F. Pacaud, R. B. Parker, B. Legat, K. Sundar, R. Bent, P. Van Hentenryck. A general and streamlined differentiable optimization framework. Preprint <a href="https://arxiv.org/abs/2510.25986">arXiv:2510.25986</a>, 2025a.</li>
+</ol>
+</section>
+<nav class="research-compass" aria-label="Continue through the research"><p>Navigate This Work</p><div class="research-compass-grid"><a href="../../research/masked-sobolev/"><small>Theory</small><span>Learning Solution Maps<b aria-hidden="true"> →</b></span></a><a href="../../research/differentiable-optimization/"><small>Software</small><span>Differentiating Optimization Models (with DiffOpt.jl)<b aria-hidden="true"> →</b></span></a><a href="#papers"><small>Paper</small><span>Publication and Technical Record<b aria-hidden="true"> →</b></span></a><a href="../../research/network-simplifications/"><small>Related Setting</small><span>Planning and Realization Mismatch<b aria-hidden="true"> →</b></span></a></div><div class="research-compass-all"><a href="../../research/">Research Overview</a><a href="../../software/">Software Index</a><a href="../../publications/">Publication Index</a></div></nav>
+<section id="papers"><h2>Publication</h2>
+<ol class="pub-list compact"><li class="pub" data-type="workshop"><div class="pub-body"><p class="pub-meta"><span class="venue-badge workshop">Workshop</span><span>NeurIPS 2025 ML×OR workshop · arXiv:2504.01970</span></p><h3 class="pub-title">Differentiable Optimization for Deep Learning-Enhanced DC Approximation of AC Optimal Power Flow</h3><p class="pub-authors"><strong class="me">Andrew&nbsp;W.&nbsp;Rosemberg</strong>, Michael&nbsp;Klamkin, Pascal&nbsp;Van&nbsp;Hentenryck</p><div class="pub-links"><a class="pub-link" href="https://arxiv.org/abs/2504.01970">arXiv <span aria-hidden="true">↗</span></a><a class="pub-link" href="https://openreview.net/forum?id=Htn3s8yUOg">OpenReview <span aria-hidden="true">↗</span></a><details class="bib"><summary class="pub-link">BibTeX</summary><div class="bib-box"><button class="copy-bib" type="button">Copy</button><pre><code>@misc{rosemberg2025dc2ac,
+  title         = {Differentiable Optimization for Deep Learning-Enhanced {DC} Approximation of {AC} Optimal Power Flow},
+  author        = {Rosemberg, Andrew and Klamkin, Michael and Van Hentenryck, Pascal},
+  year          = {2025},
+  eprint        = {2504.01970},
+  archivePrefix = {arXiv},
+  primaryClass  = {math.OC},
+  note          = {NeurIPS 2025 Workshop MLxOR}
+}</code></pre></div></details></div></div></li></ol>
+</section>
+</article></div>
+</main><footer class="site-footer">
+  <div class="footer-inner wrap">
+    <div class="footer-id">
+      <p class="footer-name">Andrew Rosemberg</p>
+      <p>PhD Candidate in Machine Learning<br>Georgia Tech · AI4OPT · Atlanta, GA</p>
+      <p><a href="mailto:arosemberg3@gatech.edu">arosemberg3@gatech.edu</a></p>
+    </div>
+    <nav class="footer-col" aria-label="Site">
+      <p class="footer-label">Site</p>
+      <a href="../../research/">Research</a>
+      <a href="../../publications/">Publications</a>
+      <a href="../../software/">Software</a>
+      <a href="../../teaching/">Teaching</a>
+      <a href="../../experience/">Experience</a>
+    </nav>
+    <nav class="footer-col" aria-label="Elsewhere">
+      <p class="footer-label">Elsewhere</p>
+      <a href="https://scholar.google.com/citations?user=jOuzK3EAAAAJ">Google Scholar</a>
+      <a href="https://github.com/andrewrosemberg">GitHub</a>
+      <a href="https://github.com/LearningToOptimize">LearningToOptimize</a>
+      <a href="https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/">LinkedIn</a>
+      <a href="../../assets/files/Andrew_Rosemberg_CV.pdf">CV (PDF)</a>
+    </nav>
+  </div>
+  <div class="footer-bottom wrap"><div class="footer-bottom-inner"><p>© 2026 Andrew Rosemberg</p><p>Updated November 2026</p></div></div>
+</footer>
+</body>
+</html>
