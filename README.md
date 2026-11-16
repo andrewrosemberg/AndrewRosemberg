@@ -1,6 +1,8 @@
 # Andrew Rosemberg
 
-PhD candidate in Machine Learning at [Georgia Tech](https://www.isye.gatech.edu/) and [AI4OPT](https://www.ai4opt.org/), advised by [Pascal Van Hentenryck](https://www.isye.gatech.edu/users/pascal-van-hentenryck). I work at the intersection of machine learning and mathematical optimization, developing methods for **reliable, effective, and computationally efficient decision-making under uncertainty**: learned solution maps and policies, the local response of optimization models, value functions, and decisions under estimated uncertainty and model mismatch.
+PhD candidate in Machine Learning at [Georgia Tech](https://www.isye.gatech.edu/) and [AI4OPT](https://www.ai4opt.org/), advised by [Pascal Van Hentenryck](https://www.isye.gatech.edu/users/pascal-van-hentenryck); graduate researcher at Los Alamos National Laboratory; visiting researcher in Pieter Abbeel's Robot Learning Lab at UC Berkeley (2026). I work at the intersection of machine learning and mathematical optimization, developing methods for **reliable, effective, and computationally efficient decision-making under uncertainty**: learned solution maps and policies, the local response of optimization models, value functions, and decisions under estimated uncertainty and model mismatch.
+
+I take this research all the way to working software for real decisions: three years of daily bidding models across **seven US electricity markets** at Invenia Labs, planning and contracting models for **Brazilian utilities** (Energisa Group, FGV Energia), open-source optimization tools, and policy distillation for **humanoid robots**.
 
 **[Website](https://andrewrosemberg.github.io/AndrewRosemberg/)** · [CV](https://andrewrosemberg.github.io/AndrewRosemberg/assets/files/Andrew_Rosemberg_CV.pdf) · [Google Scholar](https://scholar.google.com/citations?user=jOuzK3EAAAAJ) · [LinkedIn](https://www.linkedin.com/in/andrew-rosemberg-46ba8613b/)
 
