@@ -1,6 +1,6 @@
 <!--
 title: Andrew Rosemberg — Machine Learning & Optimization
-description: Andrew Rosemberg develops learning and optimization methods for solution maps, sequential policies, multi-level decision processes, and decisions under uncertainty and ambiguity.
+description: Andrew Rosemberg develops learning and optimization methods for decisions in power grids, electricity markets and robotics: solution maps, sequential policies, multi-level decision processes, and decisions under uncertainty and ambiguity.
 nav: home
 -->
 <section class="hero wrap" aria-labelledby="name">
@@ -9,14 +9,21 @@ nav: home
   </figure>
   <div class="hero-grid">
     <div>
-      <p class="eyebrow"><span class="dot" aria-hidden="true"></span>PhD Candidate · Machine Learning · Georgia Tech</p>
+      <p class="eyebrow"><span class="dot" aria-hidden="true"></span>Machine Learning &amp; Optimization · Georgia Tech · Los Alamos · UC Berkeley</p>
       <h1 id="name">Andrew Rosemberg</h1>
       <p class="tagline">I work at the intersection of <strong class="kw">machine learning</strong> and <strong class="kw">mathematical optimization</strong>, developing methods for reliable, effective, and computationally efficient <strong class="kw">decision-making under uncertainty</strong>.</p>
       <div class="subline">
+        <p class="plain-line">I take this research all the way to working software for real decisions: three years of daily bidding models across <strong class="kw">seven US electricity markets</strong>, planning and contracting models for <strong class="kw">Brazilian utilities</strong>, open-source tools used by the optimization community, and policy distillation for <strong class="kw">humanoid robots</strong>.</p>
         <p>My research centers on the relationship between representations, <strong class="kw">decision policies</strong>, and computation. I study how policies and <strong class="kw">solution maps can be learned</strong>, approximated, and integrated with mathematical decision methods, exploiting information across problem instances while retaining the ability to adapt to individual circumstances. A central concern is how these choices affect <strong class="kw">generalization, decision quality, and the computational resources</strong> required to achieve them.</p>
         <p>This perspective extends to decisions made under incomplete information, <strong class="kw">uncertainty estimated from data</strong>, and <strong class="kw">interactions with other agents</strong>. I investigate these questions through mathematical analysis, learning algorithms, and <strong class="kw">open-source computational tools</strong>.</p>
       </div>
       <ul class="hero-topics" aria-label="Research topics"><li>Context-conditioned policies</li><li>Multi-level decision processes</li><li>Uncertainty and ambiguity</li></ul>
+      <ul class="hero-facts" aria-label="Track record">
+        <li><b>7 US power markets</b><span>Daily bidding models, Invenia Labs 2020–23</span></li>
+        <li><b>Brazilian utilities</b><span>Energisa Group and FGV Energia projects</span></li>
+        <li><b>NeurIPS 2026</b><span>Main track, masked Sobolev training</span></li>
+        <li><b>LearningToOptimize</b><span>Lead of the open-source organization</span></li>
+      </ul>
       <div class="btn-row">
         <a class="btn primary" href="{{root}}assets/files/Andrew_Rosemberg_CV.pdf">Curriculum vitae</a>
         <a class="btn" href="mailto:arosemberg3@gatech.edu">Email</a>
@@ -26,12 +33,13 @@ nav: home
       </div>
     </div>
     <aside class="portrait" aria-label="Affiliations">
-      <img src="{{root}}assets/img/andrew-rosemberg.jpg" alt="Portrait of Andrew Rosemberg" width="648" height="648">
+      <img src="{{root}}assets/img/andrew-rosemberg.jpg" alt="Portrait of Andrew Rosemberg" width="800" height="800">
       <ul class="affil">
         <li><b>Georgia Tech</b> School of Industrial and Systems Engineering and NSF AI Institute <a href="https://www.ai4opt.org/">AI4OPT</a>, advised by <a href="https://www.isye.gatech.edu/users/pascal-van-hentenryck">Pascal Van Hentenryck</a></li>
         <li><b>Los Alamos National Laboratory</b> Graduate researcher</li>
         <li><b>UC Berkeley</b> Visiting researcher in Pieter Abbeel’s Robot Learning Lab, 2026</li>
-        <li><b>Previously</b> Invenia Labs and PUC-Rio</li>
+        <li><b>Invenia Labs</b> Decision models for daily bidding in seven US electricity markets, 2020–23</li>
+        <li><b>PUC-Rio (LAMPS)</b> Planning and contracting models for Brazilian utilities, 2017–19</li>
       </ul>
     </aside>
   </div>
@@ -49,6 +57,7 @@ nav: home
         <div>
           <p class="area-claim">Repeated computation creates an opportunity to learn structure across context, without treating every instance as an unrelated problem.</p>
           <p>A parametric procedure induces a map from context to decisions. Learning that map <strong class="kw">amortizes the cost of repeated solution</strong>, but transfers the burden of generalization from the procedure to its representation. The relevant approximation must retain the <strong class="kw">local structure that governs decisions in new contexts</strong> and the response required when it becomes one component of a larger system.</p>
+          <p class="area-use"><b>In practice</b> Fast learned proxies for power-flow and dispatch problems that stay feasible, the subject of the NeurIPS 2026 paper.</p>
           <a class="topic-link" href="{{root}}research/masked-sobolev/">Learning Solution Maps <span aria-hidden="true">→</span></a>
         </div>
       </article>
@@ -57,6 +66,7 @@ nav: home
         <div>
           <p class="area-claim">When decisions alter the context of later decisions, computation must be allocated across time rather than repeated myopically.</p>
           <p>A policy is a solution map evaluated along the <strong class="kw">trajectory it creates</strong>. Its representation determines what is prescribed in advance, what is computed after new information arrives, and how future consequences enter the current decision. Appropriate reformulation can expose separability, preserve prior structure, and <strong class="kw">make reliable policy learning compatible with parallel computation</strong>.</p>
+          <p class="area-use"><b>In practice</b> Multistage operating policies for hydrothermal systems and power grids, and humanoid control policies distilled from task-specific experts.</p>
           <a class="topic-link" href="{{root}}research/decision-rules/">Policies for Multistage Decisions <span aria-hidden="true">→</span></a>
           <a class="topic-link" href="{{root}}research/value-functions/">Continuation-Value Representations <span aria-hidden="true">→</span></a>
           <a class="topic-link" href="{{root}}research/network-simplifications/">Planning and Realization Mismatch <span aria-hidden="true">→</span></a>
@@ -67,6 +77,7 @@ nav: home
         <div>
           <p class="area-claim">A decision is often evaluated through a mechanism whose response is itself part of the problem.</p>
           <p>Parameters can be interpreted by a model, targets can be realized by a downstream process, and the outcome of one decision can depend on the response of others. These systems are coupled even when their component objectives differ. The relevant learning signal is determined by the <strong class="kw">response of the composite decision process</strong>, not by any learned component in isolation.</p>
+          <p class="area-use"><b>In practice</b> Strategic bidding through electricity-market clearing, and learned corrections that turn simplified DC grid decisions into feasible AC operating points.</p>
           <a class="topic-link" href="{{root}}research/differentiable-optimization/">Differentiating Optimization Models <span aria-hidden="true">→</span></a>
           <a class="topic-link" href="{{root}}research/strategic-bidding/">Endogenous Response <span aria-hidden="true">→</span></a>
           <a class="topic-link" href="{{root}}research/dc2ac/">Learned Model Correction <span aria-hidden="true">→</span></a>
@@ -77,6 +88,7 @@ nav: home
         <div>
           <p class="area-claim">Data provide evidence about future context; they do not identify the law on which a policy is conditioned.</p>
           <p>Selection against an estimated model favors decisions whose apparent performance is helped by <strong class="kw">estimation error</strong>. Ambiguity is therefore a property of the <strong class="kw">conditional law used to construct a policy</strong>, not merely a perturbation of its eventual outcome. The research studies <strong class="kw">data-informed uncertainty sets</strong> and the consequences of mismatch between the model used for a decision and the mechanism that realizes it.</p>
+          <p class="area-use"><b>In practice</b> Robust bidding and portfolio decisions when price distributions must be estimated from data.</p>
           <a class="topic-link" href="{{root}}research/portfolio-optimization/">Uncertainty and Ambiguity <span aria-hidden="true">→</span></a>
         </div>
       </article>
@@ -121,9 +133,9 @@ nav: home
     <ol class="timeline">
       <li class="tl"><time>2026</time><div><h3>Graduate Visiting Researcher</h3><p class="org">Robot Learning Lab, UC Berkeley · with Pieter Abbeel</p><p>Policy learning and distillation for humanoid locomotion and dexterous manipulation.</p></div></li>
       <li class="tl"><time>2024–present</time><div><h3>Graduate Researcher</h3><p class="org">Los Alamos National Laboratory</p><p>Decision models inside learning pipelines: Solution sensitivities of nonconvex programs, sensitivity-supervised proxies, and strategic bidding through AC market clearing.</p></div></li>
-      <li class="tl"><time>2023–present</time><div><h3>Graduate Researcher</h3><p class="org">AI4OPT, Georgia Tech</p><p>Policy learning for constrained sequential decisions, learned value functions, and calibration of simplified decision models.</p></div></li>
-      <li class="tl industry"><time>2020–2023</time><div><h3>Researcher</h3><p class="org">Invenia Labs, Cambridge, UK</p><p>Risk-aware decision models under uncertainty for electricity-market bidding.</p></div></li>
-      <li class="tl industry"><time>2017–2019</time><div><h3>Research Staff Member</h3><p class="org">LAMPS, PUC-Rio · consulting projects</p><p>Mathematical-programming models and multistage planning software for consulting clients.</p></div></li>
+      <li class="tl"><time>2023–present</time><div><h3>Graduate Researcher</h3><p class="org">AI4OPT, Georgia Tech</p><p>Lead of the LearningToOptimize open-source organization and co-designer of the PhD course ISyE 8803. Policy learning for constrained sequential decisions, learned value functions, and calibration of simplified decision models.</p></div></li>
+      <li class="tl industry"><time>2020–2023</time><div><h3>Researcher</h3><p class="org">Invenia Labs, Cambridge, UK</p><p>Directed projects on daily bidding in seven US electricity markets (MISO, PJM, ERCOT, CAISO, SPP, ISO-NE, NYISO), with risk-aware decision models built on machine-learning estimates of price uncertainty.</p></div></li>
+      <li class="tl industry"><time>2017–2019</time><div><h3>Research Staff Member</h3><p class="org">LAMPS, PUC-Rio · consulting projects</p><p>Transmission-contracting models for Energisa Group and multistage hydrothermal planning software for FGV Energia.</p></div></li>
     </ol>
   </div>
 </section>

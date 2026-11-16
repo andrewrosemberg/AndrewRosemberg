@@ -196,7 +196,7 @@
    "portfolio-optimization"
   ],
   "selected": false,
-  "thumb": "assets/img/thumbs/portfolio-optimization.jpg"
+  "thumb": "assets/img/thumbs/virtual-transactions.jpg"
  },
  {
   "id": "rosemberg2021assessing",
@@ -247,7 +247,7 @@
    "network-simplifications"
   ],
   "selected": false,
-  "thumb": "assets/img/thumbs/network-simplifications.jpg"
+  "thumb": "assets/img/thumbs/network-formulations.jpg"
  },
  {
   "id": "rosemberg2019hydropowermodels",
@@ -277,7 +277,7 @@
   ],
   "bibtex": "@article{rosemberg2019hydropowermodels,\n  title   = {HydroPowerModels.jl: A Julia/JuMP Package for Hydrothermal Economic Dispatch Optimization},\n  author  = {Rosemberg, Andrew and Street, Alexandre and Garcia, Joaquim Dias and Silva, Thuener and Vallad{\\~a}o, Davi and Dowson, Oscar},\n  journal = {JuliaCon Proceedings},\n  volume  = {1},\n  number  = {1},\n  pages   = {35},\n  year    = {2019},\n  doi     = {10.21105/jcon.00035}\n}",
   "selected": false,
-  "thumb": "assets/img/thumbs/network-simplifications.jpg"
+  "thumb": "assets/img/thumbs/hydropowermodels.jpg"
  },
  {
   "id": "rosemberg2018futures",
